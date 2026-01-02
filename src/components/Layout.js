@@ -32,7 +32,7 @@ const Layout = ({ children, showSearch = true }) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
-      {/* HEADER RESPONSIVE */}
+      {/* HEADER RESPONSIVE - ALTURA FIJA PARA CALCULAR */}
       <header style={{
         padding: '0',
         width: '100%',
@@ -46,16 +46,17 @@ const Layout = ({ children, showSearch = true }) => {
         flexDirection: 'column',
         alignItems: 'center'
       }}>
+        {/* Logo container - ALTURA FIJA PARA CALCULAR */}
         <div style={{
           width: '100%',
           maxWidth: '1200px',
           margin: '0 auto',
-          padding: isMobile ? '12px 16px' : '15px 20px',
+          padding: isMobile ? '15px 16px' : '20px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          height: 'auto',
-          minHeight: isMobile ? '65px' : '80px'
+          height: isMobile ? '65px' : '85px', // ALTURA FIJA
+          boxSizing: 'border-box'
         }}>
           <Link href="/" style={{
             display: 'flex',
@@ -66,46 +67,43 @@ const Layout = ({ children, showSearch = true }) => {
             padding: '0',
             textDecoration: 'none'
           }}>
-            {/* Contenedor de logo responsivo - MÁS GRANDE EN MOBILE */}
+            {/* Contenedor de logo responsivo - AJUSTADO */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              height: 'auto',
+              height: '100%',
               width: '100%',
-              maxWidth: '100%',
-              padding: isMobile ? '5px 0' : '5px 0'
+              maxWidth: '100%'
             }}>
               <img
                 src="/header.png"
                 alt="M&M - Beauty and Skincare store"
                 style={{
-                  height: 'auto',
-                  width: '100%',
-                  maxWidth: isMobile ? '350px' : '400px',
-                  minWidth: isMobile ? '280px' : '250px',
+                  height: isMobile ? '45px' : '65px', // ALTURA FIJA
+                  width: 'auto',
+                  maxWidth: isMobile ? '300px' : '450px',
                   objectFit: 'contain',
                   objectPosition: 'center',
-                  display: 'flex'
+                  display: 'block'
                 }}
                 onError={(e) => {
                   e.target.style.display = 'none';
                   e.target.parentElement.innerHTML = `
                     <div style="
                       color: #9c27b0;
-                      font-size: ${isMobile ? '28px' : '32px'};
+                      font-size: ${isMobile ? '22px' : '28px'};
                       font-weight: 800;
                       text-align: center;
                       letter-spacing: 1px;
-                      padding: ${isMobile ? '10px' : '15px'};
-                      width: 100%;
+                      padding: ${isMobile ? '5px' : '10px'};
                     ">
                       M&M BEAUTY
                       <div style="
-                        font-size: ${isMobile ? '13px' : '14px'};
+                        font-size: ${isMobile ? '12px' : '14px'};
                         font-weight: 500;
                         color: #666;
-                        margin-top: 4px;
+                        margin-top: ${isMobile ? '2px' : '4px'};
                         letter-spacing: 2px;
                       ">
                         SKINCARE STORE
@@ -137,53 +135,6 @@ const Layout = ({ children, showSearch = true }) => {
             </span>
           </div>
         )}
-
-        {/* Media query inline para responsividad adicional */}
-        <style jsx>{`
-          @media (max-width: 480px) {
-            header > div:first-child {
-              padding: 10px 12px !important;
-              min-height: 60px !important;
-            }
-            header > div:first-child img {
-              max-width: 320px !important;
-              min-width: 250px !important;
-            }
-          }
-          
-          @media (max-width: 360px) {
-            header > div:first-child {
-              padding: 8px 10px !important;
-              min-height: 55px !important;
-            }
-            header > div:first-child img {
-              max-width: 290px !important;
-              min-width: 220px !important;
-            }
-          }
-          
-          @media (max-width: 320px) {
-            header > div:first-child img {
-              max-width: 270px !important;
-              min-width: 200px !important;
-            }
-          }
-          
-          @media (min-width: 769px) {
-            header > div:first-child {
-              min-height: 85px !important;
-            }
-            header > div:first-child img {
-              max-width: 520px !important;
-            }
-          }
-          
-          @media (min-width: 1024px) {
-            header > div:first-child img {
-              max-width: 550px !important;
-            }
-          }
-        `}</style>
       </header>
 
       {/* MAIN CONTENT */}

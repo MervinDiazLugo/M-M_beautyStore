@@ -6,7 +6,7 @@
   --border: #e5e7eb;
   --primary: #9c27b0;
   --primary-dark: #7b1fa2;
-  --header-height: 140px;
+  --header-height: 85px; /* ACTUALIZADO: 85px desktop, 65px mobile */
 }
 
 /* RESET BÁSICO */
@@ -46,7 +46,7 @@ body {
   position: relative;
 }
 
-/* HEADER ESTILOS */
+/* HEADER ESTILOS - ACTUALIZADO */
 header {
   background: #fff;
   border-bottom: 1px solid var(--border);
@@ -57,13 +57,14 @@ header {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
-  min-height: var(--header-height);
+  height: var(--header-height); /* Usa la variable actualizada */
 }
 
 header a {
   display: block;
   width: 100%;
   text-align: center;
+  height: 100%;
 }
 
 header img {
@@ -79,7 +80,7 @@ main {
   flex: 1;
   width: 100%;
   position: relative;
-  padding: 30px 20px;
+  padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -234,7 +235,7 @@ input[type="search"]:focus {
   }
   
   main {
-    padding: 20px 15px;
+    padding: 16px 15px;
   }
   
   h1 {
@@ -243,6 +244,10 @@ input[type="search"]:focus {
 }
 
 @media (max-width: 768px) {
+  :root {
+    --header-height: 65px; /* ALTURA MOBILE */
+  }
+  
   main {
     padding: 16px 12px;
   }
@@ -253,12 +258,20 @@ input[type="search"]:focus {
   
   header img {
     padding: 12px 0;
-    max-height: 60px;
+    max-height: 45px; /* ACTUALIZADO: 45px en mobile */
     width: auto;
+  }
+  
+  h1 {
+    font-size: 22px;
   }
 }
 
 @media (max-width: 480px) {
+  :root {
+    --header-height: 65px; /* MANTENER 65px PARA MOBILE PEQUEÑO */
+  }
+  
   main {
     padding: 12px 10px;
   }
@@ -269,12 +282,31 @@ input[type="search"]:focus {
   }
   
   header img {
-    max-height: 50px;
+    max-height: 45px;
     padding: 10px 0;
   }
   
   h1 {
-    font-size: 22px;
+    font-size: 20px;
+  }
+  
+  body {
+    font-size: 14px;
+  }
+  
+  h2 {
+    font-size: 18px;
+  }
+  
+  h3 {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  header img {
+    max-height: 40px;
+    padding: 8px 0;
   }
 }
 
@@ -402,21 +434,33 @@ textarea:focus {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Mejorar la legibilidad en móviles */
-@media (max-width: 480px) {
-  body {
-    font-size: 14px;
+/* Media query para desktop */
+@media (min-width: 769px) {
+  :root {
+    --header-height: 85px; /* ALTURA DESKTOP */
   }
   
-  h1 {
-    font-size: 20px;
+  header img {
+    max-height: 65px; /* ACTUALIZADO: 65px en desktop */
   }
-  
-  h2 {
-    font-size: 18px;
-  }
-  
-  h3 {
-    font-size: 16px;
+}
+
+/* Ajustes adicionales para asegurar consistencia */
+#__next > div {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Asegurar que el contenido principal tenga suficiente espacio */
+#__next > div > main {
+  flex: 1;
+}
+
+/* Corrección para el footer en mobile */
+@media (max-width: 768px) {
+  #__next {
+    min-height: calc(100vh - 65px); /* Restar altura del header */
   }
 }

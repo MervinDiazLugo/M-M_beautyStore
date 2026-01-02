@@ -5,22 +5,23 @@ import { PRODUCTS } from './product-data';
 
 export default function Home() {
   const { searchTerm, updateSearchTerm } = useContext(SearchContext);
-  const [headerHeight, setHeaderHeight] = useState(120); // Valor inicial
+  const [headerHeight, setHeaderHeight] = useState(85); // Valor inicial
   const [isMobile, setIsMobile] = useState(false);
 
   // Detectar tamaño del header y si es mobile
   useEffect(() => {
     const updateHeaderHeight = () => {
       const width = window.innerWidth;
-      setIsMobile(width < 768);
+      const isMobileDevice = width < 768;
+      setIsMobile(isMobileDevice);
       
-      // Ajustar altura basado en el tamaño de pantalla
+      // ALTURAS COINCIDENTES CON LAYOUT.JS
       if (width < 480) {
-        setHeaderHeight(60); // Mobile pequeño
+        setHeaderHeight(65); // Mobile pequeño - 65px del header
       } else if (width < 768) {
-        setHeaderHeight(70); // Mobile
+        setHeaderHeight(65); // Mobile - 65px del header
       } else {
-        setHeaderHeight(80); // Desktop
+        setHeaderHeight(85); // Desktop - 85px del header (65px logo + 20px padding)
       }
     };
 
@@ -41,16 +42,16 @@ export default function Home() {
 
   return (
     <div style={{ width: '100%' }}>
-      {/* Contenedor de búsqueda STICKY - POSICIÓN DINÁMICA */}
+      {/* Contenedor de búsqueda STICKY - POSICIÓN CORRECTA */}
       <div style={{
         position: 'sticky',
-        top: `${headerHeight}px`, // Posición dinámica
+        top: `${headerHeight}px`, // Posición dinámica BASADA EN HEADER REAL
         zIndex: 90,
         backgroundColor: '#fff',
         borderBottom: '1px solid #f0f0f0',
         boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
         width: '100%',
-        transition: 'top 0.3s ease' // Transición suave
+        transition: 'top 0.3s ease'
       }}>
         <div style={{
           maxWidth: '1200px',
@@ -109,17 +110,19 @@ export default function Home() {
             />
           </div>
           
-          {/* Subtítulo pequeño debajo de la búsqueda */}
-          <p style={{
-            color: '#666',
-            fontSize: isMobile ? '12px' : '13px',
-            textAlign: 'center',
-            margin: '10px 0 0 0',
-            fontStyle: 'italic',
-            opacity: 0.8
-          }}>
-            Productos premium de belleza y cuidado de la piel
-          </p>
+          {/* Subtítulo pequeño debajo de la búsqueda - SOLO EN MOBILE */}
+          {isMobile && (
+            <p style={{
+              color: '#666',
+              fontSize: '12px',
+              textAlign: 'center',
+              margin: '10px 0 0 0',
+              fontStyle: 'italic',
+              opacity: 0.8
+            }}>
+              Productos premium de belleza y cuidado de la piel
+            </p>
+          )}
         </div>
       </div>
 
