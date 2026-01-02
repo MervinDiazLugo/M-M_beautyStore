@@ -5,7 +5,7 @@ import { PRODUCTS } from './product-data';
 
 export default function Home() {
   const { searchTerm, updateSearchTerm } = useContext(SearchContext);
-  const [headerHeight, setHeaderHeight] = useState(85); // Valor inicial
+  const [headerHeight, setHeaderHeight] = useState(120); // Valor inicial
   const [isMobile, setIsMobile] = useState(false);
 
   // Detectar tamaño del header y si es mobile
