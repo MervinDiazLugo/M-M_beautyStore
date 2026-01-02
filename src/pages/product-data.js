@@ -1,3 +1,12 @@
+function ProductData() {
+  return (
+    <div>
+      <h1>Product Data Page</h1>
+    </div>
+  );
+}
+export default ProductData;
+
 export const PRODUCTS = {
     'MLAU3292639573': {
         id: 'MLAU3292639573',
