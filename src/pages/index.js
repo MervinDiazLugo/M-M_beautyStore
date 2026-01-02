@@ -21,7 +21,7 @@ export default function Home() {
       {/* Contenedor de búsqueda STICKY */}
       <div style={{
         position: 'sticky',
-        top: '80px', // Debajo del header que mide ~80px
+        top: '100px',
         zIndex: 90,
         backgroundColor: '#fff',
         borderBottom: '1px solid #f0f0f0',
