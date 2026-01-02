@@ -29,7 +29,7 @@ export default function ProductPage() {
   const priceStr = product.price.toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})
   const total = (product.price * qty).toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})
   const message = `Hola, quiero comprar *${product.name}* (SKU: ${product.sku})\nCantidad: ${qty}\nPrecio unitario: $${priceStr}\nTotal: $${total}`
-  const waBase = "https://wa.me/549XXXXXXXXXX"
+  const waBase = "https://wa.me/5491122503272"
   const waLink = `${waBase}?text=${encodeURIComponent(message)}`
 
   const goToPrevious = () => {

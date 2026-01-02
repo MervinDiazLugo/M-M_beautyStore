@@ -1,10 +1,33 @@
 ﻿import ProductCard from "../components/ProductCard";
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { SearchContext } from '../components/SearchContext';
 import { PRODUCTS } from './product-data';
 
 export default function Home() {
   const { searchTerm, updateSearchTerm } = useContext(SearchContext);
+  const [headerHeight, setHeaderHeight] = useState(120); // Valor inicial
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar tamaño del header y si es mobile
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      
+      // Ajustar altura basado en el tamaño de pantalla
+      if (width < 480) {
+        setHeaderHeight(60); // Mobile pequeño
+      } else if (width < 768) {
+        setHeaderHeight(70); // Mobile
+      } else {
+        setHeaderHeight(80); // Desktop
+      }
+    };
+
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
+  }, []);
 
   const filteredProducts = Object.entries(PRODUCTS)
     .filter(([key, product]) => {
@@ -18,20 +41,21 @@ export default function Home() {
 
   return (
     <div style={{ width: '100%' }}>
-      {/* Contenedor de búsqueda STICKY */}
+      {/* Contenedor de búsqueda STICKY - POSICIÓN DINÁMICA */}
       <div style={{
         position: 'sticky',
-        top: '120px',
+        top: `${headerHeight}px`, // Posición dinámica
         zIndex: 90,
         backgroundColor: '#fff',
         borderBottom: '1px solid #f0f0f0',
         boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-        width: '100%'
+        width: '100%',
+        transition: 'top 0.3s ease' // Transición suave
       }}>
         <div style={{
           maxWidth: '1200px',
           margin: '0 auto',
-          padding: '15px 20px',
+          padding: isMobile ? '12px 16px' : '16px 20px',
           backgroundColor: '#fff'
         }}>
           <div style={{ 
@@ -40,13 +64,19 @@ export default function Home() {
           }}>
             <div style={{
               position: 'absolute',
-              left: '16px',
+              left: isMobile ? '14px' : '18px',
               top: '50%',
               transform: 'translateY(-50%)',
               zIndex: 2,
               pointerEvents: 'none'
             }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg 
+                width={isMobile ? "16" : "18"} 
+                height={isMobile ? "16" : "18"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" 
                   stroke="#9c27b0" 
                   strokeWidth="2" 
@@ -62,24 +92,27 @@ export default function Home() {
               value={searchTerm}
               onChange={(e) => updateSearchTerm(e.target.value)}
               style={{
-                padding: '12px 16px 12px 44px',
+                padding: isMobile ? '10px 14px 10px 40px' : '12px 16px 12px 48px',
                 borderRadius: '8px',
                 border: '1px solid #e0d0f0',
                 width: '100%',
-                fontSize: '14px',
+                fontSize: isMobile ? '14px' : '15px',
                 backgroundColor: '#fff',
                 color: '#333',
                 fontFamily: 'inherit',
                 boxSizing: 'border-box',
-                outline: 'none'
+                outline: 'none',
+                transition: 'border-color 0.2s ease'
               }}
+              onFocus={(e) => e.target.style.borderColor = '#9c27b0'}
+              onBlur={(e) => e.target.style.borderColor = '#e0d0f0'}
             />
           </div>
           
           {/* Subtítulo pequeño debajo de la búsqueda */}
           <p style={{
             color: '#666',
-            fontSize: '13px',
+            fontSize: isMobile ? '12px' : '13px',
             textAlign: 'center',
             margin: '10px 0 0 0',
             fontStyle: 'italic',
@@ -95,31 +128,13 @@ export default function Home() {
         width: '100%',
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: '20px 20px 30px 20px'
+        padding: isMobile ? '16px' : '20px 20px 30px 20px'
       }}>
-        {/* Subtítulo solo desktop (opcional, puedes quitarlo si prefieres) */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '20px',
-          display: 'none'
-        }}
-          className="desktop-only"
-        >
-          <p style={{
-            color: '#666',
-            fontSize: '16px',
-            margin: '0',
-            fontStyle: 'italic'
-          }}>
-            Descubre nuestra selección de productos de belleza
-          </p>
-        </div>
-
         {/* Grid de productos */}
         <div style={{ 
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-          gap: "20px",
+          gridTemplateColumns: isMobile ? (window.innerWidth < 480 ? "1fr" : "repeat(2, 1fr)") : "repeat(auto-fill, minmax(250px, 1fr))",
+          gap: isMobile ? "12px" : "20px",
           marginBottom: '30px',
           width: '100%'
         }}>
@@ -132,7 +147,7 @@ export default function Home() {
         {filteredProducts.length === 0 && searchTerm && (
           <div style={{
             textAlign: 'center',
-            padding: '40px 20px',
+            padding: isMobile ? '30px 16px' : '40px 20px',
             backgroundColor: '#f9f5ff',
             borderRadius: '10px',
             marginBottom: '30px'
@@ -147,17 +162,17 @@ export default function Home() {
                 />
               </svg>
             </div>
-            <p style={{ fontSize: '16px', color: '#666', marginBottom: '8px' }}>
+            <p style={{ fontSize: isMobile ? '14px' : '16px', color: '#666', marginBottom: '8px' }}>
               No encontramos "{searchTerm}"
             </p>
-            <p style={{ color: '#999', fontSize: '14px' }}>
+            <p style={{ color: '#999', fontSize: isMobile ? '13px' : '14px' }}>
               Intenta con otros términos de búsqueda
             </p>
           </div>
         )}
       </main>
       
-      {/* Estilos responsivos */}
+      {/* Estilos responsivos simplificados */}
       <style jsx>{`
         /* Quitar bordes negros del input */
         input[type="search"] {
@@ -166,136 +181,29 @@ export default function Home() {
           appearance: none;
         }
         
-        /* Focus sin bordes negros */
-        input[type="search"]:focus {
-          border-color: #9c27b0 !important;
-          box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.1) !important;
-          outline: none !important;
-        }
-        
         /* Quitar la 'x' de limpiar en algunos navegadores */
         input[type="search"]::-webkit-search-cancel-button {
           -webkit-appearance: none;
           appearance: none;
         }
         
-        @media (max-width: 768px) {
-          /* Búsqueda sticky ajustada para mobile */
-          div[style*="position: sticky"] {
-            top: 60px !important; /* Header más pequeño en mobile */
-            padding: 10px 15px !important;
-          }
-          
-          /* Grid 2 columnas */
-          main > div:first-of-type {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 15px !important;
-          }
-          
-          /* Ícono más pequeño */
-          div[style*="position: absolute"] svg {
-            width: 16px !important;
-            height: 16px !important;
-            left: 14px !important;
-          }
-          
-          input[type="search"] {
-            padding-left: 40px !important;
-            padding-top: 10px !important;
-            padding-bottom: 10px !important;
-          }
-          
-          /* Subtítulo más pequeño en mobile */
-          p[style*="font-style: italic"] {
-            font-size: 11px !important;
-            margin-top: 8px !important;
-          }
-          
-          /* Padding reducido en mobile */
-          main {
-            padding: 15px !important;
-          }
+        /* Animación suave para el input */
+        input[type="search"] {
+          transition: all 0.2s ease;
         }
         
-        @media (max-width: 480px) {
-          /* Búsqueda sticky ajustada para mobile pequeño */
-          div[style*="position: sticky"] {
-            top: 50px !important;
-            padding: 8px 12px !important;
-          }
-          
-          /* Grid 1 columna */
+        /* Grid responsivo para diferentes tamaños de pantalla */
+        @media (min-width: 768px) {
           main > div:first-of-type {
-            grid-template-columns: 1fr !important;
-            gap: 12px !important;
-          }
-          
-          /* Ícono más pequeño */
-          div[style*="position: absolute"] svg {
-            width: 14px !important;
-            height: 14px !important;
-            left: 12px !important;
-          }
-          
-          input[type="search"] {
-            padding-left: 36px !important;
-            font-size: 13px !important;
-            padding-top: 9px !important;
-            padding-bottom: 9px !important;
-          }
-          
-          /* Subtítulo oculto en mobile muy pequeño */
-          p[style*="font-style: italic"] {
-            display: none !important;
-          }
-          
-          /* Padding más reducido en mobile pequeño */
-          main {
-            padding: 12px !important;
-          }
-        }
-        
-        @media (min-width: 769px) {
-          /* Mostrar subtítulo en desktop */
-          .desktop-only {
-            display: block !important;
-          }
-          
-          /* Grid 4 columnas */
-          main > div:first-of-type {
-            grid-template-columns: repeat(4, 1fr) !important;
-          }
-          
-          /* Ícono más grande */
-          div[style*="position: absolute"] svg {
-            width: 20px !important;
-            height: 20px !important;
-            left: 18px !important;
-          }
-          
-          input[type="search"] {
-            padding-left: 50px !important;
-            font-size: 15px !important;
-            padding-top: 14px !important;
-            padding-bottom: 14px !important;
-          }
-          
-          /* Búsqueda sticky ajustada para desktop */
-          div[style*="position: sticky"] {
-            top: 80px !important;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
           }
         }
         
         @media (min-width: 1024px) {
-          /* Más espacio entre productos */
           main > div:first-of-type {
-            gap: 24px !important;
+            gap: 24px;
           }
-        }
-        
-        /* Animación suave para el input */
-        input[type="search"] {
-          transition: all 0.2s ease;
         }
       `}</style>
     </div>
