@@ -1,0 +1,43 @@
+﻿:root { --bg:#fafafa; --muted:#6b7280; --accent:#25D366; --card:#fff; --border:#e5e7eb; }
+html,body,#__next { height: 100%; }
+body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin: 0; background: var(--bg); color: #111827; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; padding: 8px 12px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; }
+
+/* layout */
+main { padding-bottom: 48px; }
+
+.product-page img { max-width: 100%; height: auto; }
+
+/* product page responsive */
+@media (max-width: 900px) {
+  .product-page img { max-width: 100%; height: auto; }
+}
+
+.product-image-carousel button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.product-image-carousel button:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.product-image-carousel button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.product-image-carousel button:first-child {
+  left: 10px;
+}
+
+.product-image-carousel button:last-child {
+  right: 10px;
+}
