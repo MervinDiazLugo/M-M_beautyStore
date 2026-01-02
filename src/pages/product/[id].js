@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { PRODUCTS } from '../product-data'
+import { PRODUCTS } from '../product-data';
 
 export default function ProductPage() {
   const { query } = useRouter()
