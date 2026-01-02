@@ -1,4 +1,3 @@
-// components/Footer.js - VERSIÓN MEJORADA PARA MOBILE
 import React from 'react';
 
 const Footer = () => {

@@ -1,5 +1,4 @@
-﻿// pages/index.js - CON BÚSQUEDA STICKY
-import ProductCard from "../components/ProductCard";
+﻿import ProductCard from "../components/ProductCard";
 import { useContext } from 'react';
 import { SearchContext } from '../components/SearchContext';
 import { PRODUCTS } from './product-data';

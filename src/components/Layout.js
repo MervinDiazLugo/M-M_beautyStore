@@ -1,4 +1,3 @@
-// components/Layout.js - VERSIÓN CON HEADER MÁS GRANDE
 import Head from 'next/head';
 import Link from 'next/link';
 import { useContext } from 'react';
