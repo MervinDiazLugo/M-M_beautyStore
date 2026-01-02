@@ -15,6 +15,7 @@ export const PRODUCTS = {
         desc: 'Serum de crecimiento de pestañas marca Bioaqua para pestañas más largas, gruesas y fuertes.',
         sku: 'MLAU3292639573',
         image: ['/MLAU3292639573/a.webp', '/MLAU3292639573/b.webp', '/MLAU3292639573/c.webp'],
+        envioGratis: true,
         description: `¡Consigue pestañas más largas, gruesas y fuertes en tan solo 4 semanas! El Serum de Crecimiento de Pestañas de Bioaqua nutre intensamente cada pestaña desde la raíz hasta las puntas, promoviendo una mayor densidad, flexibilidad y un color natural radiante. Enriquecido con una poderosa combinación de ingredientes naturales como glicerina, vitamina E y proteína de avena hidrolizada. ¡Di adiós a las pestañas postizas y hola a una mirada naturalmente impresionante!
 
 **Modo de Uso:**
@@ -47,6 +48,7 @@ export const PRODUCTS = {
         desc: 'Cera capilar en barra para fijación y brillo del cabello, con ingredientes naturales como cera de abejas, vitamina E y aceite de aguacate.',
         sku: 'MLA2043708331',
         image: ['/MLA2043708331/a.webp', '/MLA2043708331/b.webp'],
+        envioGratis: false,
         description: `Descubre la solución definitiva para un peinado perfecto: la Cera Capilar en Barra Hair Wax Stick de IKT. Su innovadora consistencia en barra permite una aplicación fácil y precisa, ofreciendo una fijación profesional de larga duración sin dejar residuos pegajosos. Diseñada para brindar un brillo saludable y una definición impecable, es ideal para moldear tu estilo y controlar hasta los cabellos más rebeldes.
 
 Formulada con ingredientes premium como cera de abejas, vitamina E, aceite de aguacate y proteína de seda hidrolizada, esta cera no solo fija, sino que también nutre y protege la fibra capilar. Su práctico envase metálico tipo stick facilita llevarla contigo y usarla en cualquier momento. Dermatológicamente testeada, vegana y libre de gluten, Hair Wax Stick es adecuada para todo tipo de cabello.
@@ -84,6 +86,7 @@ Su fórmula ligera evita la molesta sensación de pesadez o grasa, dejando tu ca
         desc: 'Mascarilla nasal de 3 pasos para limpieza profunda de poros y eliminación de puntos negros, apta para todo tipo de piel.',
         sku: 'MLAU3484248769',
         image: ['/MLAU3484248769/a.webp', '/MLAU3484248769/b.webp'],
+        envioGratis: false,
         description: `Consigue una piel más limpia y pura con la Mascarilla Nasal de 3 Pasos de Bioaqua, la solución especializada para una limpieza profunda de poros y eliminación de puntos negros. Su formato práctico en tira nasal garantiza una experiencia cómoda y altamente efectiva, liberando tus poros y revelando una apariencia cutánea más fresca y saludable.
 
 Diseñada específicamente para la zona de la nariz, esta mascarilla está elaborada con ingredientes hipoalergénicos y ha sido dermatológicamente testeada, lo que la hace apta y segura para todo tipo de piel. Su consistencia adhesiva se adapta perfectamente para extraer con suavidad las impu
@@ -130,6 +133,7 @@ Sin garantía`,
         desc: 'Prebase de maquillaje que cubre poros y unifica el rostro, ideal para todo tipo de piel.',
         sku: 'MLA53283852',
         image: ['/MLA53283852/a.webp'],
+        envioGratis: false,
         description: `¿Sueñas con un maquillaje que dure más, luzca radiante y deje tu piel impecablemente suave? La solución está en esta prebase mágica.
 
 Con su textura ligera y efecto invisible, esta prebase se convierte en el lienzo perfecto para tu belleza:
@@ -171,6 +175,7 @@ Ideal para cualquier tipo de piel. ¡Con solo 20g transformarás por completo tu
         desc: 'Crema Gel Pulpa Arroz Aclarante Fortalecedora Nutre Bioaqua Todo Tipo De Piel Día/noche',
         sku: 'MLAU3326438382',
         image: ['/MLAU3326438382/a.webp', '/MLAU3326438382/b.webp', '/MLAU3326438382/c.webp', '/MLAU3326438382/d.webp', '/MLAU3326438382/e.webp'],
+        envioGratis: false,
         description: `Revela la luminosidad natural de tu piel con la Crema Gel Pulpa de Arroz Aclarante Fortalecedora de Bioaqua, diseñada especialmente para el cuidado del rostro a partir de los 30 años. Su fórmula enriquecida con pulpa de arroz no solo aclara y uniforma el tono, sino que también fortalece, nutre y realiza una limpieza profunda, potenciando tu belleza interior.
 
 De rápida absorción, esta crema gel deja una sensación fresca y ligera, sin sensación grasa. Su fragancia neutra y su composición hipoalergénica la convierten en la elección perfecta y segura para todo tipo de piel, minimizando el riesgo de irritaciones.
@@ -225,6 +230,7 @@ Sin garantía`,
             '/MLAU3387303385/b.webp',
             '/MLAU3387303385/c.webp'
         ],
+        envioGratis: false,
         description: `Dale a tu piel un tratamiento intensivo de rejuvenecimiento con la Mascarilla Facial de Bio-Colágeno de Soulgirl KNH. Especialmente formulada para combatir los signos del envejecimiento, esta mascarilla se adapta perfectamente a los contornos de tu rostro, actuando como un poderoso hidratante que reafirma la piel y minimiza visiblemente la apariencia de los poros.
 
 Desarrollada para adultos mayores de 18 años, su fórmula hipoalergénica y libre de parabenos garantiza una experiencia de cuidado suave y segura para todo tipo de piel. Gracias a sus activos de bio-colágeno, tu piel lucirá más firme, tersa y revitalizada después de cada uso, recuperando un brillo saludable y juvenil.
@@ -274,6 +280,7 @@ Sin garantía`,
         desc: 'Mascarilla nocturna de colágeno para uso durante el sueño, reafirma y combate arrugas en todo tipo de piel.',
         sku: 'MLAU3362120043',
         image: ['/MLAU3362120043/a.webp', '/MLAU3362120043/b.webp', '/MLAU3362120043/c.webp'],
+        envioGratis: false,
         description: `NOUELV Night Care Collagen Night - Mascarilla nocturna 75ml
 
 Específicamente diseñada para uso nocturno, esta mascarilla aprovecha los procesos naturales de reparación de tu piel durante el sueño, asegurando máxima eficacia y resultados visibles por la mañana. Su fórmula avanzada trabaja mientras descansas, ofreciendo beneficios de cuidado profesional adaptados a tus necesidades únicas.
@@ -329,6 +336,7 @@ Sin garantía`,
         desc: 'Mascarilla de hidrogel coreana con alta concentración de bio-colágeno, ácido hialurónico y probióticos para hidratación profunda y efecto lifting.',
         sku: 'MLAU3332919049',
         image: ['/MLAU3332919049/a.webp', '/MLAU3332919049/b.webp', '/MLAU3332919049/c.webp', '/MLAU3332919049/d.webp'],
+        envioGratis: false,
         description: `Descubre el secreto mejor guardado del skincare coreano que está revolucionando el mundo y se ha convertido en un fenómeno viral en TikTok. Te traemos en exclusiva la mascarilla #1 en ventas y amada por más de 70 millones de personas: la Biodance Bio-Collagen Real Deep Mask.
 
 ¿Buscas una transformación real y visible en tu piel desde la primera aplicación? Prepárate para experimentar un tratamiento de spa de lujo en la comodidad de tu hogar.
@@ -407,6 +415,7 @@ Sin garantía`,
         desc: 'Crema aclarante con Ácido Kójico y FPS 90 para protección solar avanzada, ideal para piel normal, hipoalergénica y libre de parabenos.',
         sku: 'MLA45498225',
         image: ['/MLA45498225/a.webp', '/MLA45498225/b.webp', '/MLA45498225/c.webp', '/MLA45498225/d.webp'],
+        envioGratis: false,
         description: `Kiss Beauty es una marca que ofrece una variedad de productos para el cuidado de la piel facial. Si buscás protegerla y mantenerla en forma, esta puede ser una buena opción.
 
 **Protección Solar Avanzada:**

@@ -29,7 +29,7 @@ export default function ProductPage() {
   const priceStr = product.price.toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})
   const total = (product.price * qty).toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})
   const message = `Hola, quiero comprar *${product.name}* (SKU: ${product.sku})\nCantidad: ${qty}\nPrecio unitario: $${priceStr}\nTotal: $${total}`
-  const waBase = "https://wa.me/5491122503272"
+  const waBase = "https://wa.me/5491123942598"
   const waLink = `${waBase}?text=${encodeURIComponent(message)}`
 
   const goToPrevious = () => {
@@ -290,19 +290,77 @@ export default function ProductPage() {
               </span>
             </div>
 
+            {/* Precio y Envío gratis en la misma línea - MISMA LÓGICA QUE PRODUCTCARD */}
             <div style={{
               display: 'flex',
-              alignItems: 'baseline',
-              gap: '8px',
-              marginBottom: isMobile ? '16px' : '24px'
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: isMobile ? '20px' : '28px',
+              flexWrap: 'wrap',
+              gap: '12px'
             }}>
-              <span style={{
-                fontSize: isMobile ? '24px' : 'clamp(28px, 4vw, 32px)',
-                fontWeight: 700,
-                color: '#111827'
+              <div style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '8px'
               }}>
-                ${priceStr}
-              </span>
+                <span style={{
+                  fontSize: isMobile ? '24px' : 'clamp(28px, 4vw, 32px)',
+                  fontWeight: 700,
+                  color: '#111827',
+                  whiteSpace: 'nowrap'
+                }}>
+                  ${priceStr}
+                </span>
+              </div>
+              
+              {/* Indicador de envío gratis AL LADO DEL PRECIO */}
+              {product.envioGratis && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: isMobile ? '6px 12px' : '8px 14px',
+                  background: 'linear-gradient(135deg, #f97316, #fbbf24)',
+                  borderRadius: '20px',
+                  color: 'white',
+                  fontSize: isMobile ? '11px' : '13px',
+                  fontWeight: 700,
+                  boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)',
+                  whiteSpace: 'nowrap',
+                  animation: 'envioPulse 2s infinite'
+                }}>
+                  {/* SVG de camión SIMPLIFICADO - IGUAL QUE EN PRODUCTCARD */}
+                  <svg 
+                    width={isMobile ? "16" : "18"} 
+                    height={isMobile ? "16" : "18"} 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{
+                      animation: 'envioMove 1.8s ease-in-out infinite'
+                    }}
+                  >
+                    {/* Versión simplificada del camión */}
+                    <rect x="1" y="3" width="15" height="13" rx="2"/>
+                    <path d="M16 8h4l2 4v5h-2"/>
+                    <circle cx="5.5" cy="18.5" r="2.5"/>
+                    <circle cx="18.5" cy="18.5" r="2.5"/>
+                    <path d="M8 8h8"/>
+                    <path d="M3 16h4"/>
+                  </svg>
+                  <span style={{ 
+                    fontSize: isMobile ? '12px' : '13px', 
+                    fontWeight: 800,
+                    letterSpacing: isMobile ? '0.3px' : '0.5px'
+                  }}>
+                    ENVÍO GRATIS
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Características principales */}
@@ -719,6 +777,42 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
+      
+      {/* Estilos CSS para animaciones - NECESARIOS PARA QUE FUNCIONE */}
+      <style jsx>{`
+        @keyframes envioPulse {
+          0% {
+            transform: scale(1);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+          }
+          50% {
+            transform: scale(1.03);
+            box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
+          }
+          100% {
+            transform: scale(1);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+          }
+        }
+        
+        @keyframes envioMove {
+          0% {
+            transform: translateX(0) rotate(0deg);
+          }
+          25% {
+            transform: translateX(2px) rotate(3deg);
+          }
+          50% {
+            transform: translateX(4px) rotate(0deg);
+          }
+          75% {
+            transform: translateX(2px) rotate(-3deg);
+          }
+          100% {
+            transform: translateX(0) rotate(0deg);
+          }
+        }
+      `}</style>
     </main>
   )
 }

@@ -464,3 +464,37 @@ textarea:focus {
     min-height: calc(100vh - 65px); /* Restar altura del header */
   }
 }
+
+/* ANIMACIONES PARA ENVÍO GRATIS NARANJA */
+@keyframes envioPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+  }
+}
+
+@keyframes envioMove {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(2px) rotate(5deg);
+  }
+  50% {
+    transform: translateX(4px) rotate(0deg);
+  }
+  75% {
+    transform: translateX(2px) rotate(-5deg);
+  }
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+}

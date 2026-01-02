@@ -2,7 +2,7 @@
 
 export default function ProductCard({ product }) {
   const message = `Hola, quiero comprar: ${product.name} (SKU: ${product.sku}) - $${product.price.toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})}`
-  const waBase = "https://wa.me/5491122503272"
+  const waBase = "https://wa.me/5491123942598"
   const waLink = `${waBase}?text=${encodeURIComponent(message)}`
 
   return (
@@ -59,14 +59,67 @@ export default function ProductCard({ product }) {
           minHeight: '40px'
         }}>{product.desc}</p>
         
-        <p style={{
-          margin: '0 0 16px 0',
-          fontWeight: 700,
-          fontSize: '22px',
-          color: '#111827'
+        {/* Precio y Envío gratis en la misma línea */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '16px',
+          flexWrap: 'wrap',
+          gap: '10px'
         }}>
-          ${product.price.toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})}
-        </p>
+          <p style={{
+            margin: '0',
+            fontWeight: 700,
+            fontSize: '22px',
+            color: '#111827',
+            whiteSpace: 'nowrap'
+          }}>
+            ${product.price.toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})}
+          </p>
+          
+          {/* Indicador de envío gratis AL LADO DEL PRECIO */}
+          {product.envioGratis && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px 6px 12px',
+              background: 'linear-gradient(135deg, #f97316, #fbbf24)',
+              borderRadius: '20px',
+              color: 'white',
+              fontSize: '12px',
+              fontWeight: 700,
+              boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)',
+              whiteSpace: 'nowrap',
+              animation: 'envioPulse 2s infinite'
+            }}>
+              {/* SVG de camión SIMPLIFICADO y más limpio */}
+              <svg 
+                width="18" 
+                height="18" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  animation: 'envioMove 1.8s ease-in-out infinite'
+                }}
+              >
+                {/* Versión simplificada del camión */}
+                <rect x="1" y="3" width="15" height="13" rx="2"/>
+                <path d="M16 8h4l2 4v5h-2"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+                <path d="M8 8h8"/>
+                <path d="M3 16h4"/>
+              </svg>
+              <span style={{ fontSize: '13px', fontWeight: 800 }}>ENVÍO GRATIS</span>
+            </div>
+          )}
+        </div>
         
         {/* Botones - Con carrito y ojito */}
         <div style={{ 
@@ -155,7 +208,7 @@ export default function ProductCard({ product }) {
               e.currentTarget.style.boxShadow = 'none';
             }}
             >
-              {/* OJITO perfecto que te gustaba */}
+              {/* Ojito icon*/}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                 <circle cx="12" cy="12" r="3"/>
@@ -164,6 +217,42 @@ export default function ProductCard({ product }) {
             </div>
           </Link>
         </div>
+        
+        {/* Estilos CSS para animaciones */}
+        <style jsx>{`
+          @keyframes envioPulse {
+            0% {
+              transform: scale(1);
+              box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+            }
+            50% {
+              transform: scale(1.03);
+              box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
+            }
+            100% {
+              transform: scale(1);
+              box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+            }
+          }
+          
+          @keyframes envioMove {
+            0% {
+              transform: translateX(0) rotate(0deg);
+            }
+            25% {
+              transform: translateX(2px) rotate(3deg);
+            }
+            50% {
+              transform: translateX(4px) rotate(0deg);
+            }
+            75% {
+              transform: translateX(2px) rotate(-3deg);
+            }
+            100% {
+              transform: translateX(0) rotate(0deg);
+            }
+          }
+        `}</style>
       </div>
     </div>
   )
