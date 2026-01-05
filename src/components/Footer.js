@@ -61,7 +61,7 @@ const Footer = () => {
             </svg>
             Preguntas frecuentes
           </a>
-          <a href="/envios" style={{ 
+          <a href="/preguntas-frecuentes" style={{ 
             color: '#9c27b0', 
             textDecoration: 'none',
             fontWeight: 500,
