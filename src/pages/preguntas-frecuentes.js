@@ -34,7 +34,7 @@ const PreguntasFrecuentes = () => {
           {/* 2. PRODUCTOS ORIGINALES */}
           <div className="faq-section">
             <h2 className="question">¿Los productos son originales?</h2>
-            <p className="answer"><strong>SÍ, 100% originales.</strong> Los obtenemos de páginas distribuidoras oficiales.</p>
+            <p className="answer"><strong>SÍ, 100% originales.</strong> Los obtenemos distribuidoras oficiales.</p>
           </div>
 
           {/* 3. FORMAS DE PAGO */}
