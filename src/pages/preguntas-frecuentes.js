@@ -12,7 +12,7 @@ const PreguntasFrecuentes = () => {
         <div className="faq-container">
           {/* TÍTULO */}
           <div className="intro-section">
-            <h1 className="faq-title">Preguntas Frecuentes</h1>
+            <h1 className="faq-title" style={{ color: 'white' }}>Preguntas Frecuentes</h1>
             <p className="intro-text">Respuestas rápidas sobre productos y servicios</p>
           </div>
 
