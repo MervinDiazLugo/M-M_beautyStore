@@ -1,6 +1,9 @@
 ﻿import Link from 'next/link'
 
 export default function ProductCard({ product }) {
+  // Si no está publicado → no renderizamos nada (o un placeholder mínimo si querés)
+  if (!product.published) return null;
+
   const message = `Hola, quiero comprar: ${product.name} (SKU: ${product.sku}) - $${product.price.toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})}`
   const waBase = "https://wa.me/5491123942598"
   const waLink = `${waBase}?text=${encodeURIComponent(message)}`
@@ -59,12 +62,12 @@ export default function ProductCard({ product }) {
           minHeight: '40px'
         }}>{product.desc}</p>
         
-        {/* Precio y Envío gratis en la misma línea */}
+        {/* Precio + Envío gratis */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '16px',
+          marginBottom: '8px',  // reducido para dejar espacio a la leyenda
           flexWrap: 'wrap',
           gap: '10px'
         }}>
@@ -78,7 +81,6 @@ export default function ProductCard({ product }) {
             ${product.price.toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})}
           </p>
           
-          {/* Indicador de envío gratis AL LADO DEL PRECIO */}
           {product.envioGratis && (
             <div style={{
               display: 'flex',
@@ -94,7 +96,6 @@ export default function ProductCard({ product }) {
               whiteSpace: 'nowrap',
               animation: 'envioPulse 2s infinite'
             }}>
-              {/* SVG de camión SIMPLIFICADO y más limpio */}
               <svg 
                 width="18" 
                 height="18" 
@@ -104,11 +105,8 @@ export default function ProductCard({ product }) {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{
-                  animation: 'envioMove 1.8s ease-in-out infinite'
-                }}
+                style={{ animation: 'envioMove 1.8s ease-in-out infinite' }}
               >
-                {/* Versión simplificada del camión */}
                 <rect x="1" y="3" width="15" height="13" rx="2"/>
                 <path d="M16 8h4l2 4v5h-2"/>
                 <circle cx="5.5" cy="18.5" r="2.5"/>
@@ -120,14 +118,39 @@ export default function ProductCard({ product }) {
             </div>
           )}
         </div>
+
+        {/* Nueva leyenda: Precio en MercadoLibre */}
+        {product.ml_price && product.mercadoLibreUrl && (
+          <p style={{
+            margin: '0 0 16px 0',
+            fontSize: '13px',
+            color: '#6b7280',
+            fontStyle: 'italic',
+            lineHeight: 1.3
+          }}>
+            Precio en MercadoLibre:{' '}
+            <a
+              href={product.mercadoLibreUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: '#0284c7',
+                textDecoration: 'underline',
+                fontStyle: 'normal',
+                fontWeight: 500
+              }}
+            >
+              ${product.ml_price.toLocaleString('es-AR')}
+            </a>
+          </p>
+        )}
         
-        {/* Botones - Con carrito y ojito */}
+        {/* Botones */}
         <div style={{ 
           display: 'flex', 
           gap: '12px',
           marginTop: 'auto'
         }}>
-          {/* Botón Comprar - Con ícono de carrito */}
           <a
             href={waLink}
             target="_blank"
@@ -163,7 +186,6 @@ export default function ProductCard({ product }) {
               e.currentTarget.style.boxShadow = '0 4px 12px rgba(37, 211, 102, 0.3)';
             }}
             >
-              {/* Ícono de carrito */}
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="9" cy="21" r="1"/>
                 <circle cx="20" cy="21" r="1"/>
@@ -173,7 +195,6 @@ export default function ProductCard({ product }) {
             </div>
           </a>
           
-          {/* Botón Ver detalles - CON EL OJITO QUE TE GUSTABA */}
           <Link
             href={`/product/${product.id}`}
             style={{
@@ -208,7 +229,6 @@ export default function ProductCard({ product }) {
               e.currentTarget.style.boxShadow = 'none';
             }}
             >
-              {/* Ojito icon*/}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                 <circle cx="12" cy="12" r="3"/>
@@ -218,40 +238,9 @@ export default function ProductCard({ product }) {
           </Link>
         </div>
         
-        {/* Estilos CSS para animaciones */}
         <style jsx>{`
-          @keyframes envioPulse {
-            0% {
-              transform: scale(1);
-              box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
-            }
-            50% {
-              transform: scale(1.03);
-              box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
-            }
-            100% {
-              transform: scale(1);
-              box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
-            }
-          }
-          
-          @keyframes envioMove {
-            0% {
-              transform: translateX(0) rotate(0deg);
-            }
-            25% {
-              transform: translateX(2px) rotate(3deg);
-            }
-            50% {
-              transform: translateX(4px) rotate(0deg);
-            }
-            75% {
-              transform: translateX(2px) rotate(-3deg);
-            }
-            100% {
-              transform: translateX(0) rotate(0deg);
-            }
-          }
+          @keyframes envioPulse { ... }  /* mantener tus animaciones */
+          @keyframes envioMove { ... }
         `}</style>
       </div>
     </div>

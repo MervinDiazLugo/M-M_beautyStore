@@ -6,6 +6,64 @@ import { PRODUCTS } from '../product-data';
 export default function ProductPage() {
   const { query } = useRouter()
   const product = PRODUCTS[query.id]
+
+  // 1) No mostrar si no existe o published === false
+  if (!product || product.published === false) {
+    return (
+      <main style={{ 
+        padding: '60px 24px', 
+        textAlign: 'center', 
+        minHeight: '80vh',
+        backgroundColor: '#f9fafb',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <h1 style={{ 
+          fontSize: 'clamp(24px, 5vw, 36px)', 
+          color: '#111827', 
+          marginBottom: '16px' 
+        }}>
+          Producto no disponible
+        </h1>
+        <p style={{ 
+          fontSize: 'clamp(16px, 4vw, 18px)', 
+          color: '#6b7280', 
+          marginBottom: '32px',
+          maxWidth: '500px'
+        }}>
+          Este producto no está publicado actualmente o no se encuentra en nuestro catálogo.
+        </p>
+        <Link 
+          href="/" 
+          style={{ 
+            display: 'inline-block',
+            padding: '14px 32px',
+            background: 'linear-gradient(135deg, #9c27b0, #7c3aed)',
+            color: 'white',
+            borderRadius: '10px',
+            textDecoration: 'none',
+            fontWeight: 600,
+            fontSize: '16px',
+            boxShadow: '0 4px 12px rgba(156, 39, 176, 0.2)',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.transform = 'translateY(-2px)'
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(156, 39, 176, 0.3)'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(156, 39, 176, 0.2)'
+          }}
+        >
+          Volver al inicio
+        </Link>
+      </main>
+    )
+  }
+
   const [qty, setQty] = useState(1)
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -20,13 +78,8 @@ export default function ProductPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  if (!product) return (
-    <main style={{ padding: 24 }}>
-      <p>Producto no encontrado — <Link href='/'>Volver</Link></p>
-    </main>
-  )
-
   const priceStr = product.price.toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})
+  const mlPriceStr = product.ml_price ? product.ml_price.toLocaleString('es-AR') : ''
   const total = (product.price * qty).toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})
   const message = `Hola, quiero comprar *${product.name}* (SKU: ${product.sku})\nCantidad: ${qty}\nPrecio unitario: $${priceStr}\nTotal: $${total}`
   const waBase = "https://wa.me/5491123942598"
@@ -57,7 +110,7 @@ export default function ProductPage() {
   return (
     <main className="product-page" style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
       
-      {/* Header - NO ES STICKY y NO TAPA NADA */}
+      {/* Header */}
       <header style={{
         backgroundColor: '#fff',
         borderBottom: '1px solid #e5e7eb',
@@ -75,7 +128,6 @@ export default function ProductPage() {
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          {/* LOGO CON ENLACE - NO SE TAPA */}
           <Link href="/" style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -157,8 +209,8 @@ export default function ProductPage() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: isMobile ? '5px' : '5px',
-          marginBottom: isMobile ? '5px' : '5px',
+          gap: isMobile ? '16px' : '24px',
+          marginBottom: '32px',
         }}>
           {/* Image Carousel Section */}
           <div style={{ 
@@ -168,8 +220,8 @@ export default function ProductPage() {
             <div style={{
               background: '#fff',
               border: '1px solid #e5e7eb',
-              borderRadius: '1px',
-              padding: isMobile ? '1px' : '2px',
+              borderRadius: '12px',
+              padding: isMobile ? '8px' : '12px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -205,14 +257,14 @@ export default function ProductPage() {
                     padding: isMobile ? '8px' : '12px',
                     cursor: 'pointer',
                     borderRadius: '50%',
-                    width: isMobile ? '32px' : '44px',
-                    height: isMobile ? '32px' : '44px',
+                    width: isMobile ? '36px' : '48px',
+                    height: isMobile ? '36px' : '48px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                     transition: 'all 0.2s ease',
-                    fontSize: isMobile ? '14px' : '16px'
+                    fontSize: isMobile ? '16px' : '18px'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)'}
@@ -233,14 +285,14 @@ export default function ProductPage() {
                     padding: isMobile ? '8px' : '12px',
                     cursor: 'pointer',
                     borderRadius: '50%',
-                    width: isMobile ? '32px' : '44px',
-                    height: isMobile ? '32px' : '44px',
+                    width: isMobile ? '36px' : '48px',
+                    height: isMobile ? '36px' : '48px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                     transition: 'all 0.2s ease',
-                    fontSize: isMobile ? '14px' : '16px'
+                    fontSize: isMobile ? '16px' : '18px'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)'}
@@ -256,7 +308,7 @@ export default function ProductPage() {
           {/* Product Info Section */}
           <div style={{
             background: '#fff',
-            padding: isMobile ? '20px' : '32px',
+            padding: isMobile ? '24px' : '32px',
             borderRadius: '12px',
             height: 'fit-content',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
@@ -290,12 +342,12 @@ export default function ProductPage() {
               </span>
             </div>
 
-            {/* Precio y Envío gratis en la misma línea - MISMA LÓGICA QUE PRODUCTCARD */}
+            {/* Precio y Envío gratis */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginBottom: isMobile ? '20px' : '28px',
+              marginBottom: '8px',
               flexWrap: 'wrap',
               gap: '12px'
             }}>
@@ -314,7 +366,6 @@ export default function ProductPage() {
                 </span>
               </div>
               
-              {/* Indicador de envío gratis AL LADO DEL PRECIO */}
               {product.envioGratis && (
                 <div style={{
                   display: 'flex',
@@ -330,7 +381,6 @@ export default function ProductPage() {
                   whiteSpace: 'nowrap',
                   animation: 'envioPulse 2s infinite'
                 }}>
-                  {/* SVG de camión SIMPLIFICADO - IGUAL QUE EN PRODUCTCARD */}
                   <svg 
                     width={isMobile ? "16" : "18"} 
                     height={isMobile ? "16" : "18"} 
@@ -344,7 +394,6 @@ export default function ProductPage() {
                       animation: 'envioMove 1.8s ease-in-out infinite'
                     }}
                   >
-                    {/* Versión simplificada del camión */}
                     <rect x="1" y="3" width="15" height="13" rx="2"/>
                     <path d="M16 8h4l2 4v5h-2"/>
                     <circle cx="5.5" cy="18.5" r="2.5"/>
@@ -362,6 +411,32 @@ export default function ProductPage() {
                 </div>
               )}
             </div>
+
+            {/* NUEVA LEYENDA */}
+            {product.ml_price && product.mercadoLibreUrl && (
+              <p style={{
+                margin: '0 0 24px 0',
+                fontSize: isMobile ? '13.5px' : '14px',
+                color: '#6b7280',
+                fontStyle: 'italic',
+                lineHeight: 1.4
+              }}>
+                Precio en MercadoLibre:{' '}
+                <a
+                  href={product.mercadoLibreUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#0284c7',
+                    textDecoration: 'underline',
+                    fontStyle: 'normal',
+                    fontWeight: 500
+                  }}
+                >
+                  ${mlPriceStr}
+                </a>
+              </p>
+            )}
 
             {/* Características principales */}
             <div style={{ marginBottom: isMobile ? '20px' : '28px' }}>
@@ -536,7 +611,7 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* Action Buttons - Con ícono de carrito */}
+        {/* Action Buttons */}
         <div style={{
           display: 'flex',
           flexDirection: isMobile ? 'column' : 'row',
@@ -576,7 +651,6 @@ export default function ProductPage() {
               e.currentTarget.style.boxShadow = '0 4px 12px rgba(37, 211, 102, 0.3)';
             }}
           >
-            {/* Ícono de carrito SVG - IGUAL que en ProductCard */}
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="9" cy="21" r="1"/>
               <circle cx="20" cy="21" r="1"/>
@@ -657,7 +731,7 @@ export default function ProductPage() {
               </p>
             ))}
             
-            {/* MercadoLibre Banner - REORGANIZADO con logo debajo del título */}
+            {/* MercadoLibre Banner */}
             <div style={{
               backgroundColor: '#f8fafc',
               borderRadius: '12px',
@@ -671,7 +745,6 @@ export default function ProductPage() {
                 gap: isMobile ? '16px' : '20px',
                 flexDirection: 'column'
               }}>
-                {/* Título y logo en columna */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -694,7 +767,6 @@ export default function ProductPage() {
                     </h4>
                   </div>
                   
-                  {/* LOGO SVG DE MERCADOLIBRE - MÁS GRANDE */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -724,9 +796,7 @@ export default function ProductPage() {
                   </div>
                 </div>
                 
-                <div style={{ 
-                  width: '100%'
-                }}>
+                <div style={{ width: '100%' }}>
                   <a 
                     href={product.mercadoLibreUrl}
                     style={{
@@ -778,7 +848,6 @@ export default function ProductPage() {
         </div>
       </div>
       
-      {/* Estilos CSS para animaciones - NECESARIOS PARA QUE FUNCIONE */}
       <style jsx>{`
         @keyframes envioPulse {
           0% {

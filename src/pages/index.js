@@ -29,7 +29,7 @@ export default function Home() {
   const [gridColumns, setGridColumns] = useState("repeat(auto-fill, minmax(250px, 1fr))");
   const [visibleProducts, setVisibleProducts] = useState(12);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const searchCache = useRef({});
 
@@ -41,15 +41,15 @@ export default function Home() {
       const isSmallMobileDevice = width < 480;
       setIsMobile(isMobileDevice);
       setIsSmallMobile(isSmallMobileDevice);
-      
+
       // Usar variable CSS para consistencia
       const cssHeaderHeight = getComputedStyle(document.documentElement)
         .getPropertyValue('--header-height')
         .trim();
-      
+
       const height = cssHeaderHeight ? parseInt(cssHeaderHeight) : (isMobileDevice ? 65 : 85);
       setHeaderHeight(height);
-      
+
       // Actualizar grid columns según el tamaño
       if (width < 480) {
         setGridColumns("1fr");
@@ -89,8 +89,8 @@ export default function Home() {
         const productCategory = (product.category || '').toLowerCase();
 
         // Búsqueda avanzada: todas las palabras deben coincidir en algún campo
-        return searchWords.every(word => 
-          productName.includes(word) || 
+        return searchWords.every(word =>
+          productName.includes(word) ||
           productSku.includes(word) ||
           productDesc.includes(word) ||
           productCategory.includes(word)
@@ -121,8 +121,8 @@ export default function Home() {
         // 5. Orden alfabético
         return aName.localeCompare(bName);
       })
-      .map(([key, product]) => ({ 
-        key, 
+      .map(([key, product]) => ({
+        key,
         product,
         relevance: calculateRelevance(product, termLower)
       }));
@@ -137,25 +137,73 @@ export default function Home() {
     let score = 0;
     const name = product.name.toLowerCase();
     const sku = product.sku.toLowerCase();
-    
+
     if (name === searchTerm) score += 100;
     if (sku === searchTerm) score += 90;
     if (name.startsWith(searchTerm)) score += 80;
     if (sku.startsWith(searchTerm)) score += 70;
     if (name.includes(searchTerm)) score += 60;
     if (sku.includes(searchTerm)) score += 50;
-    
+
     return score;
   };
 
   // Obtener productos filtrados
   const filteredProducts = useMemo(() => {
     setIsLoading(true);
-    const result = getFilteredProducts(debouncedSearchTerm);
-    // Simular carga para mostrar skeleton
+
+    // Primero: solo productos publicados
+    let candidates = Object.entries(PRODUCTS)
+      .filter(([_, product]) => product.published === true);
+
+    // Luego: aplicar la búsqueda (si hay término)
+    if (debouncedSearchTerm.trim()) {
+      const termLower = debouncedSearchTerm.toLowerCase();
+      const searchWords = termLower.split(' ').filter(w => w.length > 0);
+
+      candidates = candidates.filter(([_, product]) => {
+        const name = product.name.toLowerCase();
+        const sku = product.sku.toLowerCase();
+        const desc = (product.description || '').toLowerCase();
+        const brand = (product.brand || '').toLowerCase();
+
+        return searchWords.every(word =>
+          name.includes(word) ||
+          sku.includes(word) ||
+          desc.includes(word) ||
+          brand.includes(word)
+        );
+      });
+
+      // Ordenamiento (tu lógica actual)
+      candidates.sort((a, b) => {
+        const aName = a[1].name.toLowerCase();
+        const bName = b[1].name.toLowerCase();
+        const aSku = a[1].sku.toLowerCase();
+        const bSku = b[1].sku.toLowerCase();
+
+        if (aName === termLower) return -1;
+        if (bName === termLower) return 1;
+        if (aSku === termLower) return -1;
+        if (bSku === termLower) return 1;
+        if (aName.startsWith(termLower)) return -1;
+        if (bName.startsWith(termLower)) return 1;
+        if (aSku.startsWith(termLower)) return -1;
+        if (bSku.startsWith(termLower)) return 1;
+        return aName.localeCompare(bName);
+      });
+    }
+
+    // Agregar relevance solo si hubo búsqueda
+    const final = candidates.map(([key, product]) => ({
+      key,
+      product,
+      relevance: debouncedSearchTerm.trim() ? calculateRelevance(product, debouncedSearchTerm.toLowerCase()) : 0
+    }));
+
     setTimeout(() => setIsLoading(false), 200);
-    return result;
-  }, [debouncedSearchTerm, getFilteredProducts]);
+    return final;
+  }, [debouncedSearchTerm]);
 
   // Resetear productos visibles al buscar
   useEffect(() => {
@@ -171,7 +219,7 @@ export default function Home() {
         setVisibleProducts(prev => Math.min(prev + 12, filteredProducts.length));
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [visibleProducts, filteredProducts.length]);
@@ -184,22 +232,22 @@ export default function Home() {
       {/* SEO con Head nativo de Next.js */}
       <Head>
         <title>{searchTerm ? `Buscar: ${searchTerm} | ` : ''}M&M Beauty Store</title>
-        <meta 
-          name="description" 
-          content="Tienda online de productos premium de belleza y cuidado de la piel. Encuentra los mejores productos de skincare y belleza." 
+        <meta
+          name="description"
+          content="Tienda online de productos premium de belleza y cuidado de la piel. Encuentra los mejores productos de skincare y belleza."
         />
-        <meta 
-          name="keywords" 
-          content="belleza, skincare, productos belleza, cuidado piel, cosméticos, maquillaje" 
+        <meta
+          name="keywords"
+          content="belleza, skincare, productos belleza, cuidado piel, cosméticos, maquillaje"
         />
-        
+
         {/* Open Graph */}
         <meta property="og:title" content="M&M Beauty Store - Productos Premium" />
         <meta property="og:description" content="Descubre nuestra colección de productos de belleza y cuidado de la piel" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/og-image.jpg" />
         <meta property="og:url" content="https://tutienda.com/" />
-        
+
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="M&M Beauty Store" />
@@ -210,7 +258,7 @@ export default function Home() {
       {/* Contenedor de búsqueda STICKY - PADDING DRAMÁTICAMENTE REDUCIDO */}
       <div style={{
         position: 'sticky',
-        top: `${headerHeight}px`, 
+        top: `${headerHeight}px`,
         zIndex: 999,
         backgroundColor: '#fff',
         borderBottom: '1px solid #f0f0f0',
@@ -224,7 +272,7 @@ export default function Home() {
           padding: isSmallMobile ? '8px 12px' : isMobile ? '10px 16px' : '32px 48px',
           backgroundColor: '#fff'
         }}>
-          <div style={{ 
+          <div style={{
             position: 'relative',
             width: '100%',
             display: 'flex',
@@ -233,7 +281,7 @@ export default function Home() {
             flexWrap: 'nowrap'
           }}>
             {/* Search input container */}
-            <div style={{ 
+            <div style={{
               position: 'relative',
               flex: isSmallMobile ? '1 1 65%' : isMobile ? '1 1 70%' : '1 1 75%',
               minWidth: 0
@@ -258,13 +306,13 @@ export default function Home() {
                   aria-hidden="true"
                 >
                   <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"
-                  stroke="#9c27b0" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
+                    stroke="#9c27b0"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
               <input
                 type="search"
                 aria-label="Buscar productos por nombre o SKU"
@@ -304,23 +352,23 @@ export default function Home() {
             </div>
 
             {/* Botón de Contacto - CON ICONO DE MENSAJES */}
-            <a 
-              href="https://wa.me/5491123942598?text=Hola, tengo una consulta sobre un producto de la tienda" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href="https://wa.me/5491123942598?text=Hola, tengo una consulta sobre un producto de la tienda"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="Consultar por mensaje"
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 background: 'linear-gradient(135deg, #25D366, #128C7E)', // Verde WhatsApp
-                color: '#fff', 
-                padding: isSmallMobile ? '8px' : isMobile ? '9px 10px' : '10px 12px', 
+                color: '#fff',
+                padding: isSmallMobile ? '8px' : isMobile ? '9px 10px' : '10px 12px',
                 borderRadius: '6px',
                 flex: isSmallMobile ? '0 0 35%' : isMobile ? '0 0 30%' : '0 0 25%',
                 maxWidth: isSmallMobile ? '100px' : isMobile ? '120px' : '150px',
                 minWidth: isSmallMobile ? '70px' : isMobile ? '80px' : '100px',
-                textDecoration: 'none', 
+                textDecoration: 'none',
                 fontSize: isSmallMobile ? '12px' : isMobile ? '13px' : '14px',
                 fontWeight: 600,
                 textAlign: 'center',
@@ -329,7 +377,7 @@ export default function Home() {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 transition: 'all 0.2s ease',
-                boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)', 
+                boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)',
                 border: 'none',
                 cursor: 'pointer',
                 minHeight: isSmallMobile ? '36px' : isMobile ? '38px' : '40px',
@@ -345,20 +393,20 @@ export default function Home() {
               }}
             >
               {/* ICONO DE MENSAJES - REEMPLAZA AL DE WHATSAPP */}
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width={isSmallMobile ? "14" : isMobile ? "15" : "16"} 
-                height={isSmallMobile ? "14" : isMobile ? "15" : "16"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={isSmallMobile ? "14" : isMobile ? "15" : "16"}
+                height={isSmallMobile ? "14" : isMobile ? "15" : "16"}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 aria-hidden="true"
-                style={{ 
+                style={{
                   marginRight: isSmallMobile ? '4px' : isMobile ? '5px' : '6px',
-                  flexShrink: 0 
+                  flexShrink: 0
                 }}
               >
                 {/* Icono de burbuja de chat/mensaje */}
@@ -404,7 +452,7 @@ export default function Home() {
                   lineHeight: 1.3,
                   paddingTop: '2px'
                 }}>
-                  Productos premium de belleza y cuidado de la piel
+                  Consultanos por WhatsApp puedes recibir asesoramiento personalizado.
                 </p>
               </>
             )}
@@ -430,7 +478,7 @@ export default function Home() {
             width: '100%'
           }}>
             {[...Array(6)].map((_, i) => (
-              <div 
+              <div
                 key={i}
                 style={{
                   background: '#f5f5f5',
@@ -508,18 +556,18 @@ export default function Home() {
                 />
               </svg>
             </div>
-            <p style={{ 
-              fontSize: isSmallMobile ? '13px' : isMobile ? '14px' : '16px', 
-              color: '#333', 
-              marginBottom: '6px', 
-              fontWeight: 600 
+            <p style={{
+              fontSize: isSmallMobile ? '13px' : isMobile ? '14px' : '16px',
+              color: '#333',
+              marginBottom: '6px',
+              fontWeight: 600
             }}>
               No encontramos "{searchTerm}"
             </p>
-            <p style={{ 
-              color: '#666', 
-              fontSize: isSmallMobile ? '11px' : isMobile ? '12px' : '14px', 
-              marginBottom: isMobile ? '12px' : '16px' 
+            <p style={{
+              color: '#666',
+              fontSize: isSmallMobile ? '11px' : isMobile ? '12px' : '14px',
+              marginBottom: isMobile ? '12px' : '16px'
             }}>
               Intenta con otros términos de búsqueda
             </p>
