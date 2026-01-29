@@ -49,7 +49,7 @@ export const PRODUCTS = {
         "condition": "new",
         "sold_quantity": 106,
         "available_quantity": 0,
-        "published": false
+        "published": true
     },
     'MLA1519662745': {
         "id": "MLA1519662745",
