@@ -353,7 +353,7 @@ export default function Home() {
 
             {/* Botón de Contacto - CON ICONO DE MENSAJES */}
             <a
-              href="https://wa.me/5491123942598?text=Hola, tengo una consulta sobre un producto de la tienda"
+              href="https://wa.me/5491178267112?text=Hola, tengo una consulta sobre un producto de la tienda"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Consultar por mensaje"

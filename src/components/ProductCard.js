@@ -4,7 +4,7 @@ export default function ProductCard({ product }) {
   if (!product.published) return null;
 
   const message = `Hola, quiero comprar: ${product.name} (SKU: ${product.sku}) - $${(product.price || 0).toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})}`
-  const waBase = "https://wa.me/5491123942598"
+  const waBase = "https://wa.me/5491178267112"
   const waLink = `${waBase}?text=${encodeURIComponent(message)}`
   const mlLink = product.mercadoLibreUrl || product.permalink;
   const cantidadVendida = product.cantidad_vendida || product.sold_quantity || 0;

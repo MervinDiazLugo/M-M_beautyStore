@@ -96,7 +96,7 @@ export default function ProductPage() {
   const message = esMayorista
     ? `Hola, quiero comprar al MAYOR *${product.name}* (SKU: ${product.sku})\nCantidad: ${qty} unidades (Precio mayorista)\nPrecio unitario: $${precioMayoristaStr}\nTotal: $${totalMayorista}`
     : `Hola, quiero comprar *${product.name}* (SKU: ${product.sku})\nCantidad: ${qty}\nPrecio unitario: $${priceStr}\nTotal: $${total}`
-  const waBase = "https://wa.me/5491123942598"
+  const waBase = "https://wa.me/5491178267112"
   const waLink = `${waBase}?text=${encodeURIComponent(message)}`
 
   const goToPrevious = () => {
