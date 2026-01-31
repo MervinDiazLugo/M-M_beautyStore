@@ -169,22 +169,86 @@ const PreguntasFrecuentes = () => {
             <p className="answer no-changes">No se realizan cambios ni devoluciones tras el pago</p>
           </div>
 
-          {/* VENTA MAYORISTA */}
-          <div className="faq-section">
+          {/* 🔥 MODIFICADO: VENTA MAYORISTA (INFORMACIÓN AMPLIADA) */}
+          <div className="faq-section majorista-section">
             <h2 className="question">¿Venta mayorista?</h2>
             <div className="answer">
-              <p><strong>¡Sí!</strong> Tenemos precios especiales para revendedoras/es.</p>
-              <a
-                href="https://wa.me/5491123942598?text=Hola%20quiero%20consultar%20por%20venta%20mayorista"
-                className="whatsapp-btn"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.446l-.232-.139-3.578-.321c-.039-.003-.062-.007-.084-.007l-.003-.001A9.87 9.87 0 0 1 1.799 10.53c0-5.446 4.418-9.864 9.877-9.864s9.877 4.418 9.877 9.864a9.824 9.824 0 0 1-2.786 6.946l-.395.347-.034.028z" />
-                </svg>
-                Consultar por Mayorista
-              </a>
+              <div className="majorista-info">
+                <p><strong>¡Sí! Tenemos condiciones especiales para revendedoras/es.</strong></p>
+                
+                <div className="majorista-benefits">
+                  <div className="benefit-card">
+                    <div className="benefit-icon">🏪</div>
+                    <div className="benefit-content">
+                      <h3>Cantidad Mínima</h3>
+                      <p>Ver en la pagína de detalle de cada producto para ver la cantidad mínima requerida para acceder al precio mayorista</p>
+                    </div>
+                  </div>
+                  
+                  <div className="benefit-card">
+                    <div className="benefit-icon">💰</div>
+                    <div className="benefit-content">
+                      <h3>Precios Especiales</h3>
+                      <p>Descuentos significativos vs. precio minorista (ej: -20% o más)</p>
+                    </div>
+                  </div>
+                  
+                  <div className="benefit-card">
+                    <div className="benefit-icon">🚚</div>
+                    <div className="benefit-content">
+                      <h3>Envío Gratis</h3>
+                      <p><strong>ENVÍO GRATIS automático</strong> para todas las compras al por mayor</p>
+                    </div>
+                  </div>
+                  
+                  <div className="benefit-card">
+                    <div className="benefit-icon">💬</div>
+                    <div className="benefit-content">
+                      <h3>Atención Personalizada</h3>
+                      <p>Asesoramiento directo para optimizar tu stock y ganancias</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="majorista-process">
+                  <h3>Proceso de Compra Mayorista</h3>
+                  <ol>
+                    <li><strong>Selección de cantidad:</strong> Elige las unidades minimas para darte el precio mayorista del producto deseado</li>
+                    <li><strong>Precio automático:</strong> Al alcanzar el mínimo, se aplica el precio mayorista automáticamente</li>
+                    <li><strong>Visualización en tiempo real:</strong> Barra de progreso que muestra cuánto falta para mayorista</li>
+                    <li><strong>Generación de mensaje:</strong> WhatsApp con información correcta (mayorista/minorista)</li>
+                    <li><strong>Confirmación de pedido:</strong> Contacto directo para coordinar envío y pago</li>
+                  </ol>
+                </div>
+                
+                <div className="payment-condition">
+                  <div className="payment-icon">⚠️</div>
+                  <div className="payment-content">
+                    <h3>Condición de Pago para Mayoristas</h3>
+                    <p><strong>TODAS LAS COMPRAS AL MAYOR REQUIEREN 50% DE SEÑA AL MOMENTO DEL PEDIDO</strong></p>
+                    <p>El 50% restante se abona al momento de la entrega o según acuerdo con el vendedor</p>
+                  </div>
+                </div>
+                
+                <div className="comparison-benefit">
+                  <h3>Ahorro vs. MercadoLibre</h3>
+                  <p>Calculamos automáticamente cuánto ahorras por unidad comparando nuestro precio mayorista vs. el precio en MercadoLibre</p>
+                </div>
+                
+                <div className="whatsapp-majorista">
+                  <a
+                    href="https://wa.me/5491123942598?text=Hola%20quiero%20consultar%20por%20venta%20mayorista"
+                    className="whatsapp-btn majorista-btn"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.446l-.232-.139-3.578-.321c-.039-.003-.062-.007-.084-.007l-.003-.001A9.87 9.87 0 0 1 1.799 10.53c0-5.446 4.418-9.864 9.877-9.864s9.877 4.418 9.877 9.864a9.824 9.824 0 0 1-2.786 6.946l-.395.347-.034.028z" />
+                    </svg>
+                    Consultar por Mayorista
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -244,6 +308,10 @@ const PreguntasFrecuentes = () => {
           box-shadow: 0 3px 12px rgba(0,0,0,0.04);
         }
 
+        .majorista-section {
+          border-left: 5px solid var(--accent);
+        }
+
         .question {
           font-size: 1.18rem;
           font-weight: 700;
@@ -253,10 +321,162 @@ const PreguntasFrecuentes = () => {
           border-bottom: 1px solid #f0e8ff;
         }
 
+        .majorista-section .question {
+          color: var(--accent);
+        }
+
         .answer {
           font-size: 0.95rem;
           line-height: 1.68;
           color: #444;
+        }
+
+        .majorista-info {
+          margin-top: 15px;
+        }
+
+        .majorista-benefits {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 16px;
+          margin: 20px 0;
+        }
+
+        .benefit-card {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 16px;
+          background: linear-gradient(135deg, #f8f5ff, #f3e8ff);
+          border-radius: 12px;
+          border-left: 4px solid var(--accent);
+          transition: transform 0.2s;
+        }
+
+        .benefit-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 6px 16px rgba(171, 71, 188, 0.15);
+        }
+
+        .benefit-icon {
+          font-size: 24px;
+          flex-shrink: 0;
+        }
+
+        .benefit-content h3 {
+          margin: 0 0 6px 0;
+          font-size: 1rem;
+          color: var(--primary-dark);
+          font-weight: 700;
+        }
+
+        .benefit-content p {
+          margin: 0;
+          font-size: 0.9rem;
+          line-height: 1.5;
+          color: #555;
+        }
+
+        .majorista-process {
+          background: #f0f9ff;
+          padding: 20px;
+          border-radius: 12px;
+          margin: 24px 0;
+          border: 1px solid #bae6fd;
+        }
+
+        .majorista-process h3 {
+          color: #0369a1;
+          margin-top: 0;
+          margin-bottom: 16px;
+          font-size: 1.1rem;
+          font-weight: 700;
+        }
+
+        .majorista-process ol {
+          margin: 0;
+          padding-left: 20px;
+        }
+
+        .majorista-process li {
+          margin-bottom: 10px;
+          color: #374151;
+          line-height: 1.5;
+        }
+
+        .majorista-process li strong {
+          color: #0ea5e9;
+        }
+
+        .payment-condition {
+          background: #fef3c7;
+          border: 2px solid #fbbf24;
+          border-radius: 12px;
+          padding: 18px;
+          margin: 24px 0;
+          display: flex;
+          align-items: flex-start;
+          gap: 16px;
+        }
+
+        .payment-icon {
+          font-size: 32px;
+          flex-shrink: 0;
+        }
+
+        .payment-content h3 {
+          margin: 0 0 8px 0;
+          color: #92400e;
+          font-size: 1.1rem;
+          font-weight: 700;
+        }
+
+        .payment-content p {
+          margin: 0;
+          color: #92400e;
+          line-height: 1.5;
+        }
+
+        .payment-content p:first-of-type {
+          font-weight: 700;
+          font-size: 1.05rem;
+          margin-bottom: 8px;
+        }
+
+        .comparison-benefit {
+          background: #dcfce7;
+          border: 1px solid #86efac;
+          border-radius: 12px;
+          padding: 18px;
+          margin: 20px 0;
+        }
+
+        .comparison-benefit h3 {
+          color: #065f46;
+          margin-top: 0;
+          margin-bottom: 8px;
+          font-size: 1.1rem;
+          font-weight: 700;
+        }
+
+        .comparison-benefit p {
+          margin: 0;
+          color: #065f46;
+          line-height: 1.5;
+        }
+
+        .whatsapp-majorista {
+          text-align: center;
+          margin-top: 25px;
+        }
+
+        .majorista-btn {
+          background: linear-gradient(135deg, #0ea5e9, #0284c7);
+          box-shadow: 0 3px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .majorista-btn:hover {
+          box-shadow: 0 6px 18px rgba(14, 165, 233, 0.4);
         }
 
         ul {
@@ -483,6 +703,9 @@ const PreguntasFrecuentes = () => {
           .bullet-zone { display: inline; margin-left: 6px; }
           .map-image { max-height: 360px; }
           .whatsapp-btn { width: 100%; justify-content: center; padding: 14px 24px; }
+          .majorista-benefits { grid-template-columns: 1fr; }
+          .payment-condition { flex-direction: column; align-items: center; text-align: center; }
+          .payment-icon { margin-bottom: 8px; }
         }
 
         @keyframes fadeIn {

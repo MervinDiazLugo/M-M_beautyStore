@@ -1,27 +1,37 @@
 ﻿import Link from 'next/link'
 
 export default function ProductCard({ product }) {
-  // Si no está publicado → no renderizamos nada (o un placeholder mínimo si querés)
   if (!product.published) return null;
 
-  const message = `Hola, quiero comprar: ${product.name} (SKU: ${product.sku}) - $${product.price.toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})}`
+  const message = `Hola, quiero comprar: ${product.name} (SKU: ${product.sku}) - $${(product.price || 0).toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})}`
   const waBase = "https://wa.me/5491123942598"
   const waLink = `${waBase}?text=${encodeURIComponent(message)}`
+  const mlLink = product.mercadoLibreUrl || product.permalink;
+  const cantidadVendida = product.cantidad_vendida || product.sold_quantity || 0;
+  const esTopVenta = cantidadVendida > 1000;
 
   return (
     <div style={{ 
       width: '100%', 
+      height: '100%',
       display: 'flex', 
       justifyContent: 'center' 
     }}>
+      {/* ✅ CONTENEDOR CON BORDE FINO */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         height: '100%',
-        width: '100%'
+        width: '100%',
+        minHeight: '600px',
+        padding: '16px', // ✅ ESPACIADO INTERNO
+        background: '#ffffff',
+        border: '1px solid #e5e7eb', // ✅ LÍNEA FINA
+        borderRadius: '16px', // ✅ ESQUINAS REDONDEADAS
+        boxShadow: '0 2px 8px rgba(0,0,0,0.06)' // ✅ SOMBRA SUTIL
       }}>
-        {/* Imagen del producto */}
+        {/* Imagen - ALTURA FIJA */}
         <div style={{
           height: 200,
           background: '#f8fafc',
@@ -33,53 +43,80 @@ export default function ProductCard({ product }) {
           overflow: 'hidden',
           border: '1px solid #e5e7eb'
         }}>
-          <img
-            src={product.image[0]}
-            alt={product.name}
-            style={{
-              maxHeight: '100%',
-              maxWidth: '100%',
-              objectFit: 'contain',
-              padding: '8px'
-            }}
-          />
+          {product.image && product.image[0] ? (
+            <img
+              src={product.image[0]}
+              alt={product.name}
+              style={{
+                maxHeight: '100%',
+                maxWidth: '100%',
+                objectFit: 'contain',
+                padding: '8px'
+              }}
+            />
+          ) : (
+            <span style={{ color: '#9ca3af', fontSize: '14px' }}>Sin imagen</span>
+          )}
         </div>
         
-        {/* Información del producto */}
-        <h3 style={{
-          margin: '0 0 8px 0',
-          fontSize: '18px',
-          fontWeight: 700,
-          color: '#111827',
-          lineHeight: '1.3'
-        }}>{product.name}</h3>
+        {/* Título - PEGADO A DESCRIPCIÓN */}
+        <div style={{ 
+          marginBottom: 4, // ✅ MUY CERCA (era 8px)
+          height: '72px',
+          overflow: 'hidden'
+        }}>
+          <h3 style={{
+            margin: 0,
+            fontSize: '16px',
+            fontWeight: 700,
+            color: '#111827',
+            lineHeight: '1.4',
+            height: '72px',
+            display: '-webkit-box',
+            WebkitLineClamp: 4,
+            WebkitBoxOrient: 'vertical'
+          }}>
+            {product.name || 'Sin nombre'}
+          </h3>
+        </div>
         
-        <p style={{
-          margin: '0 0 8px 0',
+        {/* Descripción - PEGADA A TÍTULO */}
+        <div style={{
+          margin: '0 0 12px 0', // ✅ SIN MARGEN ARRIBA
           color: '#6b7280',
           fontSize: '14px',
           lineHeight: '1.4',
-          minHeight: '40px'
-        }}>{product.desc}</p>
+          height: '40px',
+          overflow: 'hidden',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical'
+        }}>
+          {product.desc || 'Sin descripción disponible'}
+        </div>
         
-        {/* Precio + Envío gratis */}
+        {/* Precio con "Precio:" + Envío */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '8px',  // reducido para dejar espacio a la leyenda
+          marginBottom: '12px',
+          minHeight: '32px',
           flexWrap: 'wrap',
           gap: '10px'
         }}>
-          <p style={{
-            margin: '0',
-            fontWeight: 700,
-            fontSize: '22px',
-            color: '#111827',
-            whiteSpace: 'nowrap'
-          }}>
-            ${product.price.toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})}
-          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '12px', color: '#6b7280', marginBottom: '2px' }}>Precio:</span>
+            <p style={{
+              margin: '0',
+              fontWeight: 700,
+              fontSize: '22px',
+              color: '#059669',
+              whiteSpace: 'nowrap'
+            }}>
+              ${(product.price || 0).toLocaleString('es-AR', {minimumFractionDigits: 2,maximumFractionDigits: 2})}
+            </p>
+          </div>
           
           {product.envioGratis && (
             <div style={{
@@ -96,84 +133,103 @@ export default function ProductCard({ product }) {
               whiteSpace: 'nowrap',
               animation: 'envioPulse 2s infinite'
             }}>
-              <svg 
-                width="18" 
-                height="18" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ animation: 'envioMove 1.8s ease-in-out infinite' }}
-              >
-                <rect x="1" y="3" width="15" height="13" rx="2"/>
-                <path d="M16 8h4l2 4v5h-2"/>
-                <circle cx="5.5" cy="18.5" r="2.5"/>
-                <circle cx="18.5" cy="18.5" r="2.5"/>
-                <path d="M8 8h8"/>
-                <path d="M3 16h4"/>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'envioMove 1.8s ease-in-out infinite' }}>
+                <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l2 4v5h-2"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/><path d="M8 8h8"/><path d="M3 16h4"/>
               </svg>
               <span style={{ fontSize: '13px', fontWeight: 800 }}>ENVÍO GRATIS</span>
             </div>
           )}
         </div>
 
-        {/* Nueva leyenda: Precio en MercadoLibre */}
-        {product.ml_price && product.mercadoLibreUrl && (
-          <p style={{
-            margin: '0 0 16px 0',
-            fontSize: '13px',
-            color: '#6b7280',
-            fontStyle: 'italic',
-            lineHeight: 1.3
+        {/* Vendidas ARRIBA + ML ABAJO */}
+        <div style={{
+          marginBottom: '20px',
+          minHeight: '56px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center'
+        }}>
+          {/* Cantidad Vendidas PRIMERO */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '6px 12px',
+            background: esTopVenta ? '#fef3c7' : '#f9fafb',
+            borderRadius: '20px',
+            border: esTopVenta ? '2px solid #f59e0b' : '1px solid #e5e7eb',
+            width: 'fit-content',
+            marginBottom: '4px'
           }}>
-            Precio en MercadoLibre:{' '}
-            <a
-              href={product.mercadoLibreUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: '#0284c7',
-                textDecoration: 'underline',
-                fontStyle: 'normal',
-                fontWeight: 500
-              }}
-            >
-              ${product.ml_price.toLocaleString('es-AR')}
-            </a>
-          </p>
-        )}
-        
+            <div style={{
+              width: '10px',
+              height: '10px',
+              background: esTopVenta ? '#f59e0b' : '#6b7280',
+              borderRadius: '50%'
+            }}></div>
+            <span style={{
+              fontSize: '16px',
+              fontWeight: 700,
+              color: esTopVenta ? '#b45309' : '#374151'
+            }}>
+              {cantidadVendida.toLocaleString('es-AR')} vendidas
+            </span>
+            {esTopVenta && (
+              <span style={{
+                background: '#f59e0b',
+                color: 'white',
+                padding: '3px 8px',
+                borderRadius: '12px',
+                fontSize: '10px',
+                fontWeight: 700,
+                textTransform: 'uppercase'
+              }}>
+                🔥 TOP
+              </span>
+            )}
+          </div>
+          
+          {/* Precio MercadoLibre ABAJO */}
+          {product.ml_price && product.mercadoLibreUrl && (
+            <p style={{
+              margin: 0,
+              fontSize: '13px',
+              color: '#6b7280',
+              fontStyle: 'italic'
+            }}>
+              Precio en MercadoLibre:{' '}
+              <a
+                href={product.mercadoLibreUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: '#0284c7',
+                  textDecoration: 'underline',
+                  fontStyle: 'normal',
+                  fontWeight: 500
+                }}
+              >
+                ${(product.ml_price || 0).toLocaleString('es-AR')}
+              </a>
+            </p>
+          )}
+        </div>
+
         {/* Botones */}
         <div style={{ 
           display: 'flex', 
           gap: '12px',
-          marginTop: 'auto'
+          marginTop: '8px',
+          height: '64px',
+          minHeight: '64px'
         }}>
-          <a
-            href={waLink}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              textDecoration: 'none',
-              flex: 1
-            }}
-          >
+          <a href={waLink} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', flex: 1 }}>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              background: 'linear-gradient(135deg, #25D366, #128C7E)',
-              color: '#fff',
-              padding: '12px 16px',
-              borderRadius: '10px',
-              fontWeight: 600,
-              fontSize: '14px',
-              border: 'none',
-              transition: 'all 0.3s ease',
-              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: '8px', background: 'linear-gradient(135deg, #25D366, #128C7E)',
+              color: '#fff', padding: '12px 16px', borderRadius: '10px',
+              fontWeight: 600, fontSize: '14px', border: 'none',
+              transition: 'all 0.3s ease', cursor: 'pointer',
               boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)',
               textAlign: 'center'
             }}
@@ -187,35 +243,19 @@ export default function ProductCard({ product }) {
             }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="9" cy="21" r="1"/>
-                <circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
               </svg>
               Comprar
             </div>
           </a>
           
-          <Link
-            href={`/product/${product.id}`}
-            style={{
-              textDecoration: 'none',
-              flex: 1
-            }}
-          >
+          <Link href={`/product/${product.id}`} style={{ textDecoration: 'none', flex: 1 }}>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              background: '#fff',
-              color: '#374151',
-              padding: '12px 16px',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: 500,
-              border: '2px solid #e5e7eb',
-              transition: 'all 0.3s ease',
-              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: '8px', background: '#fff', color: '#374151',
+              padding: '12px 16px', borderRadius: '8px', fontSize: '14px',
+              fontWeight: 500, border: '2px solid #e5e7eb',
+              transition: 'all 0.3s ease', cursor: 'pointer',
               textAlign: 'center'
             }}
             onMouseEnter={(e) => {
@@ -230,8 +270,7 @@ export default function ProductCard({ product }) {
             }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
               </svg>
               Detalles
             </div>
@@ -239,8 +278,14 @@ export default function ProductCard({ product }) {
         </div>
         
         <style jsx>{`
-          @keyframes envioPulse { ... }  /* mantener tus animaciones */
-          @keyframes envioMove { ... }
+          @keyframes envioPulse {
+            0%, 100% { box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); }
+            50% { box-shadow: 0 4px 20px rgba(249, 115, 22, 0.5); }
+          }
+          @keyframes envioMove {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(3px); }
+          }
         `}</style>
       </div>
     </div>
