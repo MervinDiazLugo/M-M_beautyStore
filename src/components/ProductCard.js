@@ -157,20 +157,20 @@ export default function ProductCard({ product }) {
             padding: '6px 12px',
             background: esTopVenta ? '#fef3c7' : '#f9fafb',
             borderRadius: '20px',
-            border: esTopVenta ? '2px solid #f59e0b' : '1px solid #e5e7eb',
+            border: esTopVenta ? '2px solid #f59e0b' : '1px solid  rgb(5, 150, 105)',
             width: 'fit-content',
             marginBottom: '4px'
           }}>
             <div style={{
               width: '10px',
               height: '10px',
-              background: esTopVenta ? '#f59e0b' : '#6b7280',
+              background: esTopVenta ? '#f59e0b' : '#059669',
               borderRadius: '50%'
             }}></div>
             <span style={{
               fontSize: '16px',
               fontWeight: 700,
-              color: esTopVenta ? '#b45309' : '#374151'
+              color: esTopVenta ? '#b45309' : '#37513a'
             }}>
               {cantidadVendida.toLocaleString('es-AR')} vendidas
             </span>
