@@ -105,30 +105,129 @@ export default function ProductPage() {
 
         <Breadcrumb product={product} isMobile={isMobile} />
 
-        {/* Main Content Grid - ORDEN CORREGIDO CON GRID AREAS */}
-        <div style={{
-          display: 'grid',
-          gap: isMobile ? '16px' : '24px',
-          marginBottom: '32px',
-          // Mobile: info arriba, imagen abajo
-          // Desktop: imagen izquierda, info derecha  
-          gridTemplateAreas: isMobile 
-            ? '"info" "gallery"' 
-            : '"gallery info"',
-          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-          gridTemplateRows: isMobile ? 'auto 1fr' : '1fr'
-        }}>
-
-          {/* COLUMNA INFO - SIEMPRE EN ÁREA "info" (arriba mobile, derecha desktop) */}
-          <div style={{ 
-            gridArea: 'info',
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '20px'
+        {/* MOBILE vs DESKTOP */}
+        {isMobile ? (
+          /* ================= MOBILE: Título + Galería + SKU+Venta Mayorista ================= */
+          <div style={{
+            background: '#fff',
+            borderRadius: '12px',
+            padding: '20px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            marginBottom: '24px'
           }}>
-            <ProductInfo product={product} isMobile={isMobile} />
+            {/* TÍTULO PEQUEÑO */}
+            <h1 style={{
+              fontSize: '18px',
+              fontWeight: 700,
+              color: '#111827',
+              margin: '0 0 12px 0',
+              lineHeight: '1.3'
+            }}>
+              {product.name}
+            </h1>
 
-            <PricingCard 
+            {/* SKU + VENTA MAYORISTA → UNA LÍNEA FORZADA - SIEMPRE VISIBLE */}
+            <div style={{
+              display: 'flex',
+              flexWrap: 'nowrap',
+              gap: '12px',
+              alignItems: 'center',
+              height: '28px',
+              marginBottom: '20px',
+              fontSize: '14px',
+              overflow: 'hidden'
+            }}>
+              {product.sku && (
+                <span style={{
+                  color: '#6b7280',
+                  background: '#f3f4f6',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
+                }}>
+                  SKU: {product.sku}
+                </span>
+              )}
+              {precioMayoristaStr && (
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '4px 10px',
+                  backgroundColor: '#ecfdf5',     // Fondo verde muy claro
+                  color: '#059669',               // Texto verde oscuro
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  borderRadius: '4px',
+                  border: '1px solid #a7f3d0',     // Borde verde claro
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                  </svg>
+                  Venta Mayorista
+                </div>
+              )}
+            </div>
+
+            {/* GALERÍA GRANDE */}
+            <div style={{ minHeight: '280px' }}>
+              <ImageGallery
+                product={product}
+                isMobile={isMobile}
+                currentImageIndex={currentImageIndex}
+                goToPrevious={goToPrevious}
+                goToNext={goToNext}
+                esTopVenta={esTopVenta}
+                cantidadVendida={cantidadVendida}
+              />
+            </div>
+          </div>
+        ) : (
+          /* ================= DESKTOP: Grid original ================= */
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '24px',
+            marginBottom: '32px',
+          }}>
+            <ImageGallery
+              product={product}
+              isMobile={isMobile}
+              currentImageIndex={currentImageIndex}
+              goToPrevious={goToPrevious}
+              goToNext={goToNext}
+              esTopVenta={esTopVenta}
+              cantidadVendida={cantidadVendida}
+            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <ProductInfo product={product} isMobile={isMobile} />
+              <PricingCard
+                product={product}
+                isMobile={isMobile}
+                qty={qty}
+                setQty={setQty}
+                priceStr={priceStr}
+                precioMayoristaStr={precioMayoristaStr}
+                mlPriceStr={mlPriceStr}
+                descuentoMayorista={descuentoMayorista}
+                waLink={waLink}
+                esMayorista={esMayorista}
+                cantidadMinimaMayorista={cantidadMinimaMayorista}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* PRECIO - SOLO MOBILE */}
+        {isMobile && (
+          <div style={{ marginBottom: '32px' }}>
+            <PricingCard
               product={product}
               isMobile={isMobile}
               qty={qty}
@@ -142,18 +241,7 @@ export default function ProductPage() {
               cantidadMinimaMayorista={cantidadMinimaMayorista}
             />
           </div>
-
-          {/* COLUMNA IMAGEN - SIEMPRE EN ÁREA "gallery" (abajo mobile, izquierda desktop) */}
-          <ImageGallery 
-            product={product}
-            isMobile={isMobile}
-            currentImageIndex={currentImageIndex}
-            goToPrevious={goToPrevious}
-            goToNext={goToNext}
-            esTopVenta={esTopVenta}
-            cantidadVendida={cantidadVendida}
-          />
-        </div>
+        )}
 
         {/* Product Features Grid */}
         <div style={{
@@ -187,7 +275,7 @@ export default function ProductPage() {
           ))}
         </div>
 
-        <ProductDescription 
+        <ProductDescription
           product={product}
           isMobile={isMobile}
           mlPriceStr={mlPriceStr}
