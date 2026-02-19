@@ -157,12 +157,12 @@ export default function ProductPage() {
                   alignItems: 'center',
                   gap: '6px',
                   padding: '4px 10px',
-                  backgroundColor: '#ecfdf5',     // Fondo verde muy claro
-                  color: '#059669',               // Texto verde oscuro
+                  backgroundColor: '#ecfdf5',
+                  color: '#059669',
                   fontSize: '10px',
                   fontWeight: 600,
                   borderRadius: '4px',
-                  border: '1px solid #a7f3d0',     // Borde verde claro
+                  border: '1px solid #a7f3d0',
                   whiteSpace: 'nowrap',
                   flexShrink: 0
                 }}>
@@ -207,6 +207,8 @@ export default function ProductPage() {
             />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <ProductInfo product={product} isMobile={isMobile} />
+              
+              {/* PricingCard con toda la funcionalidad de mayorista */}
               <PricingCard
                 product={product}
                 isMobile={isMobile}

@@ -11,13 +11,18 @@ export function PricingCard({
   esMayorista, 
   cantidadMinimaMayorista 
 }) {
+  // Calcular valores para la barra de progreso
+  const unidadesFaltantes = cantidadMinimaMayorista - qty;
+  const progresoMayorista = Math.min(100, (qty / cantidadMinimaMayorista) * 100);
+
   return (
     <div style={{
       background: '#fff',
       padding: isMobile ? '20px' : '28px',
       borderRadius: '12px',
       height: 'fit-content',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+      border: esMayorista ? '1px solid #10b981' : '1px solid #e5e7eb'
     }}>
       {/* Precios */}
       <div style={{ marginBottom: '20px' }}>
@@ -33,16 +38,47 @@ export function PricingCard({
 
         {/* Línea 2: Precio mayorista */}
         {product.precio_mayorista && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <span style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 600, color: '#374151', whiteSpace: 'nowrap' }}>
-              Mayorista:
-            </span>
-            <span style={{ fontSize: isMobile ? '20px' : 'clamp(22px, 3vw, 24px)', fontWeight: 700, color: '#059669', whiteSpace: 'nowrap' }}>
-              ${precioMayoristaStr}
-            </span>
-            <span style={{ fontSize: isMobile ? '12px' : '14px', fontWeight: 800, color: '#dc2626', backgroundColor: '#fee2e2', padding: '2px 8px', borderRadius: '4px', marginLeft: '4px' }}>
-              -{descuentoMayorista}%
-            </span>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px', 
+            marginBottom: '6px',
+            backgroundColor: esMayorista ? '#ecfdf5' : 'transparent',
+            padding: esMayorista ? '8px 12px' : '0',
+            borderRadius: '8px',
+            marginLeft: esMayorista ? '-12px' : '0',
+            marginRight: esMayorista ? '-12px' : '0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 600, color: '#374151', whiteSpace: 'nowrap' }}>
+                Mayorista:
+              </span>
+              {esMayorista && (
+                <span style={{
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  padding: '2px 8px',
+                  borderRadius: '12px'
+                }}>
+                  APLICADO
+                </span>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ 
+                fontSize: isMobile ? '20px' : 'clamp(22px, 3vw, 24px)', 
+                fontWeight: esMayorista ? 700 : 600, 
+                color: esMayorista ? '#10b981' : '#059669', 
+                whiteSpace: 'nowrap' 
+              }}>
+                ${precioMayoristaStr}
+              </span>
+              <span style={{ fontSize: isMobile ? '12px' : '14px', fontWeight: 800, color: '#dc2626', backgroundColor: '#fee2e2', padding: '2px 8px', borderRadius: '4px', marginLeft: '4px' }}>
+                -{descuentoMayorista}%
+              </span>
+            </div>
           </div>
         )}
 
@@ -91,7 +127,7 @@ export function PricingCard({
       )}
 
       {/* Selector de cantidad */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '12px' : '16px', marginBottom: isMobile ? '20px' : '28px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '12px' : '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
         <label style={{ color: '#111827', fontSize: isMobile ? '14px' : '16px', fontWeight: 600 }}>Cantidad:</label>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', border: '1px solid #d1d5db', borderRadius: '8px', padding: '4px', backgroundColor: '#fff' }}>
           <button
@@ -115,22 +151,84 @@ export function PricingCard({
         </div>
       </div>
 
-      {/* Alerta de Mayorista */}
+      {/* BARRA DE PROGRESO MAYORISTA */}
       {product.precio_mayorista && (
         <div style={{
-          backgroundColor: esMayorista ? '#ecfdf5' : '#fff7ed',
-          border: `1px solid ${esMayorista ? '#10b981' : '#f97316'}`,
-          borderRadius: '10px',
-          padding: '12px 16px',
+          marginTop: '16px',
+          padding: '16px',
+          backgroundColor: '#f9fafb',
+          borderRadius: '8px',
           marginBottom: '20px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: esMayorista ? '#059669' : '#c2410c' }}>
-            <span style={{ fontSize: '18px' }}>{esMayorista ? '✅' : '💡'}</span>
-            <div style={{ fontSize: isMobile ? '12px' : '14px', fontWeight: 500 }}>
-              {esMayorista 
-                ? '¡Genial! Estás comprando con precio mayorista.' 
-                : `Compra ${cantidadMinimaMayorista} o más unidades para acceder al precio mayorista.`}
-            </div>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '12px'
+          }}>
+            <span style={{
+              fontSize: '13px',
+              fontWeight: 500,
+              color: '#374151'
+            }}>
+              Progreso hacia precio mayorista
+            </span>
+            <span style={{
+              fontSize: '13px',
+              fontWeight: 600,
+              color: esMayorista ? '#10b981' : '#6b7280'
+            }}>
+              {qty}/{cantidadMinimaMayorista} unidades
+            </span>
+          </div>
+
+          {/* Barra de progreso */}
+          <div style={{
+            width: '100%',
+            height: '6px',
+            backgroundColor: '#e5e7eb',
+            borderRadius: '3px',
+            overflow: 'hidden',
+            marginBottom: '8px'
+          }}>
+            <div style={{
+              width: `${progresoMayorista}%`,
+              height: '100%',
+              background: esMayorista 
+                ? '#10b981'
+                : '#9ca3af',
+              borderRadius: '3px',
+              transition: 'width 0.3s ease'
+            }} />
+          </div>
+
+          {/* Mensaje de estado */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '12px',
+            color: esMayorista ? '#10b981' : '#6b7280',
+            fontWeight: 500
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {esMayorista ? (
+                <path d="M20 6L9 17l-5-5" />
+              ) : (
+                <circle cx="12" cy="12" r="10" />
+              )}
+              {!esMayorista && (
+                <>
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </>
+              )}
+            </svg>
+            {esMayorista ? (
+              <span>¡Precio mayorista aplicado! Ahorras {descuentoMayorista}% por unidad.</span>
+            ) : (
+              <span>Faltan {unidadesFaltantes} {unidadesFaltantes === 1 ? 'unidad' : 'unidades'} para acceder al precio mayorista</span>
+            )}
           </div>
         </div>
       )}
@@ -147,7 +245,7 @@ export function PricingCard({
           gap: '12px',
           width: '100%',
           padding: isMobile ? '14px' : '18px',
-          backgroundColor: '#25D366',
+          background: 'linear-gradient(135deg, #25D366, #128C7E)',
           color: 'white',
           textDecoration: 'none',
           borderRadius: '12px',
@@ -159,12 +257,12 @@ export function PricingCard({
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'translateY(-2px)';
           e.currentTarget.style.boxShadow = '0 6px 20px rgba(37, 211, 102, 0.4)';
-          e.currentTarget.style.backgroundColor = '#22c35e';
+          e.currentTarget.style.background = 'linear-gradient(135deg, #22c35e, #0e7b5e)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'translateY(0)';
           e.currentTarget.style.boxShadow = '0 4px 14px rgba(37, 211, 102, 0.3)';
-          e.currentTarget.style.backgroundColor = '#25D366';
+          e.currentTarget.style.background = 'linear-gradient(135deg, #25D366, #128C7E)';
         }}
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
