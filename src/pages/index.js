@@ -1,7 +1,7 @@
-﻿import ProductCard from "../components/ProductCard";
+import { getProducts } from '../lib/api';
+import ProductCard from "../components/ProductCard";
 import { useContext, useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { SearchContext } from '../components/SearchContext';
-import { PRODUCTS } from './product-data';
 import Head from 'next/head';
 
 // Hook para debouncing
@@ -28,7 +28,30 @@ export default function Home() {
   const [isSmallMobile, setIsSmallMobile] = useState(false);
   const [gridColumns, setGridColumns] = useState("repeat(auto-fill, minmax(250px, 1fr))");
   const [visibleProducts, setVisibleProducts] = useState(12);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [products, setProducts] = useState({});
+
+  useEffect(() => {
+    async function loadProducts() {
+      setIsLoading(true);
+      console.log('Loading products...');
+      try {
+        const data = await getProducts();
+        console.log('Products loaded:', data.length);
+        const productsMap = data.reduce((acc, product) => {
+          acc[product.id] = product;
+          return acc;
+        }, {});
+        console.log('Products map size:', Object.keys(productsMap).length);
+        setProducts(productsMap);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadProducts();
+  }, []);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const searchCache = useRef({});
@@ -69,7 +92,7 @@ export default function Home() {
   const getFilteredProducts = useCallback((term) => {
     if (!term.trim()) {
       // Si no hay término, mostrar todos los productos
-      return Object.entries(PRODUCTS).map(([key, product]) => ({ key, product }));
+      return Object.entries(products).map(([key, product]) => ({ key, product }));
     }
 
     // Verificar cache
@@ -81,7 +104,7 @@ export default function Home() {
     const termLower = term.toLowerCase();
     const searchWords = termLower.split(' ').filter(word => word.length > 0);
 
-    const filtered = Object.entries(PRODUCTS)
+    const filtered = Object.entries(products)
       .filter(([key, product]) => {
         const productName = product.name.toLowerCase();
         const productSku = product.sku.toLowerCase();
@@ -150,11 +173,12 @@ export default function Home() {
 
   // Obtener productos filtrados
   const filteredProducts = useMemo(() => {
-    setIsLoading(true);
-
     // Primero: solo productos publicados
-    let candidates = Object.entries(PRODUCTS)
+    let candidates = Object.entries(products)
       .filter(([_, product]) => product.published === true);
+
+    console.log('All products count:', Object.keys(products).length);
+    console.log('Published products count:', candidates.length);
 
     // Luego: aplicar la búsqueda (si hay término)
     if (debouncedSearchTerm.trim()) {
@@ -203,7 +227,7 @@ export default function Home() {
 
     setTimeout(() => setIsLoading(false), 200);
     return final;
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, products]);
 
   // Resetear productos visibles al buscar
   useEffect(() => {
@@ -468,29 +492,35 @@ export default function Home() {
         padding: isSmallMobile ? '12px' : isMobile ? '14px' : '16px 20px 24px 20px',
         paddingTop: isSmallMobile ? '10px' : isMobile ? '12px' : '16px'
       }}>
-        {/* Loading Skeleton */}
-        {isLoading ? (
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: gridColumns,
-            gap: isSmallMobile ? "8px" : isMobile ? "10px" : "16px",
-            marginBottom: isSmallMobile ? '16px' : isMobile ? '20px' : '24px',
-            width: '100%'
+        {/* Loading Spinner */}
+        {isLoading && (
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: '60px',
+            gap: '20px'
           }}>
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  background: '#f5f5f5',
-                  borderRadius: '10px',
-                  height: isSmallMobile ? '280px' : isMobile ? '300px' : '320px',
-                  animation: 'pulse 1.5s ease-in-out infinite',
-                  border: '1px solid #eee'
-                }}
-              />
-            ))}
+            <div style={{
+              width: '50px',
+              height: '50px',
+              border: '4px solid #f3f3f3',
+              borderTop: '4px solid #9c27b0',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <style>{`
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            `}</style>
+            <p style={{ color: '#666', margin: 0 }}>Cargando productos...</p>
           </div>
-        ) : (
+        )}
+
+        {!isLoading && (
           <>
             {/* Grid de productos */}
             <div style={{
@@ -537,7 +567,14 @@ export default function Home() {
           </>
         )}
 
-        {/* Mensaje si no hay productos */}
+        {/* Mensaje si no hay productos y no hay búsqueda */}
+        {filteredProducts.length === 0 && !searchTerm && !isLoading && Object.keys(products).length > 0 && (
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            No hay productos disponibles
+          </div>
+        )}
+
+        {/* Mensaje si no hay productos con búsqueda */}
         {filteredProducts.length === 0 && searchTerm && !isLoading && (
           <div style={{
             textAlign: 'center',

@@ -1,4 +1,22 @@
 export function ImageGallery({ product, isMobile, currentImageIndex, goToPrevious, goToNext, esTopVenta, cantidadVendida }) {
+  const images = product.image || [];
+  const currentImage = images[currentImageIndex];
+  
+  if (!currentImage) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: isMobile ? '300px' : '450px',
+        background: '#f3f4f6',
+        borderRadius: '12px'
+      }}>
+        <p style={{ color: '#6b7280' }}>Imagen no disponible</p>
+      </div>
+    );
+  }
+  
   return (
     <div style={{
       position: 'relative',
@@ -18,7 +36,7 @@ export function ImageGallery({ product, isMobile, currentImageIndex, goToPreviou
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
       }}>
         <img
-          src={product.image[currentImageIndex]}
+          src={currentImage}
           alt={product.name}
           style={{
             maxWidth: '100%',
@@ -106,7 +124,7 @@ export function ImageGallery({ product, isMobile, currentImageIndex, goToPreviou
       </div>
 
       {/* Carousel Controls */}
-      {product.image.length > 1 && (
+      {images.length > 1 && (
         <>
           <button
             style={{

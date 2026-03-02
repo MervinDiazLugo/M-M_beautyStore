@@ -1,6 +1,4 @@
-import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { PRODUCTS } from '../product-data';
 import { useProduct } from '../../hooks/useProduct';
 import { ProductHeader } from '../../components/product/ProductHeader';
 import { Breadcrumb } from '../../components/product/Breadcrumb';
@@ -9,10 +7,59 @@ import { ProductInfo } from '../../components/product/ProductInfo';
 import { PricingCard } from '../../components/product/PricingCard';
 import { ProductDescription } from '../../components/product/ProductDescription';
 
-export default function ProductPage() {
-  const { query } = useRouter();
-  const product = PRODUCTS[query.id];
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://m-m-beauty-store-api.vercel.app';
 
+function normalizeProduct(product) {
+  if (!product) return null;
+  
+  return {
+    id: product.id,
+    name: product.name,
+    ml_price: product.mlPrice,
+    price: product.price,
+    precio_mayorista: product.precioMayorista,
+    cantidad_minima_mayorista: product.cantidadMinimaMayorista,
+    cantidad_vendida: product.cantidadVendida,
+    sold_quantity_real: product.soldQuantityReal,
+    desc: product.desc,
+    sku: product.sku,
+    image: product.image,
+    envioGratis: product.envioGratis,
+    description: product.description,
+    features: product.features,
+    specifications: product.specifications,
+    mercadoLibreUrl: product.mercadoLibreUrl,
+    brand: product.brand,
+    condition: product.condition,
+    sold_quantity: product.soldQuantity,
+    available_quantity: product.availableQuantity,
+    published: product.published,
+    permalink: product.permalink,
+  };
+}
+
+export async function getServerSideProps({ params }) {
+  try {
+    const response = await fetch(`${API_URL}/api/items/${params.id}`);
+    
+    if (!response.ok) {
+      return { notFound: true };
+    }
+    
+    const product = await response.json();
+    
+    return {
+      props: {
+        product: normalizeProduct(product)
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return { notFound: true };
+  }
+}
+
+export default function ProductPage({ product }) {
   const productData = useProduct(product);
 
   // 1) No mostrar si no existe o published === false
