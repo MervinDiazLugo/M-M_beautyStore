@@ -40,6 +40,7 @@ function normalizeProduct(product) {
     published: product.published,
     permalink: product.permalink,
     createdAt: product.createdAt,
+    instagramReel: product.instagramReel,
   };
 }
 

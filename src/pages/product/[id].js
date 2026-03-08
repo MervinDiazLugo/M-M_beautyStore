@@ -6,6 +6,7 @@ import { ImageGallery } from '../../components/product/ImageGallery';
 import { ProductInfo } from '../../components/product/ProductInfo';
 import { PricingCard } from '../../components/product/PricingCard';
 import { ProductDescription } from '../../components/product/ProductDescription';
+import { InstagramReelEmbed } from '../../components/product/InstagramReelEmbed';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://m-m-beauty-store-api.vercel.app';
 
@@ -35,6 +36,7 @@ function normalizeProduct(product) {
     available_quantity: product.availableQuantity,
     published: product.published,
     permalink: product.permalink,
+    instagramReel: product.instagramReel,
   };
 }
 
@@ -324,32 +326,87 @@ export default function ProductPage({ product }) {
           ))}
         </div>
 
+        {/* Product Description */}
         <ProductDescription
           product={product}
           isMobile={isMobile}
           mlPriceStr={mlPriceStr}
         />
 
-        {/* Especificaciones */}
-        <div style={{
-          background: '#fff',
-          padding: isMobile ? '20px' : '28px',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-          marginBottom: '32px'
-        }}>
-          <h3 style={{ margin: '0 0 16px 0', fontSize: isMobile ? '16px' : '18px', fontWeight: 600, color: '#111827' }}>
-            Especificaciones
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: isMobile ? '8px' : '12px' }}>
-            {Object.entries(product.specifications).map(([key, value]) => (
-              <div key={key} style={{ padding: isMobile ? '10px' : '12px', backgroundColor: '#f9fafb', borderRadius: '8px' }}>
-                <div style={{ fontSize: isMobile ? '11px' : '12px', color: '#6b7280', fontWeight: 500, marginBottom: '4px' }}>{key}</div>
-                <div style={{ fontSize: isMobile ? '13px' : '14px', color: '#374151', fontWeight: 500, wordBreak: 'break-word' }}>{value}</div>
+        {/* Specifications + Instagram Reel - Side by side if specs exist */}
+        {(() => {
+          const hasSpecs = product.specifications && Object.keys(product.specifications).length > 0;
+          const hasReel = product.instagramReel && product.instagramReel.trim() !== '';
+          
+          if (!hasSpecs && !hasReel) return null;
+          
+          if (hasSpecs && hasReel) {
+            // Both: side by side columns
+            return (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                gap: isMobile ? '16px' : '24px',
+                marginBottom: '32px'
+              }}>
+                {/* Specifications */}
+                <div style={{
+                  background: '#fff',
+                  padding: isMobile ? '20px' : '28px',
+                  borderRadius: '12px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                }}>
+                  <h3 style={{ margin: '0 0 16px 0', fontSize: isMobile ? '16px' : '18px', fontWeight: 600, color: '#111827' }}>
+                    Especificaciones
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: isMobile ? '8px' : '12px' }}>
+                    {Object.entries(product.specifications).map(([key, value]) => (
+                      <div key={key} style={{ padding: isMobile ? '10px' : '12px', backgroundColor: '#f9fafb', borderRadius: '8px' }}>
+                        <div style={{ fontSize: isMobile ? '11px' : '12px', color: '#6b7280', fontWeight: 500, marginBottom: '4px' }}>{key}</div>
+                        <div style={{ fontSize: isMobile ? '13px' : '14px', color: '#374151', fontWeight: 500, wordBreak: 'break-word' }}>{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Instagram Reel */}
+                <InstagramReelEmbed product={product} isMobile={isMobile} />
               </div>
-            ))}
-          </div>
-        </div>
+            );
+          }
+          
+          if (hasReel) {
+            // Only reel - smaller and centered
+            return (
+              <div style={{ marginBottom: '32px', maxWidth: '400px', margin: '0 auto 32px auto' }}>
+                <InstagramReelEmbed product={product} isMobile={isMobile} />
+              </div>
+            );
+          }
+          
+          // Only specs
+          return (
+            <div style={{
+              background: '#fff',
+              padding: isMobile ? '20px' : '28px',
+              borderRadius: '12px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              marginBottom: '32px'
+            }}>
+              <h3 style={{ margin: '0 0 16px 0', fontSize: isMobile ? '16px' : '18px', fontWeight: 600, color: '#111827' }}>
+                Especificaciones
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: isMobile ? '8px' : '12px' }}>
+                {Object.entries(product.specifications).map(([key, value]) => (
+                  <div key={key} style={{ padding: isMobile ? '10px' : '12px', backgroundColor: '#f9fafb', borderRadius: '8px' }}>
+                    <div style={{ fontSize: isMobile ? '11px' : '12px', color: '#6b7280', fontWeight: 500, marginBottom: '4px' }}>{key}</div>
+                    <div style={{ fontSize: isMobile ? '13px' : '14px', color: '#374151', fontWeight: 500, wordBreak: 'break-word' }}>{value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
       </div>
 
