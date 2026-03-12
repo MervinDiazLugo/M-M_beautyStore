@@ -36,7 +36,7 @@ function normalizeProduct(product) {
     available_quantity: product.availableQuantity,
     published: product.published,
     permalink: product.permalink,
-    instagramReel: product.instagramReel,
+    instagramReel: product.instagramReel || null,
   };
 }
 

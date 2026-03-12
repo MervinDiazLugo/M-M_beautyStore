@@ -231,7 +231,7 @@ export default function ProductCard({ product }) {
               fontWeight: 600, fontSize: '14px', border: 'none',
               transition: 'all 0.3s ease', cursor: 'pointer',
               boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)',
-              textAlign: 'center'
+              textAlign: 'center', whiteSpace: 'nowrap'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-2px)';
@@ -242,10 +242,10 @@ export default function ProductCard({ product }) {
               e.currentTarget.style.boxShadow = '0 4px 12px rgba(37, 211, 102, 0.3)';
             }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
               </svg>
-              Comprar
+              Lo quiero
             </div>
           </a>
           
