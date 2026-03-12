@@ -255,28 +255,36 @@ export default function Home() {
     <div style={{ width: '100%' }}>
       {/* SEO con Head nativo de Next.js */}
       <Head>
-        <title>{searchTerm ? `Buscar: ${searchTerm} | ` : ''}M&M Beauty Store</title>
-        <meta
-          name="description"
-          content="Tienda online de productos premium de belleza y cuidado de la piel. Encuentra los mejores productos de skincare y belleza."
-        />
-        <meta
-          name="keywords"
-          content="belleza, skincare, productos belleza, cuidado piel, cosméticos, maquillaje"
-        />
+        <title>{searchTerm ? `${searchTerm} | ` : ''}M&M Beauty Store - Productos de Belleza y Cuidado de la Piel</title>
+        <meta name="description" content="Tienda online de productos premium de belleza y cuidado de la piel. Encuentra los mejores productos de skincare, cosméticos y maquillaje. Envíos a todo Argentina." />
+        <meta name="keywords" content="belleza, skincare, productos belleza, cuidado piel, cosméticos, maquillaje, bioaqua, геge bear, vaseline, soulgirl" />
+        <link rel="canonical" href="https://m-m-beautystore.vercel.app/" />
 
         {/* Open Graph */}
-        <meta property="og:title" content="M&M Beauty Store - Productos Premium" />
-        <meta property="og:description" content="Descubre nuestra colección de productos de belleza y cuidado de la piel" />
+        <meta property="og:title" content="M&M Beauty Store - Productos Premium de Belleza" />
+        <meta property="og:description" content="Descubre nuestra colección de productos de belleza y cuidado de la piel. Los mejores precios y calidad." />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="/og-image.jpg" />
-        <meta property="og:url" content="https://tutienda.com/" />
+        <meta property="og:url" content="https://m-m-beautystore.vercel.app/" />
+        <meta property="og:site_name" content="M&M Beauty Store" />
+        <meta property="og:locale" content="es_AR" />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="M&M Beauty Store" />
         <meta name="twitter:description" content="Productos premium de belleza y cuidado de la piel" />
-        <meta name="twitter:image" content="/og-image.jpg" />
+
+        {/* Schema.org */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Store",
+            "name": "M&M Beauty Store",
+            "description": "Tienda online de productos premium de belleza y cuidado de la piel",
+            "url": "https://m-m-beautystore.vercel.app",
+            "areaServed": "AR",
+            "priceRange": "$$$"
+          })}
+        </script>
       </Head>
 
       {/* Contenedor de búsqueda STICKY - PADDING DRAMÁTICAMENTE REDUCIDO */}
