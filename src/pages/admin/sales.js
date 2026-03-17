@@ -11,6 +11,7 @@ export default function Sales() {
   const [productSearch, setProductSearch] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [syncing, setSyncing] = useState(false);
+  const [dateFilter, setDateFilter] = useState('all');
 
   useEffect(() => { 
     loadData(); 
@@ -137,6 +138,23 @@ export default function Sales() {
   const totalRevenue = Array.isArray(sales) ? sales.reduce((sum, s) => sum + (s.net_received || 0), 0) : 0;
   const totalProfit = Array.isArray(sales) ? sales.reduce((sum, s) => sum + (s.profit || 0), 0) : 0;
 
+  const filteredSales = sales.filter(s => {
+    if (dateFilter === 'all') return true;
+    const saleDate = s.sale_date ? new Date(s.sale_date) : new Date(s.created_at);
+    const now = new Date();
+    if (dateFilter === 'today') {
+      return saleDate.toDateString() === now.toDateString();
+    }
+    if (dateFilter === 'week') {
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return saleDate >= weekAgo;
+    }
+    if (dateFilter === 'month') {
+      return saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear();
+    }
+    return true;
+  });
+
   if (loading) {
     return (
       <AdminLayout>
@@ -152,9 +170,15 @@ export default function Sales() {
           <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff', marginBottom: '0.125rem' }}>Ventas</h1>
           <p style={{ color: '#71717a', fontSize: '0.875rem' }}>Gestión de ventas</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#1a1a2e', color: '#fff', fontSize: '0.875rem' }}>
+            <option value="all">Todas</option>
+            <option value="today">Hoy</option>
+            <option value="week">Última semana</option>
+            <option value="month">Este mes</option>
+          </select>
           <button onClick={syncFromML} disabled={syncing} style={{ padding: '0.5rem 1rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.875rem', cursor: syncing ? 'not-allowed' : 'pointer', opacity: syncing ? 0.7 : 1 }}>
-            {syncing ? '⏳ Sync...' : '🔄 Sync ML'}
+            {syncing ? '⏳ Sync...' : '🔄 Sync Mercadolibre'}
           </button>
           <button onClick={() => setShowForm(!showForm)} style={{ padding: '0.5rem 1rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.875rem', cursor: 'pointer' }}>
             {showForm ? '✕ Cancelar' : '+ Nueva Venta'}
@@ -255,7 +279,7 @@ export default function Sales() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e' }}>
           <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Total Ventas</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff' }}>{sales.length}</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff' }}>{filteredSales.length}</div>
         </div>
         <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e' }}>
           <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Ingresos Netos</div>
@@ -281,11 +305,11 @@ export default function Sales() {
             </tr>
           </thead>
           <tbody>
-            {sales.map((sale) => {
+            {filteredSales.map((sale) => {
               const isEditing = editingId === sale.id;
               return (
                 <tr key={sale.id} style={{ borderTop: '1px solid #2a2a3e' }}>
-                  <td style={{ padding: '1rem', color: '#a1a1aa' }}>{new Date(sale.created_at).toLocaleDateString('es-AR')}</td>
+                  <td style={{ padding: '1rem', color: '#a1a1aa' }}>{sale.sale_date ? new Date(sale.sale_date).toLocaleDateString('es-AR') : '—'}</td>
                   <td style={{ padding: '1rem' }}>
                     {isEditing ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -345,7 +369,7 @@ export default function Sales() {
             })}
           </tbody>
         </table>
-        {sales.length === 0 && (
+        {filteredSales.length === 0 && (
           <div style={{ padding: '3rem', textAlign: 'center', color: '#71717a' }}>No hay ventas registradas</div>
         )}
       </div>
