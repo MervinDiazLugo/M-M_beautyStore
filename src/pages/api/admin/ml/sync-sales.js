@@ -42,10 +42,16 @@ async function getMLToken() {
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      // Always refresh the token first
-      const newToken = await getMLToken();
-      if (!newToken) {
-        return res.status(401).json({ error: 'No se pudo obtener token de acceso' });
+      // Get token directly from DB (like debug does)
+      const { data: tokenData } = await supabaseAdmin
+        .from('settings')
+        .select('value')
+        .eq('key', 'ml_access_token')
+        .single();
+
+      const accessToken = tokenData?.value;
+      if (!accessToken) {
+        return res.status(401).json({ error: 'No hay token de acceso' });
       }
 
       const { data: userIdData } = await supabaseAdmin
@@ -61,7 +67,7 @@ export default async function handler(req, res) {
 
       // Get all orders
       const ordersRes = await fetch(`https://api.mercadolibre.com/orders/search?seller=${userId}&limit=100`, {
-        headers: { Authorization: `Bearer ${newToken}` },
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       if (!ordersRes.ok) {
