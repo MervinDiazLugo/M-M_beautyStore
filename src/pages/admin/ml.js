@@ -49,6 +49,8 @@ export default function MLIntegration() {
       const res = await fetch('/api/admin/ml/sync', { method: 'POST' });
       const data = await res.json();
       setResult(data);
+      // Also load shipments after sync
+      loadShipments();
     } catch (e) {
       setResult({ error: e.message });
     }
@@ -71,6 +73,13 @@ export default function MLIntegration() {
     await fetch('/api/admin/ml/disconnect', { method: 'POST' });
     setConnected(false);
     setResult(null);
+  }
+
+  async function debug() {
+    const res = await fetch('/api/admin/ml/debug');
+    const data = await res.json();
+    console.log('ML Debug:', data);
+    alert(JSON.stringify(data, null, 2));
   }
 
   if (loading) {
@@ -139,17 +148,19 @@ export default function MLIntegration() {
 
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
           <button
-            onClick={() => setActiveTab('sales')}
+            onClick={sync}
+            disabled={!connected || syncing}
             style={{
               padding: '0.5rem 1rem',
-              backgroundColor: activeTab === 'sales' ? '#f472b6' : '#2a2a3e',
+              backgroundColor: '#f472b6',
               color: '#fff',
               border: 'none',
               borderRadius: '0.375rem',
-              cursor: 'pointer'
+              cursor: (!connected || syncing) ? 'not-allowed' : 'pointer',
+              opacity: syncing ? 0.7 : 1
             }}
           >
-            📊 Ventas
+            {syncing ? '⏳ Sincronizando...' : '🔄 Sincronizar'}
           </button>
           <button
             onClick={() => setActiveTab('shipments')}
@@ -163,7 +174,7 @@ export default function MLIntegration() {
               cursor: connected ? 'pointer' : 'not-allowed'
             }}
           >
-            🚚 Envíos en tránsito
+            🚚 Ver envíos
           </button>
         </div>
 
