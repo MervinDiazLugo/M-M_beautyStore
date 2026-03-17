@@ -9,6 +9,8 @@ export default function Sales() {
   const [form, setForm] = useState({ product_id: '', sale_price: '', quantity: 1, ml_order_id: '' });
   const [saving, setSaving] = useState(false);
   const [productSearch, setProductSearch] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => { 
     loadData(); 
@@ -75,6 +77,63 @@ export default function Sales() {
     setSales(prev => prev.filter(s => s.id !== id));
   }
 
+  function startEdit(sale) {
+    setEditingId(sale.id);
+    setForm({
+      product_id: sale.product_id || '',
+      sale_price: sale.sale_price || '',
+      quantity: sale.quantity || 1,
+      ml_order_id: sale.ml_order_id || ''
+    });
+    const product = products.find(p => p.id === sale.product_id);
+    setProductSearch(product?.name || '');
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setForm({ product_id: '', sale_price: '', quantity: 1, ml_order_id: '' });
+    setProductSearch('');
+  }
+
+  async function saveEdit(saleId) {
+    setSaving(true);
+    await fetch(`/api/admin/sales/${saleId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_id: form.product_id,
+        sale_price: parseFloat(form.sale_price),
+        quantity: parseInt(form.quantity),
+        ml_order_id: form.ml_order_id,
+      }),
+    });
+    loadData();
+    setEditingId(null);
+    setSaving(false);
+  }
+
+  async function syncFromML() {
+    setSyncing(true);
+    try {
+      const res = await fetch('/api/admin/ml/debug');
+      const data = await res.json();
+      const orders = data.ordersInfo?.results || [];
+      
+      const importRes = await fetch('/api/admin/ml/import-sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orders })
+      });
+      
+      const importData = await importRes.json();
+      alert(`Importadas: ${importData.imported}, Omitidas: ${importData.skipped}, Matcheadas: ${importData.matched}`);
+      loadData();
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+    setSyncing(false);
+  }
+
   const totalRevenue = Array.isArray(sales) ? sales.reduce((sum, s) => sum + (s.net_received || 0), 0) : 0;
   const totalProfit = Array.isArray(sales) ? sales.reduce((sum, s) => sum + (s.profit || 0), 0) : 0;
 
@@ -93,9 +152,14 @@ export default function Sales() {
           <h1 style={{ fontSize: '2rem', fontWeight: '700', color: '#fff', marginBottom: '0.25rem' }}>Ventas</h1>
           <p style={{ color: '#71717a' }}>Registrá y gestioná tus ventas</p>
         </div>
-        <button onClick={() => setShowForm(!showForm)} style={{ padding: '0.75rem 1.5rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.5rem', fontWeight: '600', cursor: 'pointer' }}>
-          {showForm ? '✕ Cancelar' : '+ Nueva Venta'}
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button onClick={syncFromML} disabled={syncing} style={{ padding: '0.75rem 1.5rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.5rem', fontWeight: '600', cursor: syncing ? 'not-allowed' : 'pointer', opacity: syncing ? 0.7 : 1 }}>
+            {syncing ? '⏳ Sync...' : '🔄 Sync ML'}
+          </button>
+          <button onClick={() => setShowForm(!showForm)} style={{ padding: '0.75rem 1.5rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.5rem', fontWeight: '600', cursor: 'pointer' }}>
+            {showForm ? '✕ Cancelar' : '+ Nueva Venta'}
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -218,15 +282,62 @@ export default function Sales() {
           </thead>
           <tbody>
             {sales.map((sale) => {
+              const isEditing = editingId === sale.id;
               return (
                 <tr key={sale.id} style={{ borderTop: '1px solid #2a2a3e' }}>
                   <td style={{ padding: '1rem', color: '#a1a1aa' }}>{new Date(sale.created_at).toLocaleDateString('es-AR')}</td>
-                  <td style={{ padding: '1rem', color: '#fff' }}>{sale.productName || '—'}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#a1a1aa' }}>${(sale.sale_price || 0).toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '1rem' }}>
+                    {isEditing ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <input 
+                          type="text" 
+                          value={productSearch} 
+                          onChange={(e) => {
+                            setProductSearch(e.target.value);
+                            if (!e.target.value) setForm({ ...form, product_id: '' });
+                          }}
+                          placeholder="Buscar producto..."
+                          style={{ padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '0.75rem' }}
+                        />
+                        {productSearch && filteredProducts.slice(0, 3).map(p => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => { setForm({ ...form, product_id: p.id }); setProductSearch(p.name); }}
+                            style={{ padding: '0.25rem', textAlign: 'left', backgroundColor: '#2a2a3e', border: 'none', borderRadius: '0.25rem', color: '#fff', cursor: 'pointer', fontSize: '0.7rem' }}
+                          >
+                            {p.name}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <span style={{ color: '#fff' }}>{sale.productName || '—'}</span>
+                    )}
+                  </td>
+                  <td style={{ padding: '1rem', textAlign: 'right', color: '#a1a1aa' }}>
+                    {isEditing ? (
+                      <input 
+                        type="number" 
+                        value={form.sale_price} 
+                        onChange={(e) => setForm({ ...form, sale_price: e.target.value })}
+                        style={{ width: '80px', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', textAlign: 'right' }}
+                      />
+                    ) : (
+                      `$${(sale.sale_price || 0).toLocaleString('es-AR')}`
+                    )}
+                  </td>
                   <td style={{ padding: '1rem', textAlign: 'right', color: '#ef4444' }}>-${(sale.ml_fees || 0).toLocaleString('es-AR')}</td>
                   <td style={{ padding: '1rem', textAlign: 'right', color: '#fff' }}>${(sale.net_received || 0).toLocaleString('es-AR')}</td>
                   <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: (sale.profit || 0) >= 0 ? '#10b981' : '#ef4444' }}>${(sale.profit || 0).toLocaleString('es-AR')}</td>
                   <td style={{ padding: '1rem', textAlign: 'right' }}>
+                    {isEditing ? (
+                      <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'flex-end' }}>
+                        <button onClick={() => saveEdit(sale.id)} disabled={saving} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer' }}>✓</button>
+                        <button onClick={cancelEdit} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer' }}>✕</button>
+                      </div>
+                    ) : (
+                      <button onClick={() => startEdit(sale)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', marginRight: '0.5rem' }}>✏️</button>
+                    )}
                     <button onClick={() => deleteSale(sale.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>🗑️</button>
                   </td>
                 </tr>

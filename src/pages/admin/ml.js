@@ -6,8 +6,6 @@ export default function MLIntegration() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [result, setResult] = useState(null);
-  const [debugInfo, setDebugInfo] = useState(null);
-  const [activeTab, setActiveTab] = useState('sales');
   const [shipments, setShipments] = useState([]);
 
   useEffect(() => {
@@ -47,6 +45,14 @@ export default function MLIntegration() {
       
       const orders = data.ordersInfo?.results || [];
       
+      // Show product titles in result for debug
+      const productTitles = orders.slice(0, 5).map(o => ({
+        id: o.id,
+        title: o.order_items?.[0]?.item?.title || 'No title',
+        total: o.total_amount,
+        status: o.status
+      }));
+      
       // Send to import endpoint
       const importRes = await fetch('/api/admin/ml/import-sales', {
         method: 'POST',
@@ -55,6 +61,8 @@ export default function MLIntegration() {
       });
       
       const importData = await importRes.json();
+      // Add product titles to result for display
+      importData.productTitles = productTitles;
       setResult(importData);
       
       // Load shipments
@@ -158,25 +166,7 @@ export default function MLIntegration() {
               opacity: syncing ? 0.7 : 1
             }}
           >
-            {syncing ? '⏳ Sincronizando...' : '🔄 Sincronizar'}
-          </button>
-          <button
-            onClick={async () => {
-              const res = await fetch('/api/admin/ml/debug');
-              const data = await res.json();
-              setDebugInfo(data);
-            }}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#2a2a3e',
-              color: '#a1a1aa',
-              border: '1px solid #3f3f5a',
-              borderRadius: '0.375rem',
-              cursor: 'pointer',
-              fontSize: '0.75rem'
-            }}
-          >
-            Debug
+            {syncing ? '⏳ Sincronizando...' : '🔄 Synchronize'}
           </button>
         </div>
 
@@ -197,17 +187,18 @@ export default function MLIntegration() {
                 ✅ Sincronización completa<br/>
                 - Ventas importadas: {result.imported}<br/>
                 - Ventas omitidas: {result.skipped}
+                {result.productTitles && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>
+                    <div style={{ fontWeight: 'bold' }}>Productos encontrados:</div>
+                    {result.productTitles.map(p => (
+                      <div key={p.id} style={{ color: '#a1a1aa' }}>
+                        - {p.title} (${p.total}) [{p.status}]
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
-
-        {debugInfo && (
-          <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#161625', borderRadius: '0.5rem', fontSize: '0.75rem', color: '#a1a1aa', maxHeight: '300px', overflow: 'auto' }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: '#fff' }}>Debug Info:</div>
-            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-              {JSON.stringify(debugInfo, null, 2)}
-            </pre>
           </div>
         )}
 

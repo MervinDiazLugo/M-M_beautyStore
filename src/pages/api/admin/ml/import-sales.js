@@ -5,6 +5,31 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseAdmin = createClient(supabaseUrl, serviceKey);
 
+function findMatchingProduct(productTitle, products) {
+  if (!productTitle || !products) return null;
+  
+  const titleLower = productTitle.toLowerCase();
+  
+  // Direct match
+  for (const p of products) {
+    if (p.name && titleLower.includes(p.name.toLowerCase())) {
+      return p.id;
+    }
+  }
+  
+  // Partial match - extract key words
+  const words = titleLower.split(/[\s\-_]+/).filter(w => w.length > 3);
+  for (const word of words) {
+    for (const p of products) {
+      if (p.name && p.name.toLowerCase().includes(word)) {
+        return p.id;
+      }
+    }
+  }
+  
+  return null;
+}
+
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
@@ -14,8 +39,12 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'orders es requerido' });
       }
 
+      // Get all products
+      const { data: products } = await supabaseAdmin.from('products').select('id, name');
+
       let imported = 0;
       let skipped = 0;
+      let matched = 0;
 
       for (const order of orders) {
         if (order.status !== 'paid') continue;
@@ -39,9 +68,14 @@ export default async function handler(req, res) {
 
         const orderItem = order.order_items?.[0];
         const quantity = orderItem?.quantity || 1;
+        const productTitle = orderItem?.item?.title || '';
+
+        // Try to match product
+        const matchedProductId = findMatchingProduct(productTitle, products);
+        if (matchedProductId) matched++;
 
         await supabaseAdmin.from('sales').insert({
-          product_id: 'unknown',
+          product_id: matchedProductId || 'unknown',
           sale_price: totalAmount,
           quantity,
           ml_order_id: order.id.toString(),
@@ -53,7 +87,7 @@ export default async function handler(req, res) {
         imported++;
       }
 
-      return res.status(200).json({ success: true, imported, skipped });
+      return res.status(200).json({ success: true, imported, skipped, matched });
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }

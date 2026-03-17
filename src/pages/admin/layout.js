@@ -73,7 +73,6 @@ export default function AdminLayout({ children }) {
     { href: '/admin/products', label: 'Productos', icon: '📦' },
     { href: '/admin/sales', label: 'Ventas', icon: '💰' },
     { href: '/admin/profitability', label: 'Rentabilidad', icon: '📈' },
-    { href: '/admin/ml', label: 'ML', icon: '📦' },
   ];
 
   const isActive = (href) => router.pathname === href;
