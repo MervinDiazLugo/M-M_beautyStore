@@ -39,120 +39,104 @@ async function getMLToken() {
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { data: tokenData } = await supabaseAdmin
-      .from('settings')
-      .select('value')
-      .eq('key', 'ml_access_token')
-      .single();
-
-    let accessToken = tokenData?.value;
-    if (!accessToken) {
-      accessToken = await getMLToken();
-      if (!accessToken) {
-        return res.status(401).json({ error: 'No hay token de acceso' });
-      }
-    }
-
-    const { data: userIdData } = await supabaseAdmin
-      .from('settings')
-      .select('value')
-      .eq('key', 'ml_user_id')
-      .single();
-
-    const userId = userIdData?.value;
-    if (!userId) {
-      return res.status(400).json({ error: 'No hay user_id' });
-    }
-
-    // Get all orders
-    console.log('Fetching orders with userId:', userId, 'token:', accessToken?.substring(0, 20) + '...');
-    
-    const ordersRes = await fetch(`https://api.mercadolibre.com/orders/search?seller=${userId}&limit=100`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    console.log('Orders response status:', ordersRes.status);
-    
-    if (!ordersRes.ok) {
-      const errorText = await ordersRes.text();
-      console.log('Orders error:', errorText);
-      return res.status(500).json({ error: 'Error al obtener pedidos de ML', details: errorText });
-    }
-
-    const ordersData = await ordersRes.json();
-    const orders = ordersData.results || [];
-
-    // Get products
-    const { data: products } = await supabaseAdmin.from('products').select('id, name');
-    const productMap = {};
-    products?.forEach(p => { productMap[p.name.toLowerCase()] = p.id; });
-
-    let imported = 0;
-    let skipped = 0;
-    let errors = [];
-
-    for (const order of orders) {
-      // Only process paid orders
-      if (order.status !== 'paid') continue;
-
-      // Check if already imported
-      const { data: existing } = await supabaseAdmin
-        .from('sales')
-        .select('id')
-        .eq('ml_order_id', order.id.toString())
+    try {
+      const { data: tokenData } = await supabaseAdmin
+        .from('settings')
+        .select('value')
+        .eq('key', 'ml_access_token')
         .single();
 
-      if (existing) {
-        skipped++;
-        continue;
-      }
-
-      // Get order details
-      const orderRes = await fetch(`https://api.mercadolibre.com/orders/${order.id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const orderDetail = await orderRes.json();
-
-      const totalAmount = orderDetail.total_amount || 0;
-      const mlFees = totalAmount * 0.34;
-      const netReceived = totalAmount - mlFees;
-      const profit = netReceived - 1000;
-
-      const orderItem = orderDetail.order_items?.[0];
-      const productTitle = orderItem?.item?.title || '';
-      
-      let matchedProductId = null;
-      for (const [name, id] of Object.entries(productMap)) {
-        if (productTitle.toLowerCase().includes(name)) {
-          matchedProductId = id;
-          break;
+      let accessToken = tokenData?.value;
+      if (!accessToken) {
+        accessToken = await getMLToken();
+        if (!accessToken) {
+          return res.status(401).json({ error: 'No hay token de acceso' });
         }
       }
 
-      const insertResult = await supabaseAdmin.from('sales').insert({
-        product_id: matchedProductId || 'unknown',
-        sale_price: totalAmount,
-        quantity: orderItem?.quantity || 1,
-        ml_order_id: order.id.toString(),
-        ml_fees: mlFees,
-        net_received: netReceived,
-        profit: profit,
+      const { data: userIdData } = await supabaseAdmin
+        .from('settings')
+        .select('value')
+        .eq('key', 'ml_user_id')
+        .single();
+
+      const userId = userIdData?.value;
+      if (!userId) {
+        return res.status(400).json({ error: 'No hay user_id' });
+      }
+
+      // Get all orders
+      const ordersRes = await fetch(`https://api.mercadolibre.com/orders/search?seller=${userId}&limit=100`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      if (insertResult.error) {
-        errors.push({ orderId: order.id, error: insertResult.error.message });
-      } else {
+      if (!ordersRes.ok) {
+        return res.status(500).json({ error: 'Error al obtener pedidos de ML', status: ordersRes.status });
+      }
+
+      const ordersData = await ordersRes.json();
+      const orders = ordersData.results || [];
+
+      // Get products
+      const { data: products } = await supabaseAdmin.from('products').select('id, name');
+      const productMap = {};
+      products?.forEach(p => { productMap[p.name.toLowerCase()] = p.id; });
+
+      let imported = 0;
+      let skipped = 0;
+
+      for (const order of orders) {
+        if (order.status !== 'paid') continue;
+
+        const { data: existing } = await supabaseAdmin
+          .from('sales')
+          .select('id')
+          .eq('ml_order_id', order.id.toString())
+          .single();
+
+        if (existing) {
+          skipped++;
+          continue;
+        }
+
+        const totalAmount = order.total_amount || 0;
+        const mlFees = totalAmount * 0.34;
+        const netReceived = totalAmount - mlFees;
+        const profit = netReceived - 1000;
+
+        const orderItem = order.order_items?.[0];
+        const productTitle = orderItem?.item?.title || '';
+        
+        let matchedProductId = null;
+        for (const [name, id] of Object.entries(productMap)) {
+          if (productTitle.toLowerCase().includes(name)) {
+            matchedProductId = id;
+            break;
+          }
+        }
+
+        await supabaseAdmin.from('sales').insert({
+          product_id: matchedProductId || 'unknown',
+          sale_price: totalAmount,
+          quantity: orderItem?.quantity || 1,
+          ml_order_id: order.id.toString(),
+          ml_fees: mlFees,
+          net_received: netReceived,
+          profit: profit,
+        });
+
         imported++;
       }
-    }
 
-    return res.status(200).json({
-      success: true,
-      imported,
-      skipped,
-      totalProcessed: orders.length,
-      errors: errors.slice(0, 5)
-    });
+      return res.status(200).json({
+        success: true,
+        imported,
+        skipped,
+        totalProcessed: orders.length
+      });
+    } catch (error) {
+      return res.status(500).json({ error: error.message, stack: error.stack });
+    }
   }
 
   res.setHeader('Allow', ['POST']);
