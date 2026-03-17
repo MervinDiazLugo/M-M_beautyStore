@@ -6,6 +6,7 @@ export default function MLIntegration() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [result, setResult] = useState(null);
+  const [debugInfo, setDebugInfo] = useState(null);
   const [activeTab, setActiveTab] = useState('sales');
   const [shipments, setShipments] = useState([]);
 
@@ -150,7 +151,7 @@ export default function MLIntegration() {
             onClick={async () => {
               const res = await fetch('/api/admin/ml/debug');
               const data = await res.json();
-              alert(JSON.stringify(data, null, 2));
+              setDebugInfo(data);
             }}
             style={{
               padding: '0.5rem 1rem',
@@ -188,11 +189,18 @@ export default function MLIntegration() {
           </div>
         )}
 
+        {debugInfo && (
+          <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#161625', borderRadius: '0.5rem', fontSize: '0.75rem', color: '#a1a1aa', maxHeight: '300px', overflow: 'auto' }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: '#fff' }}>Debug Info:</div>
+            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+              {JSON.stringify(debugInfo, null, 2)}
+            </pre>
+          </div>
+        )}
+
         {activeTab === 'shipments' && (
           <div>
-            {loadingShipments ? (
-              <div style={{ color: '#a1a1aa' }}>Cargando envíos...</div>
-            ) : shipments.length === 0 ? (
+            {shipments.length === 0 ? (
               <div style={{ color: '#a1a1aa' }}>No hay envíos en tránsito</div>
             ) : (
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
