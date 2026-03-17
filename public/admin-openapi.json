@@ -1,0 +1,136 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "M&M Beauty Admin API",
+    "description": "API para el panel de administración de M&M Beauty",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost:3000/api/admin" },
+    { "url": "https://m-m-beauty.vercel.app/api/admin" }
+  ],
+  "tags": [
+    { "name": "Productos", "description": "Gestión de productos" },
+    { "name": "Ventas", "description": "Gestión de ventas" },
+    { "name": "Rentabilidad", "description": "Análisis de rentabilidad" },
+    { "name": "Usuarios", "description": "Gestión de usuarios" },
+    { "name": "Auth", "description": "Autenticación" }
+  ],
+  "paths": {
+    "/products": {
+      "get": {
+        "tags": ["Productos"],
+        "summary": "Listar productos",
+        "description": "Obtiene todos los productos con sus costos",
+        "responses": { "200": { "description": "Lista de productos" } }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "tags": ["Productos"],
+        "summary": "Obtener producto",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Producto" }, "404": { "description": "No encontrado" } }
+      },
+      "put": {
+        "tags": ["Productos"],
+        "summary": "Actualizar costo de producto",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "cost": { "type": "number" }, "packaging_cost": { "type": "number" } } } } }
+        },
+        "responses": { "200": { "description": "Producto actualizado" } }
+      }
+    },
+    "/sales": {
+      "get": {
+        "tags": ["Ventas"],
+        "summary": "Listar ventas",
+        "responses": { "200": { "description": "Lista de ventas" } }
+      },
+      "post": {
+        "tags": ["Ventas"],
+        "summary": "Registrar venta",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["product_id", "sale_price"],
+                "properties": {
+                  "product_id": { "type": "string" },
+                  "sale_price": { "type": "number" },
+                  "quantity": { "type": "number" },
+                  "ml_order_id": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Venta creada" } }
+      }
+    },
+    "/sales/{id}": {
+      "delete": {
+        "tags": ["Ventas"],
+        "summary": "Eliminar venta",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Venta eliminada" } }
+      }
+    },
+    "/profitability": {
+      "get": {
+        "tags": ["Rentabilidad"],
+        "summary": "Obtener análisis de rentabilidad",
+        "parameters": [{ "name": "timeFilter", "in": "query", "schema": { "type": "string", "enum": ["all", "7d", "30d", "90d"] } }],
+        "responses": {
+          "200": {
+            "description": "Datos de rentabilidad",
+            "content": {
+              "application/json": {
+                "example": {
+                  "summary": { "totalRevenue": 100000, "totalProfit": 30000, "avgMargin": 30, "totalUnits": 15 },
+                  "products": [{ "id": "MLA2911", "title": "Producto", "sales": 5, "revenue": 50000, "costs": 20000, "profit": 30000, "margin": 60 }]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["Usuarios"],
+        "summary": "Listar usuarios",
+        "description": "Lista usuarios de Supabase",
+        "responses": { "200": { "description": "Lista de usuarios" } }
+      },
+      "post": {
+        "tags": ["Usuarios"],
+        "summary": "Crear usuario",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object", "required": ["email", "password"], "properties": { "email": { "type": "string" }, "password": { "type": "string" } } } } }
+        },
+        "responses": { "201": { "description": "Usuario creado" } }
+      }
+    },
+    "/users/{id}": {
+      "delete": {
+        "tags": ["Usuarios"],
+        "summary": "Eliminar usuario",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Usuario eliminado" } }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Iniciar sesión",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object", "required": ["email", "password"], "properties": { "email": { "type": "string" }, "password": { "type": "string" } } } } }
+        },
+        "responses": { "200": { "description": "Login exitoso" }, "401": { "description": "Credenciales inválidas" } }
+      }
+    }
+  }
+}
