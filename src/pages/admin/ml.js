@@ -41,7 +41,7 @@ export default function MLIntegration() {
     setSyncing(true);
     setResult(null);
     try {
-      const res = await fetch('/api/admin/ml/sync', { method: 'POST' });
+      const res = await fetch('/api/admin/ml/sync-sales', { method: 'POST' });
       const data = await res.json();
       setResult(data);
       // Load shipments after sync
