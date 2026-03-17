@@ -31,7 +31,18 @@ export default async function handler(req, res) {
 
       const tokenData = await tokenResponse.json();
 
-      if (tokenData.access_token) {
+        if (tokenData.access_token) {
+        let userId = tokenData.user_id;
+        
+        // If user_id not in token response, get it from API
+        if (!userId) {
+          const userResponse = await fetch('https://api.mercadolibre.com/users/me', {
+            headers: { Authorization: `Bearer ${tokenData.access_token}` },
+          });
+          const userData = await userResponse.json();
+          userId = userData.id;
+        }
+
         // Save token to Supabase
         await supabaseAdmin.from('settings').upsert({
           key: 'ml_access_token',
@@ -50,7 +61,7 @@ export default async function handler(req, res) {
 
         await supabaseAdmin.from('settings').upsert({
           key: 'ml_user_id',
-          value: tokenData.user_id,
+          value: userId,
         }, { onConflict: 'key' });
 
         // Redirect to admin with success

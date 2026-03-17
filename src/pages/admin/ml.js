@@ -18,6 +18,9 @@ export default function MLIntegration() {
     if (connected && activeTab === 'shipments') {
       loadShipments();
     }
+    if (connected && activeTab === 'sales') {
+      sync();
+    }
   }, [activeTab, connected]);
 
   async function checkConnection() {
@@ -64,6 +67,12 @@ export default function MLIntegration() {
     setLoadingShipments(false);
   }
 
+  async function disconnect() {
+    await fetch('/api/admin/ml/disconnect', { method: 'POST' });
+    setConnected(false);
+    setResult(null);
+  }
+
   if (loading) {
     return (
       <AdminLayout>
@@ -86,9 +95,45 @@ export default function MLIntegration() {
           </div>
           <div>
             <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#fff' }}>Conexión con Mercado Libre</div>
-            <div style={{ color: connected ? '#10b981' : '#ef4444' }}>
-              {connected ? '✅ Conectado' : '❌ No conectado'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+              <span style={{ color: connected ? '#10b981' : '#ef4444' }}>
+                {connected ? '✅ Conectado' : '❌ No conectado'}
+              </span>
+              {connected && (
+                <button
+                  onClick={disconnect}
+                  title="Desconectar"
+                  style={{
+                    padding: '0.25rem 0.5rem',
+                    backgroundColor: 'transparent',
+                    color: '#ef4444',
+                    border: '1px solid #ef4444',
+                    borderRadius: '0.25rem',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem'
+                  }}
+                >
+                  ⏻
+                </button>
+              )}
             </div>
+            {!connected && (
+              <button
+                onClick={connect}
+                style={{
+                  marginTop: '0.5rem',
+                  padding: '0.375rem 0.75rem',
+                  backgroundColor: '#f472b6',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  cursor: 'pointer',
+                  fontSize: '0.75rem'
+                }}
+              >
+                Conectar
+              </button>
+            )}
           </div>
         </div>
 
@@ -124,40 +169,9 @@ export default function MLIntegration() {
 
         {activeTab === 'sales' && (
           <div>
-            {!connected ? (
-              <button
-          <button
-            onClick={connect}
-            style={{
-              padding: '0.75rem 2rem',
-              backgroundColor: '#f472b6',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '0.5rem',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
-          >
-            🔗 Conectar con Mercado Libre
-          </button>
-        ) : (
-          <div>
-            <button
-              onClick={sync}
-              disabled={syncing}
-              style={{
-                padding: '0.75rem 2rem',
-                backgroundColor: '#10b981',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '0.5rem',
-                fontWeight: '600',
-                cursor: syncing ? 'not-allowed' : 'pointer',
-                opacity: syncing ? 0.7 : 1
-              }}
-            >
-              {syncing ? '⏳ Sincronizando...' : '🔄 Sincronizar Ventas'}
-            </button>
+            {syncing && (
+              <div style={{ color: '#a1a1aa' }}>Sincronizando ventas...</div>
+            )}
           </div>
         )}
 

@@ -72,20 +72,51 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'No hay user_id' });
     }
 
-    // Get shipments in transit
-    const response = await fetch(`https://api.mercadolibre.com/shipments/search?seller=${userId}&status=in_transit`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    if (!response.ok) {
-      accessToken = await getMLToken();
-      if (!accessToken) {
-        return res.status(401).json({ error: 'Token expirado' });
+    // Get shipments in transit - try different statuses
+    let shipments = [];
+    const statuses = ['in_transit', 'pending', 'shipped', 'delivered'];
+    
+    for (const status of statuses) {
+      const response = await fetch(`https://api.mercadolibre.com/shipments/search?seller=${userId}&status=${status}&limit=50`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        shipments = [...shipments, ...(data.results || [])];
       }
     }
-
-    const data = await response.json();
-    const shipments = data.results || [];
+    
+    // Also try orders directly to get shipment info
+    const ordersResponse = await fetch(`https://api.mercadolibre.com/orders/search?seller=${userId}&limit=100`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    
+    let orderShipments = [];
+    if (ordersResponse.ok) {
+      const ordersData = await ordersResponse.json();
+      const orders = ordersData.results || [];
+      
+      for (const order of orders) {
+        if (order.shipping?.id) {
+          const shipResponse = await fetch(`https://api.mercadolibre.com/shipments/${order.shipping.id}`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+          if (shipResponse.ok) {
+            const shipData = await shipResponse.json();
+            orderShipments.push(shipData);
+          }
+        }
+      }
+    }
+    
+    // Merge shipments
+    const existingIds = new Set(shipments.map(s => s.id));
+    orderShipments.forEach(s => {
+      if (!existingIds.has(s.id)) {
+        shipments.push(s);
+      }
+    });
 
     // Get product names for display
     const { data: products } = await supabaseAdmin.from('products').select('id, name');
@@ -98,28 +129,35 @@ export default async function handler(req, res) {
     sales?.forEach(s => { salesMap[s.ml_order_id] = s; });
 
     const shipmentsWithDetails = await Promise.all(shipments.map(async (shipment) => {
-      const orderId = shipment.order_id;
+      const orderId = shipment.order_id || shipment.order?.id;
       
-      // Get order details
-      const orderResponse = await fetch(`https://api.mercadolibre.com/orders/${orderId}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const orderDetail = await orderResponse.json();
+      let productName = '';
+      let buyer = '';
+      let address = '';
       
-      const orderItem = orderDetail.order_items?.[0];
-      const productTitle = orderItem?.item?.title || '';
-      const sale = salesMap[orderId?.toString()];
-      const productName = productMap[sale?.product_id] || productTitle;
+      // Get order details if we have an order ID
+      if (orderId) {
+        const orderResponse = await fetch(`https://api.mercadolibre.com/orders/${orderId}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (orderResponse.ok) {
+          const orderDetail = await orderResponse.json();
+          const orderItem = orderDetail.order_items?.[0];
+          productName = orderItem?.item?.title || '';
+          buyer = orderDetail.buyer?.nickname || '';
+          address = orderDetail.shipping?.destination?.address?.city || '';
+        }
+      }
 
       return {
         id: shipment.id,
         order_id: orderId,
         status: shipment.status,
         product: productName,
-        buyer: shipment.receiver_id?.name || '',
-        address: shipment.destination?.address?.city || '',
+        buyer: buyer,
+        address: address,
         tracking: shipment.tracking_number || shipment.tracking_method || '',
-        date: shipment.date_created,
+        date: shipment.date_created || shipment.created_date,
       };
     }));
 

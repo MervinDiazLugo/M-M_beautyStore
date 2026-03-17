@@ -73,21 +73,37 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'No hay user_id. Volvé a autorizar.' });
     }
 
-    // Get orders from ML
-    const ordersResponse = await fetch(`https://api.mercadolibre.com/orders/search?seller=${userId}&status=paid&limit=100`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    if (!ordersResponse.ok) {
-      // Token expired, try to refresh
-      accessToken = await getMLToken();
-      if (!accessToken) {
-        return res.status(401).json({ error: 'Token expirado. Volvé a autorizar.' });
+    // Get orders from ML - try different statuses
+    let orders = [];
+    const statuses = ['paid', 'approved', 'invoiced'];
+    
+    for (const status of statuses) {
+      const ordersResponse = await fetch(`https://api.mercadolibre.com/orders/search?seller=${userId}&status=${status}&limit=100`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      
+      if (ordersResponse.ok) {
+        const ordersData = await ordersResponse.json();
+        orders = [...orders, ...(ordersData.results || [])];
       }
     }
-
-    const ordersData = await ordersResponse.json();
-    const orders = ordersData.results || [];
+    
+    // Also try orders_v2 endpoint
+    const ordersV2Response = await fetch(`https://api.mercadolibre.com/orders/search?seller=${userId}&limit=100`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    
+    if (ordersV2Response.ok) {
+      const ordersV2Data = await ordersV2Response.json();
+      const newOrders = ordersV2Data.results || [];
+      // Merge, avoiding duplicates
+      const existingIds = new Set(orders.map(o => o.id));
+      newOrders.forEach(o => {
+        if (!existingIds.has(o.id)) {
+          orders.push(o);
+        }
+      });
+    }
 
     // Get products to match
     const { data: products } = await supabaseAdmin.from('products').select('id, name');
