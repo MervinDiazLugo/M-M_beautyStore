@@ -47,6 +47,11 @@ export default async function handler(req, res) {
       }
     }
 
+    // Step 5: Check sales in DB
+    const { data: sales } = await supabaseAdmin.from('sales').select('*').limit(10);
+    results.salesInDb = sales;
+    results.salesCount = sales?.length || 0;
+
     return res.status(200).json(results);
   }
 
