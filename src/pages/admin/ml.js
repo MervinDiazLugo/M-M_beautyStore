@@ -41,10 +41,23 @@ export default function MLIntegration() {
     setSyncing(true);
     setResult(null);
     try {
-      const res = await fetch('/api/admin/ml/sync-sales', { method: 'POST' });
+      // Get orders from debug endpoint
+      const res = await fetch('/api/admin/ml/debug');
       const data = await res.json();
-      setResult(data);
-      // Load shipments after sync
+      
+      const orders = data.ordersInfo?.results || [];
+      
+      // Send to import endpoint
+      const importRes = await fetch('/api/admin/ml/import-sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orders })
+      });
+      
+      const importData = await importRes.json();
+      setResult(importData);
+      
+      // Load shipments
       const shipRes = await fetch('/api/admin/ml/shipments');
       const shipData = await shipRes.json();
       setShipments(shipData.shipments || []);
