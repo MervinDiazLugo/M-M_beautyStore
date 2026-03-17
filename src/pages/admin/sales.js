@@ -147,27 +147,27 @@ export default function Sales() {
 
   return (
     <AdminLayout>
-      <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: '700', color: '#fff', marginBottom: '0.25rem' }}>Ventas</h1>
-          <p style={{ color: '#71717a' }}>Registrá y gestioná tus ventas</p>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff', marginBottom: '0.125rem' }}>Ventas</h1>
+          <p style={{ color: '#71717a', fontSize: '0.875rem' }}>Gestión de ventas</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button onClick={syncFromML} disabled={syncing} style={{ padding: '0.75rem 1.5rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.5rem', fontWeight: '600', cursor: syncing ? 'not-allowed' : 'pointer', opacity: syncing ? 0.7 : 1 }}>
+          <button onClick={syncFromML} disabled={syncing} style={{ padding: '0.5rem 1rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.875rem', cursor: syncing ? 'not-allowed' : 'pointer', opacity: syncing ? 0.7 : 1 }}>
             {syncing ? '⏳ Sync...' : '🔄 Sync ML'}
           </button>
-          <button onClick={() => setShowForm(!showForm)} style={{ padding: '0.75rem 1.5rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.5rem', fontWeight: '600', cursor: 'pointer' }}>
+          <button onClick={() => setShowForm(!showForm)} style={{ padding: '0.5rem 1rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.875rem', cursor: 'pointer' }}>
             {showForm ? '✕ Cancelar' : '+ Nueva Venta'}
           </button>
         </div>
       </div>
 
       {showForm && (
-        <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #2a2a3e', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#fff', marginBottom: '1rem' }}>Registrar Venta</h2>
+        <div style={{ backgroundColor: '#1a1a2e', borderRadius: '0.75rem', padding: '1rem', border: '1px solid #2a2a3e', marginBottom: '1rem' }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: '600', color: '#fff', marginBottom: '0.75rem' }}>Registrar Venta</h2>
           
-          <div style={{ position: 'relative', marginBottom: '1rem' }}>
-            <label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '0.5rem' }}>Buscar Producto</label>
+          <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+            <label style={{ display: 'block', fontSize: '0.75rem', color: '#a1a1aa', marginBottom: '0.375rem' }}>Buscar Producto</label>
             <input 
               type="text" 
               value={productSearch} 
@@ -176,27 +176,27 @@ export default function Sales() {
                 if (!e.target.value) setForm({ ...form, product_id: '', sale_price: '' });
               }}
               placeholder="Escribí el nombre o código del producto..."
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '1rem' }}
+              style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '0.875rem' }}
             />
 {productSearch && filteredProducts.length > 0 && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#1a1a2e', border: '1px solid #3f3f5a', borderRadius: '0.5rem', maxHeight: '300px', overflowY: 'auto', zIndex: 10, marginTop: '0.25rem' }}>
-                {filteredProducts.slice(0, 10).map(p => (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#1a1a2e', border: '1px solid #3f3f5a', borderRadius: '0.375rem', maxHeight: '200px', overflowY: 'auto', zIndex: 10, marginTop: '0.25rem' }}>
+                {filteredProducts.slice(0, 8).map(p => (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => selectProduct(p)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', padding: '0.75rem', textAlign: 'left', backgroundColor: 'transparent', border: 'none', borderBottom: '1px solid #2a2a3e', color: '#fff', cursor: 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.5rem', textAlign: 'left', backgroundColor: 'transparent', border: 'none', borderBottom: '1px solid #2a2a3e', color: '#fff', cursor: 'pointer', fontSize: '0.8rem' }}
                     onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2a2a3e'}
                     onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     {p.image && Array.isArray(p.image) && p.image[0] && (
-                      <img src={p.image[0]} alt="" style={{ width: '40px', height: '40px', borderRadius: '0.5rem', objectFit: 'cover', flexShrink: 0 }} />
+                      <img src={p.image[0]} alt="" style={{ width: '32px', height: '32px', borderRadius: '0.375rem', objectFit: 'cover', flexShrink: 0 }} />
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '0.875rem', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#71717a' }}>{p.id}</div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</div>
+                      <div style={{ fontSize: '0.7rem', color: '#71717a' }}>{p.id}</div>
                     </div>
-                    <div style={{ fontSize: '0.875rem', color: '#10b981' }}>${(p.price || 0).toLocaleString('es-AR')}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#10b981' }}>${(p.price || 0).toLocaleString('es-AR')}</div>
                   </button>
                 ))}
               </div>
@@ -206,18 +206,18 @@ export default function Sales() {
           {form.product_id && (() => {
             const selectedProduct = products.find(p => p.id === form.product_id);
             return selectedProduct ? (
-              <div style={{ marginBottom: '1rem', padding: '0.75rem', backgroundColor: '#10b98120', borderRadius: '0.5rem', border: '1px solid #10b981' }}>
+              <div style={{ marginBottom: '0.75rem', padding: '0.5rem', backgroundColor: '#10b98120', borderRadius: '0.375rem', border: '1px solid #10b981' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     {selectedProduct.image && Array.isArray(selectedProduct.image) && selectedProduct.image[0] && (
-                      <img src={selectedProduct.image[0]} alt="" style={{ width: '40px', height: '40px', borderRadius: '0.5rem', objectFit: 'cover' }} />
+                      <img src={selectedProduct.image[0]} alt="" style={{ width: '32px', height: '32px', borderRadius: '0.375rem', objectFit: 'cover' }} />
                     )}
                     <div>
-                      <div style={{ color: '#fff', fontWeight: '500' }}>{selectedProduct.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#71717a' }}>{selectedProduct.id}</div>
+                      <div style={{ color: '#fff', fontWeight: '500', fontSize: '0.875rem' }}>{selectedProduct.name}</div>
+                      <div style={{ fontSize: '0.7rem', color: '#71717a' }}>{selectedProduct.id}</div>
                     </div>
                   </div>
-                  <button type="button" onClick={() => { setForm({ ...form, product_id: '', sale_price: '' }); setProductSearch(''); }} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.75rem' }}>Cambiar</button>
+                  <button type="button" onClick={() => { setForm({ ...form, product_id: '', sale_price: '' }); setProductSearch(''); }} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.7rem' }}>Cambiar</button>
                 </div>
               </div>
             ) : null;
@@ -230,21 +230,21 @@ export default function Sales() {
       return;
     }
     handleSubmit(e);
-  }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+  }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.75rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '0.5rem' }}>Precio de Venta</label>
-              <input type="number" required value={form.sale_price} onChange={(e) => setForm({ ...form, sale_price: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff' }} placeholder="Ej: 15000" />
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#a1a1aa', marginBottom: '0.375rem' }}>Precio de Venta</label>
+              <input type="number" required value={form.sale_price} onChange={(e) => setForm({ ...form, sale_price: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '0.875rem' }} placeholder="Ej: 15000" />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '0.5rem' }}>Cantidad</label>
-              <input type="number" required min="1" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff' }} />
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#a1a1aa', marginBottom: '0.375rem' }}>Cantidad</label>
+              <input type="number" required min="1" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '0.875rem' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '0.5rem' }}>ID Orden ML (opcional)</label>
-              <input type="text" value={form.ml_order_id} onChange={(e) => setForm({ ...form, ml_order_id: e.target.value })} style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff' }} />
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#a1a1aa', marginBottom: '0.375rem' }}>ID Orden ML</label>
+              <input type="text" value={form.ml_order_id} onChange={(e) => setForm({ ...form, ml_order_id: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '0.875rem' }} />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
-              <button type="submit" disabled={saving} style={{ padding: '0.75rem 2rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.5rem', fontWeight: '600', cursor: 'pointer' }}>
+              <button type="submit" disabled={saving} style={{ padding: '0.5rem 1.5rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.875rem', cursor: 'pointer' }}>
                 {saving ? 'Guardando...' : 'Guardar Venta'}
               </button>
             </div>

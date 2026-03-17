@@ -39,7 +39,7 @@ export default async function handler(req, res) {
       results.steps.push({ step: 'user_id', exists: !!userId, value: userId });
 
       if (userId) {
-        const ordersRes = await fetch(`https://api.mercadolibre.com/orders/search?seller=${userId}&limit=100`, {
+        const ordersRes = await fetch(`https://api.mercadolibre.com/orders/search?seller=${userId}&limit=50`, {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
         results.steps.push({ step: 'orders_api', status: ordersRes.status });

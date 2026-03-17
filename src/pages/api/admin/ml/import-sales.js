@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       const { orders } = req.body;
       
       if (!orders || !Array.isArray(orders)) {
-        return res.status(400).json({ error: 'orders es requerido' });
+        return res.status(400).json({ error: 'orders es requerido', received: typeof orders });
       }
 
       // Get all products
@@ -45,9 +45,13 @@ export default async function handler(req, res) {
       let imported = 0;
       let skipped = 0;
       let matched = 0;
+      let notPaid = 0;
 
       for (const order of orders) {
-        if (order.status !== 'paid') continue;
+        if (order.status !== 'paid') {
+          notPaid++;
+          continue;
+        }
 
         // Check if already exists
         const { data: existing } = await supabaseAdmin
