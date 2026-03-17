@@ -52,6 +52,14 @@ export default async function handler(req, res) {
       .eq('key', 'ml_access_token')
       .single();
 
+    const { data: userIdData } = await supabaseAdmin
+      .from('settings')
+      .select('value')
+      .eq('key', 'ml_user_id')
+      .single();
+
+    const userId = userIdData?.value;
+
     let accessToken = tokenData?.value;
 
     if (!accessToken) {
@@ -61,8 +69,12 @@ export default async function handler(req, res) {
       }
     }
 
+    if (!userId) {
+      return res.status(400).json({ error: 'No hay user_id. Volvé a autorizar.' });
+    }
+
     // Get orders from ML
-    const ordersResponse = await fetch('https://api.mercadolibre.com/orders/search?seller&status=paid&limit=100', {
+    const ordersResponse = await fetch(`https://api.mercadolibre.com/orders/search?seller=${userId}&status=paid&limit=100`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 

@@ -48,6 +48,11 @@ export default async function handler(req, res) {
           value: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
         }, { onConflict: 'key' });
 
+        await supabaseAdmin.from('settings').upsert({
+          key: 'ml_user_id',
+          value: tokenData.user_id,
+        }, { onConflict: 'key' });
+
         // Redirect to admin with success
         res.writeHead(302, { Location: '/admin?ml=connected' });
         res.end();

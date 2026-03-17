@@ -6,10 +6,19 @@ export default function MLIntegration() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [result, setResult] = useState(null);
+  const [activeTab, setActiveTab] = useState('sales');
+  const [shipments, setShipments] = useState([]);
+  const [loadingShipments, setLoadingShipments] = useState(false);
 
   useEffect(() => {
     checkConnection();
   }, []);
+
+  useEffect(() => {
+    if (connected && activeTab === 'shipments') {
+      loadShipments();
+    }
+  }, [activeTab, connected]);
 
   async function checkConnection() {
     try {
@@ -43,6 +52,18 @@ export default function MLIntegration() {
     setSyncing(false);
   }
 
+  async function loadShipments() {
+    setLoadingShipments(true);
+    try {
+      const res = await fetch('/api/admin/ml/shipments');
+      const data = await res.json();
+      setShipments(data.shipments || []);
+    } catch (e) {
+      setShipments([]);
+    }
+    setLoadingShipments(false);
+  }
+
   if (loading) {
     return (
       <AdminLayout>
@@ -71,7 +92,40 @@ export default function MLIntegration() {
           </div>
         </div>
 
-        {!connected ? (
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+          <button
+            onClick={() => setActiveTab('sales')}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: activeTab === 'sales' ? '#f472b6' : '#2a2a3e',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '0.375rem',
+              cursor: 'pointer'
+            }}
+          >
+            📊 Ventas
+          </button>
+          <button
+            onClick={() => setActiveTab('shipments')}
+            disabled={!connected}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: activeTab === 'shipments' ? '#f472b6' : '#2a2a3e',
+              color: connected ? '#fff' : '#71717a',
+              border: 'none',
+              borderRadius: '0.375rem',
+              cursor: connected ? 'pointer' : 'not-allowed'
+            }}
+          >
+            🚚 Envíos en tránsito
+          </button>
+        </div>
+
+        {activeTab === 'sales' && (
+          <div>
+            {!connected ? (
+              <button
           <button
             onClick={connect}
             style={{
@@ -117,6 +171,37 @@ export default function MLIntegration() {
                 - Ventas importadas: {result.imported}<br/>
                 - Ventas omitidas: {result.skipped}
               </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'shipments' && (
+          <div>
+            {loadingShipments ? (
+              <div style={{ color: '#a1a1aa' }}>Cargando envíos...</div>
+            ) : shipments.length === 0 ? (
+              <div style={{ color: '#a1a1aa' }}>No hay envíos en tránsito</div>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#161625' }}>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontSize: '0.75rem' }}>Producto</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontSize: '0.75rem' }}>Comprador</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontSize: '0.75rem' }}>Dirección</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontSize: '0.75rem' }}>Tracking</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shipments.map((s) => (
+                    <tr key={s.id} style={{ borderTop: '1px solid #2a2a3e' }}>
+                      <td style={{ padding: '0.75rem', color: '#fff' }}>{s.product}</td>
+                      <td style={{ padding: '0.75rem', color: '#a1a1aa' }}>{s.buyer}</td>
+                      <td style={{ padding: '0.75rem', color: '#a1a1aa' }}>{s.address}</td>
+                      <td style={{ padding: '0.75rem', color: '#a1a1aa' }}>{s.tracking || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
         )}
