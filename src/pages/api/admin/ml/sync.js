@@ -112,6 +112,7 @@ export default async function handler(req, res) {
 
     let imported = 0;
     let skipped = 0;
+    let errors = [];
 
     for (const order of orders) {
       // Check if already imported
@@ -150,7 +151,7 @@ export default async function handler(req, res) {
       }
 
       // Insert sale
-      await supabaseAdmin.from('sales').insert({
+      const insertResult = await supabaseAdmin.from('sales').insert({
         product_id: matchedProductId || 'unknown',
         sale_price: totalAmount,
         quantity: orderItem?.quantity || 1,
@@ -160,14 +161,19 @@ export default async function handler(req, res) {
         profit: profit,
       });
 
-      imported++;
+      if (insertResult.error) {
+        errors.push({ orderId: order.id, error: insertResult.error.message });
+      } else {
+        imported++;
+      }
     }
 
     return res.status(200).json({ 
       success: true, 
       imported, 
       skipped,
-      totalOrders: orders.length 
+      totalOrders: orders.length,
+      errors: errors.slice(0, 5)
     });
   }
 
