@@ -9,6 +9,8 @@ export default function Products() {
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [sortField, setSortField] = useState('name');
+  const [sortDir, setSortDir] = useState('asc');
 
   useEffect(() => {
     loadProducts();
@@ -55,7 +57,36 @@ export default function Products() {
     
     if (filter === 'withCost') return matchesSearch && p.cost && p.cost > 0;
     if (filter === 'withoutCost') return matchesSearch && (!p.cost || p.cost === 0);
+    
     return matchesSearch;
+  }).sort((a, b) => {
+    let aVal, bVal;
+    
+    if (sortField === 'name') {
+      aVal = a.name?.toLowerCase() || '';
+      bVal = b.name?.toLowerCase() || '';
+    } else if (sortField === 'price') {
+      aVal = a.price || 0;
+      bVal = b.price || 0;
+    } else if (sortField === 'cost') {
+      aVal = a.cost || 0;
+      bVal = b.cost || 0;
+    } else if (sortField === 'profit') {
+      const getProfit = (p) => {
+        const salePrice = p.price || 0;
+        const cost = p.cost || 0;
+        const packaging = p.packaging_cost || 1000;
+        return salePrice - (salePrice * 0.34) - cost - packaging;
+      };
+      aVal = getProfit(a);
+      bVal = getProfit(b);
+    } else {
+      return 0;
+    }
+    
+    if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+    return 0;
   });
 
   const stats = {
@@ -63,6 +94,15 @@ export default function Products() {
     withCost: products.filter(p => p.cost && p.cost > 0).length,
     withoutCost: products.filter(p => !p.cost || p.cost === 0).length,
   };
+
+  function handleSort(field) {
+    if (sortField === field) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir('asc');
+    }
+  }
 
   if (loading) {
     return (
@@ -126,12 +166,19 @@ export default function Products() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ backgroundColor: '#161625' }}>
-              <th style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Código</th>
-              <th style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Producto</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Precio</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Costo</th>
+              <th onClick={() => handleSort('name')} style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
+                Producto {sortField === 'name' && (sortDir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th onClick={() => handleSort('price')} style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
+                Precio {sortField === 'price' && (sortDir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th onClick={() => handleSort('cost')} style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
+                Costo {sortField === 'cost' && (sortDir === 'asc' ? '↑' : '↓')}
+              </th>
               <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Packaging</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Ganancia</th>
+              <th onClick={() => handleSort('profit')} style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
+                Ganancia {sortField === 'profit' && (sortDir === 'asc' ? '↑' : '↓')}
+              </th>
               <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Acción</th>
             </tr>
           </thead>
@@ -146,11 +193,6 @@ export default function Products() {
 
               return (
                 <tr key={product.id} style={{ borderTop: '1px solid #2a2a3e' }}>
-                  <td style={{ padding: '1rem' }}>
-                    <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#71717a', backgroundColor: '#161625', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}>
-                      {product.id}
-                    </span>
-                  </td>
                   <td style={{ padding: '1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       {product.image && Array.isArray(product.image) && product.image[0] && <img src={product.image[0]} alt="" style={{ width: '40px', height: '40px', borderRadius: '0.5rem', objectFit: 'cover' }} />}
