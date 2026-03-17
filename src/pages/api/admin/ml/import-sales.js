@@ -73,7 +73,6 @@ export default async function handler(req, res) {
         const orderItem = order.order_items?.[0];
         const quantity = orderItem?.quantity || 1;
         const productTitle = orderItem?.item?.title || '';
-        const saleDate = order.date_created || null;
 
         // Try to match product
         const matchedProductId = findMatchingProduct(productTitle, products);
@@ -87,7 +86,6 @@ export default async function handler(req, res) {
           ml_fees: mlFees,
           net_received: netReceived,
           profit: profit,
-          sale_date: saleDate,
         });
 
         imported++;
