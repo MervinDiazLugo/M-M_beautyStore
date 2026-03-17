@@ -5,44 +5,10 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseAdmin = createClient(supabaseUrl, serviceKey);
 
-async function getMLToken() {
-  const { data: refreshToken } = await supabaseAdmin
-    .from('settings')
-    .select('value')
-    .eq('key', 'ml_refresh_token')
-    .single();
-
-  if (!refreshToken?.value) return null;
-
-  const CLIENT_ID = process.env.MERCADOLIBRE_CLIENT_ID;
-  const CLIENT_SECRET = process.env.MERCADOLIBRE_CLIENT_SECRET;
-
-  const response = await fetch('https://api.mercadolibre.com/oauth/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'refresh_token',
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      refresh_token: refreshToken.value,
-    }),
-  });
-
-  const data = await response.json();
-  
-  if (data.access_token) {
-    await supabaseAdmin.from('settings').upsert({ key: 'ml_access_token', value: data.access_token }, { onConflict: 'key' });
-    await supabaseAdmin.from('settings').upsert({ key: 'ml_refresh_token', value: data.refresh_token }, { onConflict: 'key' });
-    return data.access_token;
-  }
-  
-  throw new Error('Token refresh failed: ' + JSON.stringify(data));
-}
-
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      // Get token directly from DB (like debug does)
+      // Get tokens from DB
       const { data: tokenData } = await supabaseAdmin
         .from('settings')
         .select('value')
@@ -54,6 +20,7 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: 'No hay token de acceso' });
       }
 
+      // Get user_id
       const { data: userIdData } = await supabaseAdmin
         .from('settings')
         .select('value')
@@ -65,13 +32,13 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'No hay user_id' });
       }
 
-      // Get all orders
+      // Get orders - same as debug
       const ordersRes = await fetch(`https://api.mercadolibre.com/orders/search?seller=${userId}&limit=100`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       if (!ordersRes.ok) {
-        return res.status(500).json({ error: 'Error al obtener pedidos de ML', status: ordersRes.status });
+        return res.status(500).json({ error: 'Error al obtener pedidos', status: ordersRes.status });
       }
 
       const ordersData = await ordersRes.json();
@@ -132,10 +99,10 @@ export default async function handler(req, res) {
         success: true,
         imported,
         skipped,
-        totalProcessed: orders.length
+        total: orders.length
       });
     } catch (error) {
-      return res.status(500).json({ error: error.message, stack: error.stack });
+      return res.status(500).json({ error: error.message });
     }
   }
 
