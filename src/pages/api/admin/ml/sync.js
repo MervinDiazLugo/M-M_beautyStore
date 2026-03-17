@@ -105,6 +105,13 @@ export default async function handler(req, res) {
       });
     }
 
+    return res.status(200).json({
+      debug: true,
+      ordersCount: orders.length,
+      orders: orders.slice(0, 3).map(o => ({ id: o.id, status: o.status, total: o.total_amount })),
+      totalInML: 1403
+    });
+
     // Get products to match
     const { data: products } = await supabaseAdmin.from('products').select('id, name');
     const productMap = {};
