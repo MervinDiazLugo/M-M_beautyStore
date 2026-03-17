@@ -29,12 +29,14 @@ async function getMLToken() {
   });
 
   const data = await response.json();
+  
   if (data.access_token) {
     await supabaseAdmin.from('settings').upsert({ key: 'ml_access_token', value: data.access_token }, { onConflict: 'key' });
     await supabaseAdmin.from('settings').upsert({ key: 'ml_refresh_token', value: data.refresh_token }, { onConflict: 'key' });
     return data.access_token;
   }
-  return null;
+  
+  throw new Error('Token refresh failed: ' + JSON.stringify(data));
 }
 
 export default async function handler(req, res) {
