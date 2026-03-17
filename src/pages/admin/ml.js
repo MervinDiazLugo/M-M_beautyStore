@@ -146,6 +146,24 @@ export default function MLIntegration() {
           >
             {syncing ? '⏳ Sincronizando...' : '🔄 Sincronizar'}
           </button>
+          <button
+            onClick={async () => {
+              const res = await fetch('/api/admin/ml/debug');
+              const data = await res.json();
+              alert(JSON.stringify(data, null, 2));
+            }}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: '#2a2a3e',
+              color: '#a1a1aa',
+              border: '1px solid #3f3f5a',
+              borderRadius: '0.375rem',
+              cursor: 'pointer',
+              fontSize: '0.75rem'
+            }}
+          >
+            Debug
+          </button>
         </div>
 
         {activeTab === 'sales' && (
