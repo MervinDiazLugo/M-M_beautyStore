@@ -65,12 +65,18 @@ export default async function handler(req, res) {
     }
 
     // Get all orders
+    console.log('Fetching orders with userId:', userId, 'token:', accessToken?.substring(0, 20) + '...');
+    
     const ordersRes = await fetch(`https://api.mercadolibre.com/orders/search?seller=${userId}&limit=100`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
+    console.log('Orders response status:', ordersRes.status);
+    
     if (!ordersRes.ok) {
-      return res.status(500).json({ error: 'Error al obtener pedidos de ML' });
+      const errorText = await ordersRes.text();
+      console.log('Orders error:', errorText);
+      return res.status(500).json({ error: 'Error al obtener pedidos de ML', details: errorText });
     }
 
     const ordersData = await ordersRes.json();
