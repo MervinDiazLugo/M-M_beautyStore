@@ -8,20 +8,14 @@ export default function MLIntegration() {
   const [result, setResult] = useState(null);
   const [activeTab, setActiveTab] = useState('sales');
   const [shipments, setShipments] = useState([]);
-  const [loadingShipments, setLoadingShipments] = useState(false);
 
   useEffect(() => {
     checkConnection();
   }, []);
 
   useEffect(() => {
-    if (connected && activeTab === 'shipments') {
-      loadShipments();
-    }
-    if (connected && activeTab === 'sales') {
-      sync();
-    }
-  }, [activeTab, connected]);
+    checkConnection();
+  }, []);
 
   async function checkConnection() {
     try {
@@ -49,24 +43,14 @@ export default function MLIntegration() {
       const res = await fetch('/api/admin/ml/sync', { method: 'POST' });
       const data = await res.json();
       setResult(data);
-      // Also load shipments after sync
-      loadShipments();
+      // Load shipments after sync
+      const shipRes = await fetch('/api/admin/ml/shipments');
+      const shipData = await shipRes.json();
+      setShipments(shipData.shipments || []);
     } catch (e) {
       setResult({ error: e.message });
     }
     setSyncing(false);
-  }
-
-  async function loadShipments() {
-    setLoadingShipments(true);
-    try {
-      const res = await fetch('/api/admin/ml/shipments');
-      const data = await res.json();
-      setShipments(data.shipments || []);
-    } catch (e) {
-      setShipments([]);
-    }
-    setLoadingShipments(false);
   }
 
   async function disconnect() {
@@ -161,20 +145,6 @@ export default function MLIntegration() {
             }}
           >
             {syncing ? '⏳ Sincronizando...' : '🔄 Sincronizar'}
-          </button>
-          <button
-            onClick={() => setActiveTab('shipments')}
-            disabled={!connected}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: activeTab === 'shipments' ? '#f472b6' : '#2a2a3e',
-              color: connected ? '#fff' : '#71717a',
-              border: 'none',
-              borderRadius: '0.375rem',
-              cursor: connected ? 'pointer' : 'not-allowed'
-            }}
-          >
-            🚚 Ver envíos
           </button>
         </div>
 
