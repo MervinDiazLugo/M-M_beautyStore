@@ -1,0 +1,471 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "M&M Beauty Store API",
+    "description": "API completa: Endpoints públicos de tienda + Endpoints de administración",
+    "version": "2.0.0"
+  },
+  "servers": [
+    { "url": "https://m-m-beauty-store-api.vercel.app", "description": "API Productos (shop_api)" },
+    { "url": "https://m-m-beauty.vercel.app/api/admin", "description": "API Admin" }
+  ],
+  "tags": [
+    { "name": "Tienda", "description": "Endpoints públicos de la tienda" },
+    { "name": "Admin - Productos", "description": "Gestión de productos desde el admin" },
+    { "name": "Admin - Ventas", "description": "Gestión de ventas" },
+    { "name": "Admin - Rentabilidad", "description": "Análisis de rentabilidad" },
+    { "name": "Admin - ML", "description": "Integración con MercadoLibre" },
+    { "name": "Admin - Usuarios", "description": "Gestión de usuarios" },
+    { "name": "Admin - Auth", "description": "Autenticación" }
+  ],
+  "paths": {
+    "/api/items": {
+      "get": {
+        "tags": ["Tienda"],
+        "summary": "Listar productos (PÚBLICO)",
+        "description": "Obtiene todos los productos publicados de la tienda",
+        "responses": {
+          "200": { "description": "Lista de productos" }
+        }
+      },
+      "post": {
+        "tags": ["Tienda"],
+        "summary": "Crear producto",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "example": "MLA123456" },
+                  "name": { "type": "string" },
+                  "price": { "type": "number" },
+                  "sku": { "type": "string" },
+                  "published": { "type": "boolean" },
+                  "instagramReel": { "type": "string", "description": "Link de Instagram Reel" }
+                },
+                "required": ["id", "name", "price", "sku", "published"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Producto creado" },
+          "401": { "description": "API key requerida" }
+        }
+      }
+    },
+    "/api/items/{id}": {
+      "get": {
+        "tags": ["Tienda"],
+        "summary": "Obtener producto por ID (PÚBLICO)",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": { "description": "Producto encontrado" },
+          "404": { "description": "No encontrado" }
+        }
+      },
+      "put": {
+        "tags": ["Tienda"],
+        "summary": "Actualizar producto completo",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Producto actualizado" },
+          "401": { "description": "API key requerida" }
+        }
+      },
+      "patch": {
+        "tags": ["Tienda"],
+        "summary": "Actualizar producto parcialmente",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Producto actualizado" },
+          "401": { "description": "API key requerida" }
+        }
+      },
+      "delete": {
+        "tags": ["Tienda"],
+        "summary": "Eliminar producto",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "204": { "description": "Producto eliminado" },
+          "401": { "description": "API key requerida" }
+        }
+      }
+    },
+    "/api/maintenance/health": {
+      "get": {
+        "tags": ["Tienda"],
+        "summary": "Health check (PÚBLICO)",
+        "responses": {
+          "200": { "description": "API operativa" }
+        }
+      }
+    },
+    "/api/maintenance/ml-import": {
+      "post": {
+        "tags": ["Tienda"],
+        "summary": "Importar productos desde MercadoLibre (por IDs)",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": { "type": "string", "example": "MLA1510055959" },
+                    "description": "Lista de IDs de MercadoLibre"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Importación completada" },
+          "401": { "description": "API key requerida" }
+        }
+      }
+    },
+    "/api/maintenance/import": {
+      "post": {
+        "tags": ["Tienda"],
+        "summary": "Importar productos desde JSON",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  { "type": "array" },
+                  { "type": "object", "properties": { "data": { "type": "array" } } }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Importación completada" },
+          "401": { "description": "API key requerida" }
+        }
+      }
+    },
+    "/api/maintenance/cleanup": {
+      "delete": {
+        "tags": ["Tienda"],
+        "summary": "Limpiar todos los productos",
+        "security": [{ "ApiKeyAuth": [] }],
+        "responses": {
+          "200": { "description": "Productos eliminados" },
+          "401": { "description": "API key requerida" }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": ["Admin - Productos"],
+        "summary": "Listar productos del admin",
+        "description": "Obtiene todos los productos con sus costos desde Supabase",
+        "responses": {
+          "200": { "description": "Lista de productos" }
+        }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "tags": ["Admin - Productos"],
+        "summary": "Obtener producto",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": { "description": "Producto" },
+          "404": { "description": "No encontrado" }
+        }
+      },
+      "put": {
+        "tags": ["Admin - Productos"],
+        "summary": "Actualizar costo de producto",
+        "description": "Actualiza el costo y costo de packaging de un producto",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cost": { "type": "number", "description": "Costo del producto" },
+                  "packaging_cost": { "type": "number", "description": "Costo de packaging" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Producto actualizado" }
+        }
+      }
+    },
+    "/ml/sync-items": {
+      "post": {
+        "tags": ["Admin - ML"],
+        "summary": "Sincronizar productos desde MercadoLibre",
+        "description": "Obtiene la lista de productos activos de ML y los sincroniza en Supabase",
+        "responses": {
+          "200": {
+            "description": "Sincronización completada",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Sincronizados 25/25 productos",
+                  "total": 25,
+                  "success": 25,
+                  "failed": 0
+                }
+              }
+            }
+          },
+          "401": { "description": "No conectado a MercadoLibre" }
+        }
+      }
+    },
+    "/ml/sync-orders": {
+      "post": {
+        "tags": ["Admin - ML"],
+        "summary": "Sincronizar órdenes desde MercadoLibre",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "year": { "type": "number", "example": 2026 },
+                  "month": { "type": "number", "example": 3 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Órdenes sincronizadas" }
+        }
+      }
+    },
+    "/ml/status": {
+      "get": {
+        "tags": ["Admin - ML"],
+        "summary": "Verificar conexión con ML",
+        "responses": {
+          "200": {
+            "description": "Estado de conexión",
+            "content": {
+              "application/json": {
+                "example": { "connected": true }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ml/auth": {
+      "get": {
+        "tags": ["Admin - ML"],
+        "summary": "Iniciar OAuth con ML",
+        "responses": {
+          "200": { "description": "Redirige a ML para autorización" }
+        }
+      }
+    },
+    "/ml/callback": {
+      "get": {
+        "tags": ["Admin - ML"],
+        "summary": "Callback de OAuth ML",
+        "responses": {
+          "200": { "description": "Token guardado" }
+        }
+      }
+    },
+    "/ml/refresh-token": {
+      "post": {
+        "tags": ["Admin - ML"],
+        "summary": "Refrescar token de ML",
+        "responses": {
+          "200": { "description": "Token refrescado" }
+        }
+      }
+    },
+    "/ml/disconnect": {
+      "post": {
+        "tags": ["Admin - ML"],
+        "summary": "Desconectar de ML",
+        "responses": {
+          "200": { "description": "Desconectado" }
+        }
+      }
+    },
+    "/sales": {
+      "get": {
+        "tags": ["Admin - Ventas"],
+        "summary": "Listar ventas",
+        "responses": {
+          "200": { "description": "Lista de ventas" }
+        }
+      },
+      "post": {
+        "tags": ["Admin - Ventas"],
+        "summary": "Registrar venta",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["product_id", "sale_price"],
+                "properties": {
+                  "product_id": { "type": "string" },
+                  "sale_price": { "type": "number" },
+                  "quantity": { "type": "number" },
+                  "ml_order_id": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Venta creada" }
+        }
+      }
+    },
+    "/sales/{id}": {
+      "delete": {
+        "tags": ["Admin - Ventas"],
+        "summary": "Eliminar venta",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": { "description": "Venta eliminada" }
+        }
+      }
+    },
+    "/profitability": {
+      "get": {
+        "tags": ["Admin - Rentabilidad"],
+        "summary": "Obtener análisis de rentabilidad",
+        "parameters": [
+          { "name": "timeFilter", "in": "query", "schema": { "type": "string", "enum": ["all", "7d", "30d", "90d"] } },
+          { "name": "year", "in": "query", "schema": { "type": "number" } },
+          { "name": "month", "in": "query", "schema": { "type": "number" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Datos de rentabilidad",
+            "content": {
+              "application/json": {
+                "example": {
+                  "summary": { "totalRevenue": 100000, "totalProfit": 30000, "avgMargin": 30, "totalUnits": 15 },
+                  "products": [{ "id": "MLA2911", "title": "Producto", "sales": 5, "revenue": 50000, "costs": 20000, "profit": 30000, "margin": 60 }]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["Admin - Usuarios"],
+        "summary": "Listar usuarios",
+        "responses": {
+          "200": { "description": "Lista de usuarios" }
+        }
+      },
+      "post": {
+        "tags": ["Admin - Usuarios"],
+        "summary": "Crear usuario",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Usuario creado" }
+        }
+      }
+    },
+    "/users/{id}": {
+      "delete": {
+        "tags": ["Admin - Usuarios"],
+        "summary": "Eliminar usuario",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": { "description": "Usuario eliminado" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Admin - Auth"],
+        "summary": "Iniciar sesión",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login exitoso" },
+          "401": { "description": "Credenciales inválidas" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key",
+        "description": "API Key para endpoints protegidos"
+      }
+    }
+  }
+}

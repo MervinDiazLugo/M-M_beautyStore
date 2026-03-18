@@ -8,9 +8,14 @@ export default function handler(req, res) {
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Swagger UI - Admin API</title>
+  <title>M&M Beauty API Docs</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4/swagger-ui.css" />
-  <style>body { margin:0; }</style>
+  <style>
+    body { margin: 0; background: #1a1a2e; }
+    .swagger-ui .topbar { display: none; }
+    .swagger-ui .info .title { color: #fff; }
+    .swagger-ui .scheme-container { background: #161625; }
+  </style>
 </head>
 <body>
   <div id="swagger-ui"></div>
@@ -18,10 +23,11 @@ export default function handler(req, res) {
   <script>
     window.onload = function() {
       const ui = SwaggerUIBundle({
-        url: '/admin-openapi.json',
+        url: '/openapi-unified.json',
         dom_id: '#swagger-ui',
         presets: [SwaggerUIBundle.presets.apis],
-        layout: "BaseLayout"
+        layout: "BaseLayout",
+        deepLinking: true
       });
       window.ui = ui;
     };
