@@ -1,5 +1,9 @@
 // pages/api/admin/ml/auth.js
+import { validateApiKey } from '../../../../lib/apiAuth';
+
 export default function handler(req, res) {
+  if (!validateApiKey(req, res)) return;
+  
   const { method } = req;
   const CLIENT_ID = process.env.MERCADOLIBRE_CLIENT_ID;
   const REDIRECT_URI = process.env.ML_REDIRECT_URI || 'http://localhost:3000/api/admin/ml/callback';

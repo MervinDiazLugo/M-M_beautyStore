@@ -1,5 +1,6 @@
 // pages/api/admin/ml/refresh-token.js
 import { createClient } from '@supabase/supabase-js';
+import { validateApiKey } from '../../../../lib/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -9,7 +10,9 @@ const CLIENT_ID = process.env.MERCADOLIBRE_CLIENT_ID;
 const CLIENT_SECRET = process.env.MERCADOLIBRE_CLIENT_SECRET;
 
 export default async function handler(req, res) {
-  if (req.method === 'GET') {
+  if (!validateApiKey(req, res)) return;
+  
+  if (req.method === 'POST') {
     try {
       const { data: refreshTokenData } = await supabaseAdmin
         .from('settings')

@@ -1,7 +1,10 @@
 // pages/api/admin/profitability/index.js
 import { supabase, DEFAULT_PACKAGING_COST } from '../../../../lib/supabase';
+import { validateApiKey } from '../../../../lib/apiAuth';
 
 export default async function handler(req, res) {
+  if (!validateApiKey(req, res)) return;
+  
   const { method } = req;
 
   if (method === 'GET') {

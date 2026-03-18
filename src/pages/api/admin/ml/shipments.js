@@ -1,5 +1,6 @@
 // pages/api/admin/ml/shipments.js
 import { createClient } from '@supabase/supabase-js';
+import { validateApiKey } from '../../../../lib/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -42,6 +43,8 @@ async function getMLToken() {
 }
 
 export default async function handler(req, res) {
+  if (!validateApiKey(req, res)) return;
+  
   const { method } = req;
 
   if (method === 'GET') {

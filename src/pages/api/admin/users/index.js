@@ -1,11 +1,14 @@
 // pages/api/admin/users/index.js
 import { createClient } from '@supabase/supabase-js';
+import { validateApiKey } from '../../../../lib/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseAdmin = createClient(supabaseUrl, serviceKey);
 
 export default async function handler(req, res) {
+  if (!validateApiKey(req, res)) return;
+  
   const { method } = req;
 
   if (method === 'GET') {

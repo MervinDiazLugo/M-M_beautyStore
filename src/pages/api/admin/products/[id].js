@@ -1,7 +1,10 @@
 // pages/api/admin/products/[id].js
 import { supabase } from '../../../../lib/supabase';
+import { validateApiKey } from '../../../../lib/apiAuth';
 
 export default async function handler(req, res) {
+  if (!validateApiKey(req, res)) return;
+  
   const { method, query } = req;
   const { id } = query;
 
