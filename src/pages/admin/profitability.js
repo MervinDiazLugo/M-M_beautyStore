@@ -7,8 +7,24 @@ export default function Profitability() {
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState('30d');
   const [filterMonth, setFilterMonth] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: 'profit', dir: 'desc' });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => { loadData(); }, [timeFilter, filterMonth]);
+
+  function handleSort(key) {
+    setSortConfig(prev => ({
+      key,
+      dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc'
+    }));
+  }
 
   async function loadData() {
     setLoading(true);
@@ -34,6 +50,34 @@ export default function Profitability() {
   const pieColors = ['#f472b6', '#8b5cf6', '#22d3ee', '#10b981', '#f59e0b', '#ef4444'];
   const topProducts = profitability.slice(0, 5);
   const chartData = topProducts.map(p => ({ name: p.title.substring(0, 15) + (p.title.length > 15 ? '...' : ''), ganancia: p.profit, mlFees: p.mlFeesTotal, costos: p.costs }));
+
+  const sortedProducts = [...profitability].sort((a, b) => {
+    let aVal, bVal;
+    switch (sortConfig.key) {
+      case 'title':
+        aVal = a.title || '';
+        bVal = b.title || '';
+        break;
+      case 'sales':
+        aVal = a.sales || 0;
+        bVal = b.sales || 0;
+        break;
+      case 'revenue':
+        aVal = a.revenue || 0;
+        bVal = b.revenue || 0;
+        break;
+      case 'profit':
+        aVal = a.profit || 0;
+        bVal = b.profit || 0;
+        break;
+      default:
+        aVal = a[sortConfig.key] || 0;
+        bVal = b[sortConfig.key] || 0;
+    }
+    if (aVal < bVal) return sortConfig.dir === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortConfig.dir === 'asc' ? 1 : -1;
+    return 0;
+  });
 
   if (loading) {
     return (

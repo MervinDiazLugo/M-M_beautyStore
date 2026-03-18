@@ -13,9 +13,20 @@ export default function Sales() {
   const [syncing, setSyncing] = useState(false);
   const [notification, setNotification] = useState(null);
   const [dateFilter, setDateFilter] = useState('all');
-  const [filterMonth, setFilterMonth] = useState('');
+  const now = new Date();
+const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+const [filterMonth, setFilterMonth] = useState(currentMonth);
   const [syncMonth, setSyncMonth] = useState('');
   const [showSyncModal, setShowSyncModal] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: 'sale_date', dir: 'desc' });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => { 
     loadData(); 
@@ -156,6 +167,13 @@ export default function Sales() {
     setSyncing(false);
   }
 
+  function handleSort(key) {
+    setSortConfig(prev => ({
+      key,
+      dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc'
+    }));
+  }
+
   const totalRevenue = Array.isArray(sales) ? sales.reduce((sum, s) => sum + (s.calculated_net || s.net_received || 0), 0) : 0;
   const totalProfit = Array.isArray(sales) ? sales.reduce((sum, s) => sum + (s.calculated_profit || s.profit || 0), 0) : 0;
 
@@ -179,6 +197,32 @@ export default function Sales() {
       return saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear();
     }
     return true;
+  }).sort((a, b) => {
+    let aVal, bVal;
+    switch (sortConfig.key) {
+      case 'sale_date':
+        aVal = new Date(a.sale_date || a.created_at).getTime();
+        bVal = new Date(b.sale_date || b.created_at).getTime();
+        break;
+      case 'product':
+        aVal = a.productName || '';
+        bVal = b.productName || '';
+        break;
+      case 'sale_price':
+        aVal = a.sale_price || 0;
+        bVal = b.sale_price || 0;
+        break;
+      case 'profit':
+        aVal = a.calculated_profit || a.profit || 0;
+        bVal = b.calculated_profit || b.profit || 0;
+        break;
+      default:
+        aVal = a[sortConfig.key] || 0;
+        bVal = b[sortConfig.key] || 0;
+    }
+    if (aVal < bVal) return sortConfig.dir === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortConfig.dir === 'asc' ? 1 : -1;
+    return 0;
   });
 
   if (loading) {
@@ -204,13 +248,13 @@ export default function Sales() {
           {notification.message}
         </div>
       )}
-      <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+      <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff', marginBottom: '0.125rem' }}>Ventas</h1>
+          <h1 style={{ fontSize: isMobile ? '1.25rem' : '1.5rem', fontWeight: '700', color: '#fff', marginBottom: '0.125rem' }}>Ventas</h1>
           <p style={{ color: '#71717a', fontSize: '0.875rem' }}>Gestión de ventas</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <select value={filterMonth} onChange={(e) => { setFilterMonth(e.target.value); setDateFilter('all'); }} style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#1a1a2e', color: '#fff', fontSize: '0.875rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <select value={filterMonth} onChange={(e) => { setFilterMonth(e.target.value); setDateFilter('all'); }} style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#1a1a2e', color: '#fff', fontSize: '0.75rem' }}>
             <option value="">Todos los meses</option>
             {Array.from({ length: 12 }, (_, i) => {
               const d = new Date();
@@ -221,17 +265,17 @@ export default function Sales() {
               return <option key={`${year}-${month}`} value={`${year}-${month}`}>{months[d.getMonth()]} {year}</option>;
             })}
           </select>
-          <select value={dateFilter} onChange={(e) => { setDateFilter(e.target.value); setFilterMonth(''); }} style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#1a1a2e', color: '#fff', fontSize: '0.875rem' }}>
+          <select value={dateFilter} onChange={(e) => { setDateFilter(e.target.value); setFilterMonth(''); }} style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#1a1a2e', color: '#fff', fontSize: '0.75rem' }}>
             <option value="all">Período</option>
             <option value="today">Hoy</option>
             <option value="week">Última semana</option>
             <option value="month">Este mes</option>
           </select>
-          <button onClick={() => setShowSyncModal(true)} style={{ padding: '0.5rem 1rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.875rem', cursor: 'pointer' }}>
-            🔄 Sync Mercadolibre
+          <button onClick={() => setShowSyncModal(true)} style={{ padding: '0.5rem 0.75rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.75rem', cursor: 'pointer' }}>
+            🔄 Sync
           </button>
-          <button onClick={() => setShowForm(!showForm)} style={{ padding: '0.5rem 1rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.875rem', cursor: 'pointer' }}>
-            {showForm ? '✕ Cancelar' : '+ Nueva Venta'}
+          <button onClick={() => setShowForm(!showForm)} style={{ padding: '0.5rem 0.75rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.75rem', cursor: 'pointer' }}>
+            {showForm ? '✕' : '+'}
           </button>
         </div>
       </div>
@@ -377,30 +421,37 @@ export default function Sales() {
         </div>
       </div>
 
-      <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', border: '1px solid #2a2a3e', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', border: '1px solid #2a2a3e', overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
           <thead>
             <tr style={{ backgroundColor: '#161625' }}>
-              <th style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>ID</th>
-              <th style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Fecha</th>
-              <th style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Producto</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Precio</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Costo</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Packaging</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Comisión ML</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Neto</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Ganancia</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}></th>
+              <th onClick={() => handleSort('id')} style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                ID {sortConfig.key === 'id' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th onClick={() => handleSort('sale_date')} style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                Fecha {sortConfig.key === 'sale_date' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th onClick={() => handleSort('product')} style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                Producto {sortConfig.key === 'product' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th onClick={() => handleSort('sale_price')} style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap', display: isMobile ? 'none' : 'table-cell' }}>
+                Precio {sortConfig.key === 'sale_price' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th onClick={() => handleSort('profit')} style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                Ganancia {sortConfig.key === 'profit' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}></th>
             </tr>
           </thead>
           <tbody>
             {filteredSales.map((sale) => {
               const isEditing = editingId === sale.id;
+              const profit = sale.calculated_profit || sale.profit || 0;
               return (
                 <tr key={sale.id} style={{ borderTop: '1px solid #2a2a3e' }}>
-                  <td style={{ padding: '1rem', color: '#71717a', fontSize: '0.75rem' }}>{sale.id?.substring(0, 8)}</td>
-                  <td style={{ padding: '1rem', color: '#a1a1aa' }}>{sale.sale_date ? new Date(sale.sale_date).toLocaleDateString('es-AR') : '—'}</td>
-                  <td style={{ padding: '1rem' }}>
+                  <td style={{ padding: '0.75rem', color: '#71717a', fontSize: '0.7rem' }}>{sale.id?.substring(0, 8)}</td>
+                  <td style={{ padding: '0.75rem', color: '#a1a1aa', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{sale.sale_date ? new Date(sale.sale_date).toLocaleDateString('es-AR') : '—'}</td>
+                  <td style={{ padding: '0.75rem', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {isEditing ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         <input 
@@ -410,8 +461,8 @@ export default function Sales() {
                             setProductSearch(e.target.value);
                             if (!e.target.value) setForm({ ...form, product_id: '' });
                           }}
-                          placeholder="Buscar producto..."
-                          style={{ padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '0.75rem' }}
+                          placeholder="Buscar..."
+                          style={{ padding: '0.25rem', borderRadius: '0.25rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '0.7rem', width: '100%' }}
                         />
                         {productSearch && filteredProducts.slice(0, 3).map(p => (
                           <button
@@ -425,36 +476,36 @@ export default function Sales() {
                         ))}
                       </div>
                     ) : (
-                      <span style={{ color: '#fff' }}>{sale.productName || '—'}</span>
+                      <span style={{ color: '#fff', fontSize: '0.75rem' }}>{sale.productName || '—'}</span>
                     )}
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#a1a1aa' }}>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem', display: isMobile ? 'none' : 'table-cell' }}>
                     {isEditing ? (
                       <input 
                         type="number" 
                         value={form.sale_price} 
                         onChange={(e) => setForm({ ...form, sale_price: e.target.value })}
-                        style={{ width: '80px', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', textAlign: 'right' }}
+                        style={{ width: '60px', padding: '0.25rem', borderRadius: '0.25rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', textAlign: 'right', fontSize: '0.75rem' }}
                       />
                     ) : (
                       `$${(sale.sale_price || 0).toLocaleString('es-AR')}`
                     )}
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#ef4444' }}>-${(sale.product_cost || 0).toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#ef4444' }}>-${(sale.packaging_cost || 0).toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#f59e0b' }}>-${(sale.calculated_ml_fees || sale.ml_fees || 0).toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#fff' }}>${(sale.calculated_net || sale.net_received || 0).toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: (sale.calculated_profit || sale.profit || 0) >= 0 ? '#10b981' : '#ef4444' }}>${(sale.calculated_profit || sale.profit || 0).toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right' }}>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', fontSize: '0.75rem', color: profit >= 0 ? '#10b981' : '#ef4444' }}>
+                    ${profit.toLocaleString('es-AR')}
+                  </td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
                     {isEditing ? (
                       <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'flex-end' }}>
-                        <button onClick={() => saveEdit(sale.id)} disabled={saving} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer' }}>✓</button>
-                        <button onClick={cancelEdit} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer' }}>✕</button>
+                        <button onClick={() => saveEdit(sale.id)} disabled={saving} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.7rem' }}>✓</button>
+                        <button onClick={cancelEdit} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.7rem' }}>✕</button>
                       </div>
                     ) : (
-                      <button onClick={() => startEdit(sale)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', marginRight: '0.5rem' }}>✏️</button>
+                      <>
+                        <button onClick={() => startEdit(sale)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem', marginRight: '0.25rem' }}>✏️</button>
+                        <button onClick={() => deleteSale(sale.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}>🗑️</button>
+                      </>
                     )}
-                    <button onClick={() => deleteSale(sale.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>🗑️</button>
                   </td>
                 </tr>
               );
@@ -462,7 +513,7 @@ export default function Sales() {
           </tbody>
         </table>
         {filteredSales.length === 0 && (
-          <div style={{ padding: '3rem', textAlign: 'center', color: '#71717a' }}>No hay ventas registradas</div>
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#71717a' }}>No hay ventas</div>
         )}
       </div>
     </AdminLayout>
