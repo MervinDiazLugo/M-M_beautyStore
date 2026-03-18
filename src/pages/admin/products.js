@@ -11,6 +11,7 @@ export default function Products() {
   const [editForm, setEditForm] = useState({ cost: '', packaging_cost: '' });
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState('name');
   const [sortDir, setSortDir] = useState('asc');
@@ -57,6 +58,19 @@ export default function Products() {
     setSaving(false);
   }
 
+  async function togglePublished(product) {
+    const newStatus = product.published === false;
+    await adminFetch('/api/admin/products', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: product.id,
+        published: newStatus,
+      }),
+    });
+    loadProducts();
+  }
+
   function startEdit(product) {
     setEditingId(product.id);
     setEditForm({
@@ -76,6 +90,9 @@ export default function Products() {
     
     if (filter === 'withCost') return matchesSearch && p.cost && p.cost > 0;
     if (filter === 'withoutCost') return matchesSearch && (!p.cost || p.cost === 0);
+    
+    if (statusFilter === 'published') return matchesSearch && p.published !== false;
+    if (statusFilter === 'unpublished') return matchesSearch && p.published === false;
     
     return matchesSearch;
   }).sort((a, b) => {
@@ -112,6 +129,8 @@ export default function Products() {
     total: products.length,
     withCost: products.filter(p => p.cost && p.cost > 0).length,
     withoutCost: products.filter(p => !p.cost || p.cost === 0).length,
+    published: products.filter(p => p.published !== false).length,
+    unpublished: products.filter(p => p.published === false).length,
   };
 
   function handleSort(field) {
@@ -190,10 +209,12 @@ export default function Products() {
             { key: 'all', label: 'Todos' },
             { key: 'withCost', label: 'Con costo' },
             { key: 'withoutCost', label: 'Sin costo' },
+            { key: 'published', label: `✓ Activos (${stats.published})` },
+            { key: 'unpublished', label: `✕ Pausados (${stats.unpublished})` },
           ].map(f => (
             <button
               key={f.key}
-              onClick={() => setFilter(f.key)}
+              onClick={() => f.key === 'published' || f.key === 'unpublished' ? setStatusFilter(f.key) : setFilter(f.key)}
               style={{
                 padding: '0.75rem 1rem',
                 borderRadius: '0.5rem',
@@ -201,11 +222,11 @@ export default function Products() {
                 fontSize: '0.875rem',
                 fontWeight: '500',
                 cursor: 'pointer',
-                backgroundColor: filter === f.key ? '#f472b6' : '#2a2a3e',
-                color: filter === f.key ? '#fff' : '#a1a1aa',
+                backgroundColor: (filter === f.key || statusFilter === f.key) ? '#f472b6' : '#2a2a3e',
+                color: (filter === f.key || statusFilter === f.key) ? '#fff' : '#a1a1aa',
               }}
             >
-              {f.label} ({f.key === 'all' ? stats.total : f.key === 'withCost' ? stats.withCost : stats.withoutCost})
+              {f.label}
             </button>
           ))}
         </div>
@@ -287,6 +308,21 @@ export default function Products() {
                     ${profit.toLocaleString('es-AR')}
                   </td>
                   <td style={{ padding: '1rem', textAlign: 'right' }}>
+                    <button 
+                      onClick={() => togglePublished(product)} 
+                      style={{ 
+                        padding: '0.25rem 0.5rem', 
+                        backgroundColor: product.published === false ? '#f59e0b' : '#10b981', 
+                        color: '#fff', 
+                        border: 'none', 
+                        borderRadius: '0.375rem', 
+                        cursor: 'pointer',
+                        fontSize: '0.7rem',
+                        marginRight: '0.5rem',
+                      }}
+                    >
+                      {product.published === false ? 'Activar' : 'Pausar'}
+                    </button>
                     {editingId === product.id ? (
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                         <button onClick={() => saveCost(product.id)} disabled={saving} style={{ padding: '0.375rem 0.75rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.375rem', cursor: 'pointer' }}>✓</button>
