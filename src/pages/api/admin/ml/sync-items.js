@@ -12,23 +12,19 @@ async function getAccessToken() {
     .select('value')
     .eq('key', 'ml_access_token')
     .single();
-  
   return data?.value;
 }
 
 async function fetchAsJson(url, options = {}) {
   const res = await fetch(url, options);
   if (!res.ok) return { _httpStatus: res.status };
-  
   const buffer = await res.arrayBuffer();
   const uint8 = new Uint8Array(buffer);
   let text = new TextDecoder('utf-8', { fatal: false }).decode(uint8);
-  
   const brokenCount = (text.match(/\uFFFD/g) || []).length;
   if (brokenCount > 2) {
     text = new TextDecoder('latin1').decode(uint8);
   }
-  
   return JSON.parse(text);
 }
 
@@ -39,8 +35,21 @@ function sanitizeString(str) {
   return str;
 }
 
+async function fetchDescription(itemId, token) {
+  try {
+    const data = await fetchAsJson(`${ML_API_URL}/items/${itemId}/description`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (data._httpStatus) return '';
+    let text = data.plain_text || data.text || '';
+    return sanitizeString(text.trim());
+  } catch {
+    return '';
+  }
+}
+
 async function fetchProduct(itemId, token) {
-  const ATTRIBUTES = 'id,title,price,permalink,thumbnail,pictures';
+  const ATTRIBUTES = 'id,title,price,original_price,condition,permalink,thumbnail,pictures,shipping,attributes,sold_quantity,available_quantity,status';
   const url = `${ML_API_URL}/items/${itemId}?attributes=${ATTRIBUTES}`;
 
   const data = await fetchAsJson(url, {
@@ -49,6 +58,21 @@ async function fetchProduct(itemId, token) {
 
   if (data._httpStatus) {
     throw new Error(`ML API ${data._httpStatus} para ${itemId}`);
+  }
+
+  const fullDescription = await fetchDescription(itemId, token);
+
+  let descShort;
+  if (fullDescription) {
+    const match = fullDescription.match(/^(.+?[.!?])\s*\n?/s);
+    descShort = match ? match[1].trim() : fullDescription.slice(0, 150).trim();
+  } else {
+    descShort = (data.title || '').trim();
+  }
+
+  const specs = {};
+  for (const attr of data.attributes || []) {
+    if (attr.value_name) specs[attr.name] = sanitizeString(attr.value_name);
   }
 
   const pictures = data.pictures || [];
@@ -60,6 +84,7 @@ async function fetchProduct(itemId, token) {
     images = [data.thumbnail.replace('I.jpg', 'O.jpg').replace('http://', 'https://')];
   }
 
+  const brand = specs['Marca'] || 'Desconocida';
   const mlPrice = data.price || 0;
   let priceNeto = 0;
   if (mlPrice > 0) {
@@ -68,15 +93,37 @@ async function fetchProduct(itemId, token) {
   }
 
   const precioMayorista = priceNeto > 0 ? Math.round(priceNeto * 0.8) : 0;
+  const cantidadMinima = priceNeto <= 2999 ? 50 : priceNeto <= 5999 ? 36 : priceNeto <= 8999 ? 18 : 12;
+  const envioGratis = priceNeto > 60000;
+  const soldQuantityReal = data.sold_quantity || 0;
+  const cantidadVendida = soldQuantityReal + Math.floor(Math.random() * 201) + 800;
+  const status = data.status;
+  const published = status ? status === 'active' : true;
+  const permalink = data.permalink || `https://articulo.mercadolibre.com.ar/${itemId}`;
 
   return {
     id: itemId,
     name: sanitizeString(data.title || ''),
+    ml_price: mlPrice,
     price: priceNeto,
     precio_mayorista: precioMayorista,
+    cantidad_minima_mayorista: cantidadMinima,
+    cantidad_vendida: cantidadVendida,
+    sold_quantity_real: soldQuantityReal,
+    desc: sanitizeString(descShort),
+    sku: itemId,
     image: images,
-    permalink: data.permalink || `https://articulo.mercadolibre.com.ar/${itemId}`,
-    ml_price: mlPrice,
+    envio_gratis: envioGratis,
+    description: sanitizeString(fullDescription || 'Descripción no disponible.'),
+    features: [],
+    specifications: specs,
+    mercado_libre_url: permalink,
+    brand: sanitizeString(brand),
+    condition: data.condition || 'new',
+    sold_quantity: cantidadVendida,
+    available_quantity: data.available_quantity || 0,
+    published,
+    permalink,
   };
 }
 
@@ -130,23 +177,23 @@ export default async function handler(req, res) {
       const batchResults = await Promise.allSettled(
         batch.map(async (itemId) => {
           const product = await fetchProduct(itemId, token);
-          
+
           const { data: existing } = await supabaseAdmin
             .from('products')
-            .select('cost, packaging_cost, instagramReel')
+            .select('cost, packaging_cost, instagram_reel')
             .eq('id', itemId)
             .single();
-          
+
           if (existing) {
             product.cost = existing.cost;
             product.packaging_cost = existing.packaging_cost;
-            if (existing.instagramReel) product.instagramReel = existing.instagramReel;
+            if (existing.instagram_reel) product.instagram_reel = existing.instagram_reel;
           }
 
           const { error } = await supabaseAdmin
             .from('products')
             .upsert(product, { onConflict: 'id' });
-          
+
           if (error) throw error;
           return product;
         })
