@@ -36,8 +36,7 @@ export default async function handler(req, res) {
     const profitability = calculateProfitability(productsRes.data || [], sales);
     
     const totalRevenue = sales.reduce((sum, s) => {
-      const mlFees = (s.sale_price || 0) * 0.34;
-      const netReceived = (s.sale_price || 0) - mlFees;
+      const netReceived = s.net_received || ((s.sale_price || 0) - (s.ml_fees || 0));
       return sum + netReceived;
     }, 0);
     
@@ -72,10 +71,9 @@ function calculateProfitability(products, sales) {
     const packagingCost = product?.packaging_cost || DEFAULT_PACKAGING_COST;
     const quantity = sale.quantity || 1;
     const salePrice = sale.sale_price || 0;
-    
-    const mlFees = salePrice * 0.34;
-    const netReceived = salePrice - mlFees;
-    const profit = netReceived - productCost - packagingCost;
+    const mlFees = sale.ml_fees || 0;
+    const netReceived = sale.net_received || (salePrice - mlFees);
+    const profit = sale.profit || (netReceived - productCost - packagingCost);
     
     if (!productStats[productId]) {
       productStats[productId] = { 
