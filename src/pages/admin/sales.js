@@ -13,6 +13,7 @@ export default function Sales() {
   const [syncing, setSyncing] = useState(false);
   const [notification, setNotification] = useState(null);
   const [dateFilter, setDateFilter] = useState('all');
+  const [filterMonth, setFilterMonth] = useState('');
   const [syncMonth, setSyncMonth] = useState('');
   const [showSyncModal, setShowSyncModal] = useState(false);
 
@@ -159,9 +160,14 @@ export default function Sales() {
   const totalProfit = Array.isArray(sales) ? sales.reduce((sum, s) => sum + (s.calculated_profit || s.profit || 0), 0) : 0;
 
   const filteredSales = sales.filter(s => {
-    if (dateFilter === 'all') return true;
     const saleDate = s.sale_date ? new Date(s.sale_date) : new Date(s.created_at);
     const now = new Date();
+    
+    if (filterMonth) {
+      const [year, month] = filterMonth.split('-');
+      return saleDate.getFullYear() === parseInt(year) && saleDate.getMonth() + 1 === parseInt(month);
+    }
+    
     if (dateFilter === 'today') {
       return saleDate.toDateString() === now.toDateString();
     }
@@ -204,8 +210,19 @@ export default function Sales() {
           <p style={{ color: '#71717a', fontSize: '0.875rem' }}>Gestión de ventas</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#1a1a2e', color: '#fff', fontSize: '0.875rem' }}>
-            <option value="all">Todas</option>
+          <select value={filterMonth} onChange={(e) => { setFilterMonth(e.target.value); setDateFilter('all'); }} style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#1a1a2e', color: '#fff', fontSize: '0.875rem' }}>
+            <option value="">Todos los meses</option>
+            {Array.from({ length: 12 }, (_, i) => {
+              const d = new Date();
+              d.setMonth(d.getMonth() - i);
+              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const year = d.getFullYear();
+              const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+              return <option key={`${year}-${month}`} value={`${year}-${month}`}>{months[d.getMonth()]} {year}</option>;
+            })}
+          </select>
+          <select value={dateFilter} onChange={(e) => { setDateFilter(e.target.value); setFilterMonth(''); }} style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#1a1a2e', color: '#fff', fontSize: '0.875rem' }}>
+            <option value="all">Período</option>
             <option value="today">Hoy</option>
             <option value="week">Última semana</option>
             <option value="month">Este mes</option>
@@ -364,6 +381,7 @@ export default function Sales() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ backgroundColor: '#161625' }}>
+              <th style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>ID</th>
               <th style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Fecha</th>
               <th style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Producto</th>
               <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Precio</th>
@@ -380,6 +398,7 @@ export default function Sales() {
               const isEditing = editingId === sale.id;
               return (
                 <tr key={sale.id} style={{ borderTop: '1px solid #2a2a3e' }}>
+                  <td style={{ padding: '1rem', color: '#71717a', fontSize: '0.75rem' }}>{sale.id?.substring(0, 8)}</td>
                   <td style={{ padding: '1rem', color: '#a1a1aa' }}>{sale.sale_date ? new Date(sale.sale_date).toLocaleDateString('es-AR') : '—'}</td>
                   <td style={{ padding: '1rem' }}>
                     {isEditing ? (

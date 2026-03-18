@@ -5,13 +5,22 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 export default function Profitability() {
   const [data, setData] = useState({ summary: {}, products: [] });
   const [loading, setLoading] = useState(true);
-  const [timeFilter, setTimeFilter] = useState('all');
+  const [timeFilter, setTimeFilter] = useState('30d');
+  const [filterMonth, setFilterMonth] = useState('');
 
-  useEffect(() => { loadData(); }, [timeFilter]);
+  useEffect(() => { loadData(); }, [timeFilter, filterMonth]);
 
   async function loadData() {
     setLoading(true);
-    const res = await fetch(`/api/admin/profitability?timeFilter=${timeFilter}`);
+    const params = new URLSearchParams();
+    if (filterMonth) {
+      const [year, month] = filterMonth.split('-');
+      params.set('year', year);
+      params.set('month', month);
+    } else {
+      params.set('timeFilter', timeFilter);
+    }
+    const res = await fetch(`/api/admin/profitability?${params.toString()}`);
     const result = await res.json();
     setData(result || { summary: {}, products: [] });
     setLoading(false);
@@ -38,15 +47,27 @@ export default function Profitability() {
     <AdminLayout>
       <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: '700', color: '#fff', marginBottom: '0.25rem' }}>Rentabilidad</h1>
-          <p style={{ color: '#71717a' }}>Analizá tus ganancias por producto</p>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff', marginBottom: '0.25rem' }}>Rentabilidad</h1>
+          <p style={{ color: '#71717a', fontSize: '0.875rem' }}>Analizá tus ganancias por producto</p>
         </div>
-        <select value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', border: '1px solid #3f3f5a', backgroundColor: '#1a1a2e', color: '#fff' }}>
-          <option value="all">Todo el tiempo</option>
-          <option value="7d">Últimos 7 días</option>
-          <option value="30d">Últimos 30 días</option>
-          <option value="90d">Últimos 90 días</option>
-        </select>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <select value={filterMonth} onChange={(e) => { setFilterMonth(e.target.value); setTimeFilter('30d'); }} style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#1a1a2e', color: '#fff', fontSize: '0.875rem' }}>
+            <option value="">Mes específico</option>
+            {Array.from({ length: 12 }, (_, i) => {
+              const d = new Date();
+              d.setMonth(d.getMonth() - i);
+              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const year = d.getFullYear();
+              const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+              return <option key={`${year}-${month}`} value={`${year}-${month}`}>{months[d.getMonth()]} {year}</option>;
+            })}
+          </select>
+          <select value={timeFilter} onChange={(e) => { setTimeFilter(e.target.value); setFilterMonth(''); }} style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#1a1a2e', color: '#fff', fontSize: '0.875rem' }}>
+            <option value="all">Todo</option>
+            <option value="7d">Última semana</option>
+            <option value="30d">Este mes</option>
+          </select>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>

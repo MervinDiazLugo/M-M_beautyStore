@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   const { method } = req;
 
   if (method === 'GET') {
-    const { timeFilter } = req.query;
+    const { timeFilter, year, month } = req.query;
     
     const [productsRes, salesRes] = await Promise.all([
       supabase.from('products').select('id, name, price, cost, packaging_cost'),
@@ -14,7 +14,14 @@ export default async function handler(req, res) {
 
     let sales = salesRes.data || [];
     
-    if (timeFilter && timeFilter !== 'all') {
+    if (year && month) {
+      const targetYear = parseInt(year);
+      const targetMonth = parseInt(month);
+      sales = sales.filter(s => {
+        const saleDate = new Date(s.sale_date || s.created_at);
+        return saleDate.getFullYear() === targetYear && saleDate.getMonth() + 1 === targetMonth;
+      });
+    } else if (timeFilter && timeFilter !== 'all') {
       const now = new Date();
       const filterDate = new Date();
       if (timeFilter === '7d') filterDate.setDate(now.getDate() - 7);
