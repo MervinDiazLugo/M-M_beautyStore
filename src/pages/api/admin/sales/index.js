@@ -77,6 +77,7 @@ export default async function handler(req, res) {
         ml_fees: profitData.mlFees,
         net_received: profitData.netReceived,
         profit: profitData.profit * quantity,
+        sale_date: new Date().toISOString(),
       })
       .select()
       .single();
