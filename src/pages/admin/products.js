@@ -232,31 +232,34 @@ export default function Products() {
         </div>
       </div>
 
-      <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', border: '1px solid #2a2a3e', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', border: '1px solid #2a2a3e', overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
           <thead>
             <tr style={{ backgroundColor: '#161625' }}>
-              <th style={{ padding: '1rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', width: '50px' }}>#</th>
-              <th onClick={() => handleSort('name')} style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
+              <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', width: '40px' }}>#</th>
+              <th onClick={() => handleSort('name')} style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
                 Producto {sortField === 'name' && (sortDir === 'asc' ? '↑' : '↓')}
               </th>
-              <th onClick={() => handleSort('price')} style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
+              <th onClick={() => handleSort('price')} style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
                 Venta {sortField === 'price' && (sortDir === 'asc' ? '↑' : '↓')}
               </th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#f59e0b', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#f59e0b', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 ML Fee
               </th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#22d3ee', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#22d3ee', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 Net
               </th>
-              <th onClick={() => handleSort('cost')} style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
+              <th onClick={() => handleSort('cost')} style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
                 Costo {sortField === 'cost' && (sortDir === 'asc' ? '↑' : '↓')}
               </th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Pack</th>
-              <th onClick={() => handleSort('profit')} style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Pack</th>
+              <th onClick={() => handleSort('profit')} style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
                 Ganancia {sortField === 'profit' && (sortDir === 'asc' ? '↑' : '↓')}
               </th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Acción</th>
+              <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                Activo
+              </th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}></th>
             </tr>
           </thead>
           <tbody>
@@ -270,66 +273,79 @@ export default function Products() {
 
               return (
                 <tr key={product.id} style={{ borderTop: '1px solid #2a2a3e' }}>
-                  <td style={{ padding: '1rem', textAlign: 'center', color: '#71717a', fontSize: '0.75rem' }}>{index + 1}</td>
-                  <td style={{ padding: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      {product.image && Array.isArray(product.image) && product.image[0] && <img src={product.image[0]} alt="" style={{ width: '40px', height: '40px', borderRadius: '0.5rem', objectFit: 'cover' }} />}
-                      <span style={{ color: '#fff', fontWeight: '500' }}>{product.name}</span>
+                  <td style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontSize: '0.7rem' }}>{index + 1}</td>
+                  <td style={{ padding: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {product.image && Array.isArray(product.image) && product.image[0] && <img src={product.image[0]} alt="" style={{ width: '32px', height: '32px', borderRadius: '0.375rem', objectFit: 'cover' }} />}
+                      <span style={{ color: '#fff', fontWeight: '500', fontSize: '0.8rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</span>
                     </div>
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#a1a1aa' }}>${salePrice.toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#f59e0b' }}>-${mlFee.toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#22d3ee' }}>${netReceived.toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right' }}>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem' }}>${salePrice.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#f59e0b', fontSize: '0.75rem' }}>-${mlFee.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#22d3ee', fontSize: '0.75rem' }}>${netReceived.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                     {editingId === product.id ? (
                       <input
                         type="number"
                         value={editForm.cost}
                         onChange={(e) => setEditForm({ ...editForm, cost: e.target.value })}
-                        style={{ width: '80px', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', textAlign: 'right' }}
+                        style={{ width: '80px', padding: '0.25rem', borderRadius: '0.25rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', textAlign: 'right', fontSize: '0.75rem' }}
                       />
                     ) : (
-                      <span style={{ color: cost > 0 ? '#10b981' : '#71717a' }}>{cost > 0 ? `$${cost.toLocaleString('es-AR')}` : '—'}</span>
+                      <span style={{ color: cost > 0 ? '#10b981' : '#71717a', fontSize: '0.75rem' }}>{cost > 0 ? `$${cost.toLocaleString('es-AR')}` : '—'}</span>
                     )}
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#a1a1aa' }}>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem' }}>
                     {editingId === product.id ? (
                       <input
                         type="number"
                         value={editForm.packaging_cost}
                         onChange={(e) => setEditForm({ ...editForm, packaging_cost: e.target.value })}
-                        style={{ width: '80px', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', textAlign: 'right' }}
+                        style={{ width: '80px', padding: '0.25rem', borderRadius: '0.25rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', textAlign: 'right', fontSize: '0.75rem' }}
                       />
                     ) : (
                       `$${packaging.toLocaleString('es-AR')}`
                     )}
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: profit >= 0 ? '#10b981' : '#ef4444' }}>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: profit >= 0 ? '#10b981' : '#ef4444', fontSize: '0.75rem' }}>
                     ${profit.toLocaleString('es-AR')}
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'right' }}>
-                    <button 
-                      onClick={() => togglePublished(product)} 
-                      style={{ 
-                        padding: '0.25rem 0.5rem', 
-                        backgroundColor: product.published === false ? '#f59e0b' : '#10b981', 
-                        color: '#fff', 
-                        border: 'none', 
-                        borderRadius: '0.375rem', 
-                        cursor: 'pointer',
-                        fontSize: '0.7rem',
-                        marginRight: '0.5rem',
-                      }}
-                    >
-                      {product.published === false ? 'Activar' : 'Pausar'}
-                    </button>
+                  <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                    <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '22px', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={product.published !== false}
+                        onChange={() => togglePublished(product)}
+                        style={{ opacity: 0, width: 0, height: 0 }}
+                      />
+                      <span style={{
+                        position: 'absolute',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: product.published === false ? '#3f3f5a' : '#10b981',
+                        borderRadius: '22px',
+                        transition: '0.3s',
+                      }}>
+                        <span style={{
+                          position: 'absolute',
+                          height: '16px',
+                          width: '16px',
+                          left: product.published === false ? '4px' : '20px',
+                          bottom: '3px',
+                          backgroundColor: '#fff',
+                          borderRadius: '50%',
+                          transition: '0.3s',
+                        }} />
+                      </span>
+                    </label>
+                  </td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                     {editingId === product.id ? (
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                        <button onClick={() => saveCost(product.id)} disabled={saving} style={{ padding: '0.375rem 0.75rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.375rem', cursor: 'pointer' }}>✓</button>
-                        <button onClick={cancelEdit} style={{ padding: '0.375rem 0.75rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.375rem', cursor: 'pointer' }}>✕</button>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
+                        <button onClick={() => saveCost(product.id)} disabled={saving} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.7rem' }}>✓</button>
+                        <button onClick={cancelEdit} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.7rem' }}>✕</button>
                       </div>
                     ) : (
-                      <button onClick={() => startEdit(product)} style={{ padding: '0.375rem 0.75rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.375rem', cursor: 'pointer', fontWeight: '500' }}>Editar</button>
+                      <button onClick={() => startEdit(product)} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontWeight: '500', fontSize: '0.7rem' }}>Editar</button>
                     )}
                   </td>
                 </tr>
