@@ -13,13 +13,14 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'year y month son requeridos' });
     }
 
-    const tokenData = await supabaseAdmin
+    const tokenResult = await supabaseAdmin
       .from('settings')
-      .select('value')
+      .select('key, value')
       .in('key', ['ml_access_token', 'ml_user_id']);
 
-    const accessToken = tokenData?.find(t => t.key === 'ml_access_token')?.value;
-    const userId = tokenData?.find(t => t.key === 'ml_user_id')?.value;
+    const tokenData = tokenResult.data || [];
+    const accessToken = tokenData.find(t => t.key === 'ml_access_token')?.value;
+    const userId = tokenData.find(t => t.key === 'ml_user_id')?.value;
 
     if (!accessToken || !userId) {
       return res.status(401).json({ error: 'No conectado a MercadoLibre' });
