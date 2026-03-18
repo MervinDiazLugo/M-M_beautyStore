@@ -11,6 +11,7 @@ export default function Sales() {
   const [productSearch, setProductSearch] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [syncing, setSyncing] = useState(false);
+  const [notification, setNotification] = useState(null);
   const [dateFilter, setDateFilter] = useState('all');
 
   useEffect(() => { 
@@ -115,10 +116,26 @@ export default function Sales() {
 
   async function syncFromML() {
     setSyncing(true);
+    setNotification(null);
     try {
+      const refreshRes = await fetch('/api/admin/ml/refresh-token');
+      const refreshData = await refreshRes.json();
+      
+      if (!refreshRes.ok) {
+        setNotification({ type: 'error', message: 'Error al refrescar token de ML. Necesitás reconectar.' });
+        setSyncing(false);
+        return;
+      }
+
       const res = await fetch('/api/admin/ml/debug');
       const data = await res.json();
       const orders = data.ordersInfo?.results || [];
+      
+      if (!orders.length) {
+        setNotification({ type: 'warning', message: 'No se encontraron órdenes para importar.' });
+        setSyncing(false);
+        return;
+      }
       
       const importRes = await fetch('/api/admin/ml/import-sales', {
         method: 'POST',
@@ -127,10 +144,15 @@ export default function Sales() {
       });
       
       const importData = await importRes.json();
-      alert(`Importadas: ${importData.imported}, Omitidas: ${importData.skipped}, Matcheadas: ${importData.matched}`);
-      loadData();
+      
+      if (importData.imported > 0) {
+        setNotification({ type: 'success', message: `Importadas: ${importData.imported}, Matcheadas: ${importData.matched}, Omitidas: ${importData.skipped}` });
+        loadData();
+      } else {
+        setNotification({ type: 'warning', message: `Sin ventas nuevas. Omitidas: ${importData.skipped}` });
+      }
     } catch (e) {
-      alert('Error: ' + e.message);
+      setNotification({ type: 'error', message: 'Error: ' + e.message });
     }
     setSyncing(false);
   }
@@ -165,6 +187,19 @@ export default function Sales() {
 
   return (
     <AdminLayout>
+      {notification && (
+        <div style={{ 
+          padding: '0.75rem 1rem', 
+          borderRadius: '0.5rem', 
+          marginBottom: '1rem',
+          backgroundColor: notification.type === 'success' ? '#10b98120' : notification.type === 'error' ? '#ef444420' : '#f59e0b20',
+          border: `1px solid ${notification.type === 'success' ? '#10b981' : notification.type === 'error' ? '#ef4444' : '#f59e0b'}`,
+          color: notification.type === 'success' ? '#10b981' : notification.type === 'error' ? '#ef4444' : '#f59e0b',
+          fontSize: '0.875rem'
+        }}>
+          {notification.message}
+        </div>
+      )}
       <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff', marginBottom: '0.125rem' }}>Ventas</h1>
