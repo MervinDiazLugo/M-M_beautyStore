@@ -34,6 +34,7 @@ export default async function handler(req, res) {
         ...s,
         productName: product?.name || 'Producto no encontrado',
         product_cost: productCost,
+        packaging_cost: packagingCost,
         calculated_profit: profit,
         calculated_ml_fees: mlFees,
         calculated_net: netReceived,
