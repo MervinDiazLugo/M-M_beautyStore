@@ -166,6 +166,7 @@ export default function Products() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ backgroundColor: '#161625' }}>
+              <th style={{ padding: '1rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', width: '50px' }}>#</th>
               <th onClick={() => handleSort('name')} style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
                 Producto {sortField === 'name' && (sortDir === 'asc' ? '↑' : '↓')}
               </th>
@@ -183,7 +184,7 @@ export default function Products() {
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((product) => {
+            {filteredProducts.map((product, index) => {
               const salePrice = product.price || 0;
               const cost = product.cost || 0;
               const packaging = product.packaging_cost || 1000;
@@ -193,6 +194,7 @@ export default function Products() {
 
               return (
                 <tr key={product.id} style={{ borderTop: '1px solid #2a2a3e' }}>
+                  <td style={{ padding: '1rem', textAlign: 'center', color: '#71717a', fontSize: '0.75rem' }}>{index + 1}</td>
                   <td style={{ padding: '1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       {product.image && Array.isArray(product.image) && product.image[0] && <img src={product.image[0]} alt="" style={{ width: '40px', height: '40px', borderRadius: '0.5rem', objectFit: 'cover' }} />}
