@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from './layout';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { adminFetch } from '../../lib/adminApi';
 
 export default function Profitability() {
   const [data, setData] = useState({ summary: {}, products: [] });
@@ -36,7 +37,7 @@ export default function Profitability() {
     } else {
       params.set('timeFilter', timeFilter);
     }
-    const res = await fetch(`/api/admin/profitability?${params.toString()}`);
+    const res = await adminFetch(`/api/admin/profitability?${params.toString()}`);
     const result = await res.json();
     setData(result || { summary: {}, products: [] });
     setLoading(false);

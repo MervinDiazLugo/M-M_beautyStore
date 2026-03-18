@@ -19,7 +19,7 @@ export default function MLIntegration() {
 
   async function checkConnection() {
     try {
-      const res = await fetch('/api/admin/ml/status');
+      const res = await adminFetch('/api/admin/ml/status');
       const data = await res.json();
       setConnected(data.connected || false);
     } catch (e) {
@@ -29,7 +29,7 @@ export default function MLIntegration() {
   }
 
   async function connect() {
-    const res = await fetch('/api/admin/ml/auth');
+    const res = await adminFetch('/api/admin/ml/auth');
     const data = await res.json();
     if (data.authUrl) {
       window.location.href = data.authUrl;
@@ -40,13 +40,11 @@ export default function MLIntegration() {
     setSyncing(true);
     setResult(null);
     try {
-      // Get orders from debug endpoint
-      const res = await fetch('/api/admin/ml/debug');
+      const res = await adminFetch('/api/admin/ml/debug');
       const data = await res.json();
       
       const orders = data.ordersInfo?.results || [];
       
-      // Show product titles in result for debug
       const productTitles = orders.slice(0, 5).map(o => ({
         id: o.id,
         title: o.order_items?.[0]?.item?.title || 'No title',
@@ -54,20 +52,17 @@ export default function MLIntegration() {
         status: o.status
       }));
       
-      // Send to import endpoint
-      const importRes = await fetch('/api/admin/ml/import-sales', {
+      const importRes = await adminFetch('/api/admin/ml/import-sales', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orders })
       });
       
       const importData = await importRes.json();
-      // Add product titles to result for display
       importData.productTitles = productTitles;
       setResult(importData);
       
-      // Load shipments
-      const shipRes = await fetch('/api/admin/ml/shipments');
+      const shipRes = await adminFetch('/api/admin/ml/shipments');
       const shipData = await shipRes.json();
       setShipments(shipData.shipments || []);
     } catch (e) {
@@ -77,13 +72,13 @@ export default function MLIntegration() {
   }
 
   async function disconnect() {
-    await fetch('/api/admin/ml/disconnect', { method: 'POST' });
+    await adminFetch('/api/admin/ml/disconnect', { method: 'POST' });
     setConnected(false);
     setResult(null);
   }
 
   async function debug() {
-    const res = await fetch('/api/admin/ml/debug');
+    const res = await adminFetch('/api/admin/ml/debug');
     const data = await res.json();
     console.log('ML Debug:', data);
     alert(JSON.stringify(data, null, 2));

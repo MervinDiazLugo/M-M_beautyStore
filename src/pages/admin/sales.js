@@ -90,7 +90,7 @@ const [filterMonth, setFilterMonth] = useState(currentMonth);
 
   async function deleteSale(id) {
     if (!confirm('¿Eliminar esta venta?')) return;
-    await fetch(`/api/admin/sales/${id}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/sales/${id}`, { method: 'DELETE' });
     setSales(prev => prev.filter(s => s.id !== id));
   }
 
@@ -114,7 +114,7 @@ const [filterMonth, setFilterMonth] = useState(currentMonth);
 
   async function saveEdit(saleId) {
     setSaving(true);
-    await fetch(`/api/admin/sales/${saleId}`, {
+    await adminFetch(`/api/admin/sales/${saleId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
