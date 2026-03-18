@@ -140,7 +140,7 @@ export default async function handler(req, res) {
           
           if (matchedProduct) matched++;
 
-          const unitPrice = orderItem?.sale_price || orderItem?.unit_final_price || 0;
+          const unitPrice = orderItem?.sale_price || orderItem?.unit_final_price || order.total_amount / quantity || order.total_amount || 0;
           const totalAmount = unitPrice * quantity;
           const mlFees = totalAmount * ML_COMMISSION_RATE;
           const netReceived = totalAmount - mlFees;
