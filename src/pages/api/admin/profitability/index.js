@@ -1,5 +1,5 @@
 // pages/api/admin/profitability/index.js
-import { supabase } from '../../../../lib/supabase';
+import { supabase, DEFAULT_PACKAGING_COST } from '../../../../lib/supabase';
 
 export default async function handler(req, res) {
   const { method } = req;
@@ -20,13 +20,18 @@ export default async function handler(req, res) {
       if (timeFilter === '7d') filterDate.setDate(now.getDate() - 7);
       if (timeFilter === '30d') filterDate.setDate(now.getDate() - 30);
       if (timeFilter === '90d') filterDate.setDate(now.getDate() - 90);
-      sales = sales.filter(s => new Date(s.created_at) >= filterDate);
+      sales = sales.filter(s => new Date(s.sale_date || s.created_at) >= filterDate);
     }
 
     const profitability = calculateProfitability(productsRes.data || [], sales);
     
-    const totalRevenue = sales.reduce((sum, s) => sum + (s.net_received || 0), 0);
-    const totalProfit = sales.reduce((sum, s) => sum + (s.profit || 0), 0);
+    const totalRevenue = sales.reduce((sum, s) => {
+      const mlFees = (s.sale_price || 0) * 0.34;
+      const netReceived = (s.sale_price || 0) - mlFees;
+      return sum + netReceived;
+    }, 0);
+    
+    const totalProfit = profitability.reduce((sum, p) => sum + p.profit, 0);
     const avgMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
     const totalUnits = sales.reduce((sum, s) => sum + (s.quantity || 1), 0);
 
@@ -53,25 +58,33 @@ function calculateProfitability(products, sales) {
     const product = products.find(p => p.id === sale.product_id);
     const productId = sale.product_id;
     
+    const productCost = product?.cost || 0;
+    const packagingCost = product?.packaging_cost || DEFAULT_PACKAGING_COST;
+    const quantity = sale.quantity || 1;
+    const salePrice = sale.sale_price || 0;
+    
+    const mlFees = salePrice * 0.34;
+    const netReceived = salePrice - mlFees;
+    const profit = netReceived - productCost - packagingCost;
+    
     if (!productStats[productId]) {
       productStats[productId] = { 
         id: productId, 
         title: product?.name || 'Sin nombre', 
         sales: 0, 
         revenue: 0, 
+        totalCosts: 0,
+        mlFeesTotal: 0,
         costs: 0, 
         profit: 0 
       };
     }
     
-    const cost = product?.cost || 0;
-    const packaging = product?.packaging_cost || 1000;
-    const netReceived = sale.net_received || (sale.sale_price * 0.66);
-    
-    productStats[productId].sales += sale.quantity || 1;
+    productStats[productId].sales += quantity;
     productStats[productId].revenue += netReceived;
-    productStats[productId].costs += (cost + packaging) * (sale.quantity || 1);
-    productStats[productId].profit += sale.profit || (netReceived - cost - packaging);
+    productStats[productId].mlFeesTotal += mlFees * quantity;
+    productStats[productId].costs += (productCost + packagingCost) * quantity;
+    productStats[productId].profit += profit * quantity;
   });
 
   return Object.values(productStats)

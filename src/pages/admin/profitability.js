@@ -24,7 +24,7 @@ export default function Profitability() {
   const totalUnits = summary.totalUnits || 0;
   const pieColors = ['#f472b6', '#8b5cf6', '#22d3ee', '#10b981', '#f59e0b', '#ef4444'];
   const topProducts = profitability.slice(0, 5);
-  const chartData = topProducts.map(p => ({ name: p.title.substring(0, 15) + (p.title.length > 15 ? '...' : ''), ganancia: p.profit, costo: p.costs }));
+  const chartData = topProducts.map(p => ({ name: p.title.substring(0, 15) + (p.title.length > 15 ? '...' : ''), ganancia: p.profit, mlFees: p.mlFeesTotal, costos: p.costs }));
 
   if (loading) {
     return (
@@ -51,8 +51,20 @@ export default function Profitability() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e' }}>
+          <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Total Ventas</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff' }}>{summary.totalSales || 0}</div>
+        </div>
+        <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e' }}>
           <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Ingresos Netos</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#22d3ee' }}>${totalRevenue.toLocaleString('es-AR')}</div>
+        </div>
+        <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid '#2a2a3e'}>
+          <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Comisiones ML</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f59e0b' }}>${(profitability.reduce((sum, p) => sum + (p.mlFeesTotal || 0), 0)).toLocaleString('es-AR')}</div>
+        </div>
+        <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e' }}>
+          <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Costos Totales</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#ef4444' }}>${(profitability.reduce((sum, p) => sum + (p.costs || 0), 0)).toLocaleString('es-AR')}</div>
         </div>
         <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e' }}>
           <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Ganancia Total</div>
@@ -69,7 +81,7 @@ export default function Profitability() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
-        <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #2a2a3e' }}>
+          <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #2a2a3e' }}>
           <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#fff', marginBottom: '1rem' }}>Top 5 Productos</h2>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
@@ -79,7 +91,8 @@ export default function Profitability() {
                 <YAxis tick={{ fill: '#71717a', fontSize: 12 }} />
                 <Tooltip contentStyle={{ backgroundColor: '#161625', border: '1px solid #2a2a3e', borderRadius: '0.5rem' }} />
                 <Bar dataKey="ganancia" fill="#10b981" name="Ganancia" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="costo" fill="#ef4444" name="Costo" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="mlFees" fill="#f59e0b" name="Comisión ML" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="costos" fill="#ef4444" name="Costos" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -111,6 +124,7 @@ export default function Profitability() {
               <th style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Producto</th>
               <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Ventas</th>
               <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Ingresos</th>
+              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Comisión ML</th>
               <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Costos</th>
               <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Ganancia</th>
               <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Margen</th>
@@ -122,6 +136,7 @@ export default function Profitability() {
                 <td style={{ padding: '1rem', color: '#fff', fontWeight: '500' }}>{item.title}</td>
                 <td style={{ padding: '1rem', textAlign: 'right', color: '#a1a1aa' }}>{item.sales}</td>
                 <td style={{ padding: '1rem', textAlign: 'right', color: '#fff' }}>${item.revenue.toLocaleString('es-AR')}</td>
+                <td style={{ padding: '1rem', textAlign: 'right', color: '#f59e0b' }}>-${(item.mlFeesTotal || 0).toLocaleString('es-AR')}</td>
                 <td style={{ padding: '1rem', textAlign: 'right', color: '#ef4444' }}>-${item.costs.toLocaleString('es-AR')}</td>
                 <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: item.profit >= 0 ? '#10b981' : '#ef4444' }}>${item.profit.toLocaleString('es-AR')}</td>
                 <td style={{ padding: '1rem', textAlign: 'right' }}>
