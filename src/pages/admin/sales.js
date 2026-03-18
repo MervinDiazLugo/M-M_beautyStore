@@ -224,14 +224,50 @@ export default function Sales() {
             <option value="week">Última semana</option>
             <option value="month">Este mes</option>
           </select>
-          <button onClick={syncFromML} disabled={syncing} style={{ padding: '0.5rem 1rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.875rem', cursor: syncing ? 'not-allowed' : 'pointer', opacity: syncing ? 0.7 : 1 }}>
-            {syncing ? '⏳ Sync...' : '🔄 Sync Mercadolibre'}
+          <button onClick={() => setShowSyncModal(true)} style={{ padding: '0.5rem 1rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.875rem', cursor: 'pointer' }}>
+            🔄 Sync Mercadolibre
           </button>
           <button onClick={() => setShowForm(!showForm)} style={{ padding: '0.5rem 1rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.875rem', cursor: 'pointer' }}>
             {showForm ? '✕ Cancelar' : '+ Nueva Venta'}
           </button>
         </div>
       </div>
+
+      {showSyncModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #2a2a3e', width: '400px' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#fff', marginBottom: '1rem' }}>Sync desde MercadoLibre</h2>
+            <p style={{ color: '#a1a1aa', marginBottom: '1rem', fontSize: '0.875rem' }}>Seleccioná el mes/año para importar ventas:</p>
+            <select 
+              value={syncMonth} 
+              onChange={(e) => setSyncMonth(e.target.value)}
+              style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '1rem', marginBottom: '1rem' }}
+            >
+              <option value="">Seleccionar mes...</option>
+              {Array.from({ length: 12 }, (_, i) => {
+                const d = new Date();
+                d.setMonth(d.getMonth() - i);
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                return <option key={`${year}-${month}`} value={`${year}-${month}`}>{months[d.getMonth()]} ${year}</option>;
+              })}
+            </select>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowSyncModal(false)} style={{ padding: '0.5rem 1rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.375rem', cursor: 'pointer' }}>
+                Cancelar
+              </button>
+              <button 
+                onClick={syncFromML} 
+                disabled={syncing || !syncMonth}
+                style={{ padding: '0.5rem 1rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', cursor: (!syncing && syncMonth) ? 'pointer' : 'not-allowed', opacity: (!syncing && syncMonth) ? 1 : 0.6 }}
+              >
+                {syncing ? 'Sincronizando...' : 'Sincronizar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div style={{ backgroundColor: '#1a1a2e', borderRadius: '0.75rem', padding: '1rem', border: '1px solid #2a2a3e', marginBottom: '1rem' }}>
