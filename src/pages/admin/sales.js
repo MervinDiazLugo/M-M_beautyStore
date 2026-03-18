@@ -131,36 +131,22 @@ export default function Sales() {
       const month = syncMonth.split('-')[1];
       const year = syncMonth.split('-')[0];
       
+      setNotification({ type: 'info', message: 'Sincronizando...' });
+      
       const res = await fetch(`/api/admin/ml/sync-orders?year=${year}&month=${month}`);
       const data = await res.json();
       
       if (!res.ok) {
-        setNotification({ type: 'error', message: data.error || 'Error al obtener órdenes' });
+        setNotification({ type: 'error', message: data.error || 'Error al sincronizar' });
         setSyncing(false);
         return;
       }
 
-      const orders = data.orders || [];
-      
-      if (!orders.length) {
-        setNotification({ type: 'warning', message: `No se encontraron órdenes para ${data.period}.` });
-        setSyncing(false);
-        return;
-      }
-      
-      const importRes = await fetch('/api/admin/ml/import-sales', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orders })
-      });
-      
-      const importData = await importRes.json();
-      
-      if (importData.imported > 0) {
-        setNotification({ type: 'success', message: `Mes ${data.period}: Importadas ${importData.imported}, Matcheadas ${importData.matched}, Omitidas ${importData.skipped}` });
+      if (data.imported > 0) {
+        setNotification({ type: 'success', message: `Mes ${data.period}: Importadas ${data.imported}, Matcheadas ${data.matched}, Omitidas ${data.skipped}` });
         loadData();
       } else {
-        setNotification({ type: 'warning', message: `Mes ${data.period}: Sin ventas nuevas. Omitidas: ${importData.skipped}` });
+        setNotification({ type: 'warning', message: `Mes ${data.period}: Sin ventas nuevas. Omitidas: ${data.skipped}` });
       }
       setShowSyncModal(false);
     } catch (e) {
@@ -204,9 +190,9 @@ export default function Sales() {
           padding: '0.75rem 1rem', 
           borderRadius: '0.5rem', 
           marginBottom: '1rem',
-          backgroundColor: notification.type === 'success' ? '#10b98120' : notification.type === 'error' ? '#ef444420' : '#f59e0b20',
-          border: `1px solid ${notification.type === 'success' ? '#10b981' : notification.type === 'error' ? '#ef4444' : '#f59e0b'}`,
-          color: notification.type === 'success' ? '#10b981' : notification.type === 'error' ? '#ef4444' : '#f59e0b',
+          backgroundColor: notification.type === 'success' ? '#10b98120' : notification.type === 'error' ? '#ef444420' : notification.type === 'info' ? '#3b82f620' : '#f59e0b20',
+          border: `1px solid ${notification.type === 'success' ? '#10b981' : notification.type === 'error' ? '#ef4444' : notification.type === 'info' ? '#3b82f6' : '#f59e0b'}`,
+          color: notification.type === 'success' ? '#10b981' : notification.type === 'error' ? '#ef4444' : notification.type === 'info' ? '#3b82f6' : '#f59e0b',
           fontSize: '0.875rem'
         }}>
           {notification.message}
