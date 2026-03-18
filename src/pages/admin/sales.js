@@ -298,6 +298,7 @@ export default function Sales() {
               <th style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Fecha</th>
               <th style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Producto</th>
               <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Precio</th>
+              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Costo</th>
               <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Comisión ML</th>
               <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Neto</th>
               <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Ganancia</th>
@@ -350,7 +351,8 @@ export default function Sales() {
                       `$${(sale.sale_price || 0).toLocaleString('es-AR')}`
                     )}
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#ef4444' }}>-${(sale.ml_fees || 0).toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '1rem', textAlign: 'right', color: '#ef4444' }}>-${(sale.product_cost || 0).toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '1rem', textAlign: 'right', color: '#f59e0b' }}>-${(sale.ml_fees || 0).toLocaleString('es-AR')}</td>
                   <td style={{ padding: '1rem', textAlign: 'right', color: '#fff' }}>${(sale.net_received || 0).toLocaleString('es-AR')}</td>
                   <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: (sale.profit || 0) >= 0 ? '#10b981' : '#ef4444' }}>${(sale.profit || 0).toLocaleString('es-AR')}</td>
                   <td style={{ padding: '1rem', textAlign: 'right' }}>
