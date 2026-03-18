@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { validateApiKey } from '../../../../lib/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -132,6 +133,8 @@ export default async function handler(req, res) {
     res.setHeader('Allow', ['POST']);
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  if (!validateApiKey(req, res)) return;
 
   try {
     const token = await getAccessToken();

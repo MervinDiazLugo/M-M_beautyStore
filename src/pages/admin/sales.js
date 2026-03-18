@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from './layout';
+import { adminFetch } from '../../lib/adminApi';
 
 export default function Sales() {
   const [sales, setSales] = useState([]);
@@ -34,8 +35,8 @@ const [filterMonth, setFilterMonth] = useState(currentMonth);
 
   async function loadData() {
     try {
-      const productsRes = await fetch('/api/admin/products');
-      const salesRes = await fetch('/api/admin/sales');
+      const productsRes = await adminFetch('/api/admin/products');
+      const salesRes = await adminFetch('/api/admin/sales');
       
       const productsData = await productsRes.json();
       const salesData = await salesRes.json();
@@ -67,7 +68,7 @@ const [filterMonth, setFilterMonth] = useState(currentMonth);
     e.preventDefault();
     setSaving(true);
     
-    const res = await fetch('/api/admin/sales', {
+    const res = await adminFetch('/api/admin/sales', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -132,7 +133,7 @@ const [filterMonth, setFilterMonth] = useState(currentMonth);
     setSyncing(true);
     setNotification(null);
     try {
-      const refreshRes = await fetch('/api/admin/ml/refresh-token');
+      const refreshRes = await adminFetch('/api/admin/ml/refresh-token', { method: 'POST' });
       
       if (!refreshRes.ok) {
         setNotification({ type: 'error', message: 'Error al refrescar token de ML. Necesitás reconectar.' });
@@ -145,7 +146,7 @@ const [filterMonth, setFilterMonth] = useState(currentMonth);
       
       setNotification({ type: 'info', message: 'Sincronizando...' });
       
-      const res = await fetch(`/api/admin/ml/sync-orders?year=${year}&month=${month}`);
+      const res = await adminFetch(`/api/admin/ml/sync-orders?year=${year}&month=${month}`);
       const data = await res.json();
       
       if (!res.ok) {

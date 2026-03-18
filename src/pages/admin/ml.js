@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from './layout';
+import { adminFetch } from '../../lib/adminApi';
 
 export default function MLIntegration() {
   const [connected, setConnected] = useState(false);

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from './layout';
+import { adminFetch } from '../../lib/adminApi';
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -19,7 +20,7 @@ export default function Products() {
   }, []);
 
   async function loadProducts() {
-    const res = await fetch('/api/admin/products');
+    const res = await adminFetch('/api/admin/products');
     const data = await res.json();
     setProducts(data || []);
     setLoading(false);
@@ -29,7 +30,7 @@ export default function Products() {
     setSyncing(true);
     setSyncResult(null);
     try {
-      const res = await fetch('/api/admin/ml/sync-items', { method: 'POST' });
+      const res = await adminFetch('/api/admin/ml/sync-items', { method: 'POST' });
       const data = await res.json();
       setSyncResult(data);
       if (data.success) {
@@ -43,7 +44,7 @@ export default function Products() {
 
   async function saveCost(productId) {
     setSaving(true);
-    await fetch(`/api/admin/products/${productId}`, {
+    await adminFetch(`/api/admin/products/${productId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
