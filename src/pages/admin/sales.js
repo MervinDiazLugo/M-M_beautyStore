@@ -13,6 +13,8 @@ export default function Sales() {
   const [syncing, setSyncing] = useState(false);
   const [notification, setNotification] = useState(null);
   const [dateFilter, setDateFilter] = useState('all');
+  const [syncMonth, setSyncMonth] = useState('');
+  const [showSyncModal, setShowSyncModal] = useState(false);
 
   useEffect(() => { 
     loadData(); 
@@ -119,7 +121,6 @@ export default function Sales() {
     setNotification(null);
     try {
       const refreshRes = await fetch('/api/admin/ml/refresh-token');
-      const refreshData = await refreshRes.json();
       
       if (!refreshRes.ok) {
         setNotification({ type: 'error', message: 'Error al refrescar token de ML. Necesitás reconectar.' });
@@ -127,12 +128,22 @@ export default function Sales() {
         return;
       }
 
-      const res = await fetch('/api/admin/ml/debug');
+      const month = syncMonth.split('-')[1];
+      const year = syncMonth.split('-')[0];
+      
+      const res = await fetch(`/api/admin/ml/sync-orders?year=${year}&month=${month}`);
       const data = await res.json();
-      const orders = data.ordersInfo?.results || [];
+      
+      if (!res.ok) {
+        setNotification({ type: 'error', message: data.error || 'Error al obtener órdenes' });
+        setSyncing(false);
+        return;
+      }
+
+      const orders = data.orders || [];
       
       if (!orders.length) {
-        setNotification({ type: 'warning', message: 'No se encontraron órdenes para importar.' });
+        setNotification({ type: 'warning', message: `No se encontraron órdenes para ${data.period}.` });
         setSyncing(false);
         return;
       }
@@ -146,11 +157,12 @@ export default function Sales() {
       const importData = await importRes.json();
       
       if (importData.imported > 0) {
-        setNotification({ type: 'success', message: `Importadas: ${importData.imported}, Matcheadas: ${importData.matched}, Omitidas: ${importData.skipped}` });
+        setNotification({ type: 'success', message: `Mes ${data.period}: Importadas ${importData.imported}, Matcheadas ${importData.matched}, Omitidas ${importData.skipped}` });
         loadData();
       } else {
-        setNotification({ type: 'warning', message: `Sin ventas nuevas. Omitidas: ${importData.skipped}` });
+        setNotification({ type: 'warning', message: `Mes ${data.period}: Sin ventas nuevas. Omitidas: ${importData.skipped}` });
       }
+      setShowSyncModal(false);
     } catch (e) {
       setNotification({ type: 'error', message: 'Error: ' + e.message });
     }

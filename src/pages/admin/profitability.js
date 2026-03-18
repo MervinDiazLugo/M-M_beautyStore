@@ -58,7 +58,7 @@ export default function Profitability() {
           <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Ingresos Netos</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#22d3ee' }}>${totalRevenue.toLocaleString('es-AR')}</div>
         </div>
-        <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid '#2a2a3e'}>
+        <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e' }}>
           <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Comisiones ML</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f59e0b' }}>${(profitability.reduce((sum, p) => sum + (p.mlFeesTotal || 0), 0)).toLocaleString('es-AR')}</div>
         </div>
