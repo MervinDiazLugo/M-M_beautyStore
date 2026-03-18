@@ -4,6 +4,8 @@ import AdminLayout from './layout';
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ cost: '', packaging_cost: '' });
   const [saving, setSaving] = useState(false);
@@ -21,6 +23,22 @@ export default function Products() {
     const data = await res.json();
     setProducts(data || []);
     setLoading(false);
+  }
+
+  async function syncFromML() {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const res = await fetch('/api/admin/ml/sync-items', { method: 'POST' });
+      const data = await res.json();
+      setSyncResult(data);
+      if (data.success) {
+        loadProducts();
+      }
+    } catch (err) {
+      setSyncResult({ error: err.message });
+    }
+    setSyncing(false);
   }
 
   async function saveCost(productId) {
@@ -114,10 +132,40 @@ export default function Products() {
 
   return (
     <AdminLayout>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: '700', color: '#fff', marginBottom: '0.25rem' }}>Productos</h1>
-        <p style={{ color: '#71717a' }}>Gestiona los costos de tus productos</p>
+      <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1 style={{ fontSize: '2rem', fontWeight: '700', color: '#fff', marginBottom: '0.25rem' }}>Productos</h1>
+          <p style={{ color: '#71717a' }}>Gestiona los costos de tus productos</p>
+        </div>
+        <button
+          onClick={syncFromML}
+          disabled={syncing}
+          style={{
+            padding: '0.75rem 1.25rem',
+            backgroundColor: syncing ? '#3f3f5a' : '#10b981',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '0.5rem',
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            cursor: syncing ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {syncing ? 'Sincronizando...' : '🔄 Sincronizar desde ML'}
+        </button>
       </div>
+
+      {syncResult && (
+        <div style={{
+          padding: '1rem',
+          marginBottom: '1rem',
+          borderRadius: '0.5rem',
+          backgroundColor: syncResult.error ? '#ef444420' : '#10b98120',
+          color: syncResult.error ? '#ef4444' : '#10b981',
+        }}>
+          {syncResult.error ? `Error: ${syncResult.error}` : syncResult.message}
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
         <input
