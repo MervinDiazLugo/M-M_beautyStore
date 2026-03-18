@@ -39,6 +39,47 @@ function sanitizeString(str) {
   return str;
 }
 
+async function fetchProduct(itemId, token) {
+  const ATTRIBUTES = 'id,title,price,original_price,condition,permalink,thumbnail,pictures,shipping,attributes,sold_quantity,available_quantity,status';
+  const url = `${ML_API_URL}/items/${itemId}?attributes=${ATTRIBUTES}`;
+
+  const data = await fetchAsJson(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (data._httpStatus) {
+    throw new Error(`ML API ${data._httpStatus} para ${itemId}`);
+  }
+
+  const pictures = data.pictures || [];
+  let images = pictures
+    .map((p) => p.secure_url)
+    .filter(Boolean)
+    .slice(0, 8);
+  if (images.length === 0 && data.thumbnail) {
+    images = [data.thumbnail.replace('I.jpg', 'O.jpg').replace('http://', 'https://')];
+  }
+
+  const mlPrice = data.price || 0;
+  let priceNeto = 0;
+  if (mlPrice > 0) {
+    const comision = mlPrice * 0.055;
+    priceNeto = Math.round(Math.max(mlPrice - (comision + 600), 0));
+  }
+
+  return {
+    id: itemId,
+    name: sanitizeString(data.title || ''),
+    price: priceNeto,
+    image: images,
+    permalink: data.permalink || `https://articulo.mercadolibre.com.ar/${itemId}`,
+    ml_price: mlPrice,
+    sold_quantity: data.sold_quantity || 0,
+    available_quantity: data.available_quantity || 0,
+    status: data.status || 'active',
+  };
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
