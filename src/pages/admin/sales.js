@@ -157,8 +157,8 @@ export default function Sales() {
     setSyncing(false);
   }
 
-  const totalRevenue = Array.isArray(sales) ? sales.reduce((sum, s) => sum + (s.net_received || 0), 0) : 0;
-  const totalProfit = Array.isArray(sales) ? sales.reduce((sum, s) => sum + (s.profit || 0), 0) : 0;
+  const totalRevenue = Array.isArray(sales) ? sales.reduce((sum, s) => sum + (s.calculated_net || s.net_received || 0), 0) : 0;
+  const totalProfit = Array.isArray(sales) ? sales.reduce((sum, s) => sum + (s.calculated_profit || s.profit || 0), 0) : 0;
 
   const filteredSales = sales.filter(s => {
     if (dateFilter === 'all') return true;
@@ -387,9 +387,9 @@ export default function Sales() {
                     )}
                   </td>
                   <td style={{ padding: '1rem', textAlign: 'right', color: '#ef4444' }}>-${(sale.product_cost || 0).toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#f59e0b' }}>-${(sale.ml_fees || 0).toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', color: '#fff' }}>${(sale.net_received || 0).toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: (sale.profit || 0) >= 0 ? '#10b981' : '#ef4444' }}>${(sale.profit || 0).toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '1rem', textAlign: 'right', color: '#f59e0b' }}>-${(sale.calculated_ml_fees || sale.ml_fees || 0).toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '1rem', textAlign: 'right', color: '#fff' }}>${(sale.calculated_net || sale.net_received || 0).toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: (sale.calculated_profit || sale.profit || 0) >= 0 ? '#10b981' : '#ef4444' }}>${(sale.calculated_profit || sale.profit || 0).toLocaleString('es-AR')}</td>
                   <td style={{ padding: '1rem', textAlign: 'right' }}>
                     {isEditing ? (
                       <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'flex-end' }}>

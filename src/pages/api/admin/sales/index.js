@@ -12,20 +12,33 @@ export default async function handler(req, res) {
     
     if (error) return res.status(500).json({ error: error.message });
     
-    // Obtener nombres de productos
+    // Obtener nombres y costos de productos
     const productIds = [...new Set(data.map(s => s.product_id))];
     const { data: products } = await supabase
       .from('products')
-      .select('id, name')
+      .select('id, name, cost, packaging_cost')
       .in('id', productIds);
     
     const productMap = {};
-    products?.forEach(p => { productMap[p.id] = p.name; });
+    products?.forEach(p => { productMap[p.id] = p; });
     
-    const salesWithProducts = data.map(s => ({
-      ...s,
-      productName: productMap[s.product_id] || 'Producto no encontrado'
-    }));
+    const salesWithProducts = data.map(s => {
+      const product = productMap[s.product_id];
+      const productCost = product?.cost || 0;
+      const packagingCost = product?.packaging_cost || DEFAULT_PACKAGING_COST;
+      const mlFees = (s.sale_price || 0) * 0.34;
+      const netReceived = (s.sale_price || 0) - mlFees;
+      const profit = netReceived - productCost - packagingCost;
+      
+      return {
+        ...s,
+        productName: product?.name || 'Producto no encontrado',
+        product_cost: productCost,
+        calculated_profit: profit,
+        calculated_ml_fees: mlFees,
+        calculated_net: netReceived,
+      };
+    });
     
     return res.status(200).json(salesWithProducts);
   }
