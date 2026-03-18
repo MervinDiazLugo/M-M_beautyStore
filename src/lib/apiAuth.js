@@ -9,6 +9,7 @@ export function validateApiKey(req, res) {
   }
   
   if (!API_KEYS.includes(apiKey)) {
+    console.log('Invalid API key:', apiKey, 'Expected:', API_KEYS);
     res.status(401).json({ error: 'Invalid API key' });
     return false;
   }
