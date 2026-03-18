@@ -35,12 +35,7 @@ export default async function handler(req, res) {
 
     const profitability = calculateProfitability(productsRes.data || [], sales);
     
-    const totalRevenue = sales.reduce((sum, s) => {
-      const salePrice = s.sale_price || 0;
-      const mlFees = salePrice * 0.34;
-      const netReceived = salePrice - mlFees;
-      return sum + (netReceived * (s.quantity || 1));
-    }, 0);
+    const totalRevenue = sales.reduce((sum, s) => sum + (s.sale_price || 0), 0);
     
     const totalProfit = profitability.reduce((sum, p) => sum + p.profit, 0);
     const avgMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
@@ -76,7 +71,7 @@ function calculateProfitability(products, sales) {
     
     const mlFees = salePrice * 0.34;
     const netReceived = salePrice - mlFees;
-    const profit = netReceived - productCost - packagingCost;
+    const profit = netReceived - (productCost * quantity) - (packagingCost * quantity);
     
     if (!productStats[productId]) {
       productStats[productId] = { 
@@ -92,10 +87,10 @@ function calculateProfitability(products, sales) {
     }
     
     productStats[productId].sales += quantity;
-    productStats[productId].revenue += netReceived * quantity;
-    productStats[productId].mlFeesTotal += mlFees * quantity;
+    productStats[productId].revenue += salePrice;
+    productStats[productId].mlFeesTotal += mlFees;
     productStats[productId].costs += (productCost + packagingCost) * quantity;
-    productStats[productId].profit += profit * quantity;
+    productStats[productId].profit += profit;
   });
 
   return Object.values(productStats)
