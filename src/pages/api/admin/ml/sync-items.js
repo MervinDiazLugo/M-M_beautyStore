@@ -67,10 +67,13 @@ async function fetchProduct(itemId, token) {
     priceNeto = Math.round(Math.max(mlPrice - (comision + 600), 0));
   }
 
+  const precioMayorista = priceNeto > 0 ? Math.round(priceNeto * 0.8) : 0;
+
   return {
     id: itemId,
     name: sanitizeString(data.title || ''),
     price: priceNeto,
+    precio_mayorista: precioMayorista,
     image: images,
     permalink: data.permalink || `https://articulo.mercadolibre.com.ar/${itemId}`,
     ml_price: mlPrice,
