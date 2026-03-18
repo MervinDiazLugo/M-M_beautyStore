@@ -99,7 +99,7 @@ async function fetchProduct(itemId, token) {
   const soldQuantityReal = data.sold_quantity || 0;
   const cantidadVendida = soldQuantityReal + Math.floor(Math.random() * 201) + 800;
   const status = data.status;
-  const published = status ? status === 'active' : true;
+  const published = status === 'active';
   const permalink = data.permalink || `https://articulo.mercadolibre.com.ar/${itemId}`;
 
   return {
@@ -155,18 +155,23 @@ export default async function handler(req, res) {
 
     let offset = 0;
     const limit = 100;
-    while (true) {
-      const searchRes = await fetchAsJson(
-        `${ML_API_URL}/users/${userId}/items/search?status=active&limit=${limit}&offset=${offset}`,
-        { headers: { Authorization: `Bearer ${token}` }
-      });
+    const statuses = ['active', 'paused', 'closed'];
+    
+    for (const status of statuses) {
+      let statusOffset = 0;
+      while (true) {
+        const searchRes = await fetchAsJson(
+          `${ML_API_URL}/users/${userId}/items/search?status=${status}&limit=${limit}&offset=${statusOffset}`,
+          { headers: { Authorization: `Bearer ${token}` }
+        });
 
-      if (searchRes._httpStatus || !searchRes.results) break;
+        if (searchRes._httpStatus || !searchRes.results) break;
 
-      itemIds.push(...searchRes.results);
+        itemIds.push(...searchRes.results);
 
-      if (!searchRes.paging || searchRes.results.length < limit) break;
-      offset += limit;
+        if (!searchRes.paging || searchRes.results.length < limit) break;
+        statusOffset += limit;
+      }
     }
 
     if (itemIds.length === 0) {
