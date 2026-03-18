@@ -435,8 +435,20 @@ const [filterMonth, setFilterMonth] = useState(currentMonth);
               <th onClick={() => handleSort('product')} style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                 Producto {sortConfig.key === 'product' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
               </th>
-              <th onClick={() => handleSort('sale_price')} style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap', display: isMobile ? 'none' : 'table-cell' }}>
-                Precio {sortConfig.key === 'sale_price' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap', display: isMobile ? 'none' : 'table-cell' }}>
+                Venta
+              </th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap', display: isMobile ? 'none' : 'table-cell' }}>
+                Costo
+              </th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap', display: isMobile ? 'none' : 'table-cell' }}>
+                Pack
+              </th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap', display: isMobile ? 'none' : 'table-cell' }}>
+                ML Fee
+              </th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap', display: isMobile ? 'none' : 'table-cell' }}>
+                Net
               </th>
               <th onClick={() => handleSort('profit')} style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                 Ganancia {sortConfig.key === 'profit' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
@@ -491,6 +503,18 @@ const [filterMonth, setFilterMonth] = useState(currentMonth);
                     ) : (
                       `$${(sale.sale_price || 0).toLocaleString('es-AR')}`
                     )}
+                  </td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#ef4444', fontSize: '0.75rem', display: isMobile ? 'none' : 'table-cell' }}>
+                    -${(sale.product_cost || 0).toLocaleString('es-AR')}
+                  </td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#ef4444', fontSize: '0.75rem', display: isMobile ? 'none' : 'table-cell' }}>
+                    -${(sale.packaging_cost || 0).toLocaleString('es-AR')}
+                  </td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#f59e0b', fontSize: '0.75rem', display: isMobile ? 'none' : 'table-cell' }}>
+                    -${(sale.calculated_ml_fees || 0).toLocaleString('es-AR')}
+                  </td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#22d3ee', fontSize: '0.75rem', display: isMobile ? 'none' : 'table-cell' }}>
+                    ${(sale.calculated_net || 0).toLocaleString('es-AR')}
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', fontSize: '0.75rem', color: profit >= 0 ? '#10b981' : '#ef4444' }}>
                     ${profit.toLocaleString('es-AR')}

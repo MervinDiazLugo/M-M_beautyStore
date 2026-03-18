@@ -220,12 +220,18 @@ export default function Products() {
                 Producto {sortField === 'name' && (sortDir === 'asc' ? '↑' : '↓')}
               </th>
               <th onClick={() => handleSort('price')} style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
-                Precio {sortField === 'price' && (sortDir === 'asc' ? '↑' : '↓')}
+                Venta {sortField === 'price' && (sortDir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th style={{ padding: '1rem', textAlign: 'right', color: '#f59e0b', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                ML Fee
+              </th>
+              <th style={{ padding: '1rem', textAlign: 'right', color: '#22d3ee', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                Net
               </th>
               <th onClick={() => handleSort('cost')} style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
                 Costo {sortField === 'cost' && (sortDir === 'asc' ? '↑' : '↓')}
               </th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Packaging</th>
+              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Pack</th>
               <th onClick={() => handleSort('profit')} style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
                 Ganancia {sortField === 'profit' && (sortDir === 'asc' ? '↑' : '↓')}
               </th>
@@ -251,13 +257,15 @@ export default function Products() {
                     </div>
                   </td>
                   <td style={{ padding: '1rem', textAlign: 'right', color: '#a1a1aa' }}>${salePrice.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '1rem', textAlign: 'right', color: '#f59e0b' }}>-${mlFee.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '1rem', textAlign: 'right', color: '#22d3ee' }}>${netReceived.toLocaleString('es-AR')}</td>
                   <td style={{ padding: '1rem', textAlign: 'right' }}>
                     {editingId === product.id ? (
                       <input
                         type="number"
                         value={editForm.cost}
                         onChange={(e) => setEditForm({ ...editForm, cost: e.target.value })}
-                        style={{ width: '100px', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', textAlign: 'right' }}
+                        style={{ width: '80px', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', textAlign: 'right' }}
                       />
                     ) : (
                       <span style={{ color: cost > 0 ? '#10b981' : '#71717a' }}>{cost > 0 ? `$${cost.toLocaleString('es-AR')}` : '—'}</span>
@@ -269,7 +277,7 @@ export default function Products() {
                         type="number"
                         value={editForm.packaging_cost}
                         onChange={(e) => setEditForm({ ...editForm, packaging_cost: e.target.value })}
-                        style={{ width: '100px', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', textAlign: 'right' }}
+                        style={{ width: '80px', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', textAlign: 'right' }}
                       />
                     ) : (
                       `$${packaging.toLocaleString('es-AR')}`
