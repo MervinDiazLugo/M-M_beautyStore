@@ -84,6 +84,7 @@ export default async function handler(req, res) {
 
         const data = await mlRes.json();
         const orders = data.results || [];
+        const totalOrders = data.paging?.total || 0;
         
         if (orders.length === 0) {
           hasMore = false;
@@ -91,6 +92,15 @@ export default async function handler(req, res) {
         }
 
         for (const order of orders) {
+          const orderDate = new Date(order.date_created);
+          const orderMonth = orderDate.getMonth() + 1;
+          const orderYear = orderDate.getFullYear();
+          
+          if (parseInt(month) !== orderMonth || parseInt(year) !== orderYear) {
+            hasMore = false;
+            break;
+          }
+          
           totalProcessed++;
           
           if (order.status !== 'paid') {
