@@ -85,6 +85,8 @@ export default async function handler(req, res) {
           break;
         }
 
+        let pageProcessed = false;
+        
         for (const order of orders) {
           const orderDate = new Date(order.date_created);
           const orderYear = orderDate.getFullYear();
@@ -95,14 +97,16 @@ export default async function handler(req, res) {
           
           if (orderYear < targetYear || (orderYear === targetYear && orderMonth < targetMonth)) {
             hasMore = false;
+            pageProcessed = true;
             break;
           }
           
           if (orderYear > targetYear || (orderYear === targetYear && orderMonth > targetMonth)) {
-            offset += limit;
-            continue;
+            pageProcessed = true;
+            break;
           }
           
+          pageProcessed = true;
           totalProcessed++;
           
           if (order.status !== 'paid') {
@@ -153,7 +157,9 @@ export default async function handler(req, res) {
           imported++;
         }
 
-        offset += limit;
+        if (pageProcessed) {
+          offset += limit;
+        }
       }
 
       return res.status(200).json({ 
