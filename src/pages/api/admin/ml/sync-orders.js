@@ -55,10 +55,8 @@ export default async function handler(req, res) {
     const productsResult = await supabaseAdmin.from('products').select('id, name, cost, packaging_cost');
     const products = productsResult.data || [];
 
-    const startDate = `${year}-${String(month).padStart(2, '0')}-01T00:00:00.000-03:00`;
-    const endMonth = parseInt(month) === 12 ? 1 : parseInt(month) + 1;
-    const endYear = parseInt(month) === 12 ? parseInt(year) + 1 : parseInt(year);
-    const endDate = `${endYear}-${String(endMonth).padStart(2, '0')}-01T00:00:00.000-03:00`;
+    const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+    const endDate = new Date(parseInt(year), parseInt(month), 1);
 
     let imported = 0;
     let skipped = 0;
@@ -71,7 +69,7 @@ export default async function handler(req, res) {
 
     try {
       while (hasMore && totalProcessed < 500) {
-        const url = `https://api.mercadolibre.com/orders/search?seller=${userId}&order_date=created_from%3A${encodeURIComponent(startDate)}%3Bcreated_to%3A${encodeURIComponent(endDate)}&limit=${limit}&offset=${offset}`;
+        const url = `https://api.mercadolibre.com/orders/search?seller=${userId}&limit=${limit}&offset=${offset}&sort=date_desc`;
         
         const mlRes = await fetch(url, {
           headers: { Authorization: `Bearer ${accessToken}` }
@@ -92,10 +90,11 @@ export default async function handler(req, res) {
 
         for (const order of orders) {
           const orderDate = new Date(order.date_created);
-          const orderMonth = orderDate.getMonth() + 1;
-          const orderYear = orderDate.getFullYear();
           
-          if (parseInt(month) !== orderMonth || parseInt(year) !== orderYear) {
+          if (orderDate < startDate || orderDate >= endDate) {
+            if (orderDate < startDate) {
+              hasMore = false;
+            }
             offset += limit;
             continue;
           }
