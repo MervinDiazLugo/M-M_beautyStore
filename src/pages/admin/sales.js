@@ -273,10 +273,10 @@ const [filterMonth, setFilterMonth] = useState(currentMonth);
             <option value="month">Este mes</option>
           </select>
           <button onClick={() => setShowSyncModal(true)} style={{ padding: '0.5rem 0.75rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.75rem', cursor: 'pointer' }}>
-            🔄 Sync
+            🔄 Sync con Mercadolibre
           </button>
           <button onClick={() => setShowForm(!showForm)} style={{ padding: '0.5rem 0.75rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.375rem', fontWeight: '600', fontSize: '0.75rem', cursor: 'pointer' }}>
-            {showForm ? '✕' : '+'}
+            {showForm ? '✕' : '+ Nueva venta'}
           </button>
         </div>
       </div>
