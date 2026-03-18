@@ -243,7 +243,7 @@
                   "success": true,
                   "message": "Sincronizados 25/25 productos",
                   "total": 25,
-                  "success": 25,
+                  "synced": 25,
                   "failed": 0
                 }
               }
