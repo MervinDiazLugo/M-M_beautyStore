@@ -55,9 +55,6 @@ export default async function handler(req, res) {
     const productsResult = await supabaseAdmin.from('products').select('id, name, cost, packaging_cost');
     const products = productsResult.data || [];
 
-    const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
-    const endDate = new Date(parseInt(year), parseInt(month), 1);
-
     let imported = 0;
     let skipped = 0;
     let matched = 0;
@@ -90,11 +87,18 @@ export default async function handler(req, res) {
 
         for (const order of orders) {
           const orderDate = new Date(order.date_created);
+          const orderYear = orderDate.getFullYear();
+          const orderMonth = orderDate.getMonth() + 1;
           
-          if (orderDate < startDate || orderDate >= endDate) {
-            if (orderDate < startDate) {
-              hasMore = false;
-            }
+          const targetYear = parseInt(year);
+          const targetMonth = parseInt(month);
+          
+          if (orderYear < targetYear || (orderYear === targetYear && orderMonth < targetMonth)) {
+            hasMore = false;
+            break;
+          }
+          
+          if (orderYear > targetYear || (orderYear === targetYear && orderMonth > targetMonth)) {
             offset += limit;
             continue;
           }
