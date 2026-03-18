@@ -40,16 +40,16 @@ export default async function handler(req, res) {
       while (hasMore && totalFetched < 500) {
         const url = `https://api.mercadolibre.com/orders/search?seller=${userId}&order_date=created_from%3A${encodeURIComponent(startDate)}%3Bcreated_to%3A${encodeURIComponent(endDate)}&limit=${limit}&offset=${offset}`;
         
-        const res = await fetch(url, {
+        const mlRes = await fetch(url, {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
 
-        if (!res.ok) {
-          const error = await res.json();
+        if (!mlRes.ok) {
+          const error = await mlRes.json();
           throw new Error(error.message || 'Error al obtener órdenes');
         }
 
-        const data = await res.json();
+        const data = await mlRes.json();
         const results = data.results || [];
         
         if (results.length === 0) {
