@@ -178,106 +178,90 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0f0f1a' }}>
-      <nav style={{ backgroundColor: '#161625', borderBottom: '1px solid #2a2a3e' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0f0f1a', width: '100%' }}>
+      <nav style={{ backgroundColor: '#161625', borderBottom: '1px solid #2a2a3e', width: '100%' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '64px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-              <Link href="/admin" style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f472b6', textDecoration: 'none', letterSpacing: '-0.025em' }}>
-                M&M <span style={{ color: '#fff' }}>Beauty</span>
-              </Link>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.5rem 1rem',
-                      fontSize: '0.875rem',
-                      fontWeight: '600',
-                      color: isActive(item.href) ? '#f472b6' : '#a1a1aa',
-                      backgroundColor: isActive(item.href) ? '#f472b615' : 'transparent',
-                      borderRadius: '0.5rem',
-                      textDecoration: 'none',
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    <span>{item.icon}</span>
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <Link href="/" style={{ color: '#71717a', fontSize: '0.875rem', textDecoration: 'none' }}>
-                Ver tienda →
-              </Link>
-              
-              <div style={{ position: 'relative' }}>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
-                  style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.5rem',
+            <Link href="/admin" style={{ fontSize: '1.25rem', fontWeight: '800', color: '#f472b6', textDecoration: 'none', letterSpacing: '-0.025em' }}>
+              M&M <span style={{ color: '#fff' }}>Beauty</span>
+            </Link>
+            <div style={{ display: 'flex', gap: '0.25rem', overflowX: 'auto' }}>
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.25rem',
                     padding: '0.5rem 0.75rem',
-                    backgroundColor: '#2a2a3e',
-                    border: 'none',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    color: isActive(item.href) ? '#f472b6' : '#a1a1aa',
+                    backgroundColor: isActive(item.href) ? '#f472b615' : 'transparent',
                     borderRadius: '0.5rem',
-                    cursor: 'pointer',
-                    color: '#fff',
-                    fontSize: '0.875rem'
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  <span>👤</span>
-                  <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {user.email}
-                  </span>
-                  <span style={{ fontSize: '0.75rem' }}>▼</span>
-                </button>
-                {showUserMenu && (
-                  <div style={{ 
-                    position: 'absolute', 
-                    top: '100%', 
-                    right: 0, 
-                    marginTop: '0.5rem',
-                    backgroundColor: '#1a1a2e', 
-                    border: '1px solid #2a2a3e',
-                    borderRadius: '0.5rem',
-                    overflow: 'hidden',
-                    zIndex: 100,
-                    minWidth: '150px'
-                  }}>
-                    <button 
-                      onClick={handleLogout}
-                      style={{ 
-                        display: 'block',
-                        width: '100%',
-                        padding: '0.75rem 1rem',
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        textAlign: 'left',
-                        color: '#ef4444',
-                        cursor: 'pointer',
-                        fontSize: '0.875rem'
-                      }}
-                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2a2a3e'}
-                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      🚪 Cerrar sesión
-                    </button>
-                  </div>
-                )}
-              </div>
+                  <span>{item.icon}</span>
+                  <span style={{ display: 'none' }}>{item.label}</span>
+                </Link>
+              ))}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); }}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  padding: '0.5rem',
+                  backgroundColor: '#2a2a3e',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  color: '#fff',
+                  fontSize: '0.875rem'
+                }}
+              >
+                <span>👤</span>
+              </button>
+              {showUserMenu && (
+                <div style={{ 
+                  position: 'absolute', 
+                  top: '60px', 
+                  right: '1rem',
+                  backgroundColor: '#1a1a2e', 
+                  border: '1px solid #2a2a3e',
+                  borderRadius: '0.5rem',
+                  overflow: 'hidden',
+                  zIndex: 100,
+                  minWidth: '150px'
+                }}>
+                  <button 
+                    onClick={handleLogout}
+                    style={{ 
+                      display: 'block',
+                      width: '100%',
+                      padding: '0.75rem 1rem',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      textAlign: 'left',
+                      color: '#ef4444',
+                      cursor: 'pointer',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    🚪 Cerrar sesión
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </nav>
       
-      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '1.5rem 1rem' }}>
         {children}
       </main>
     </div>
