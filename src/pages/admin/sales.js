@@ -489,7 +489,7 @@ const [filterMonth, setFilterMonth] = useState(currentMonth);
                         ))}
                       </div>
                     ) : (
-                      <span style={{ color: '#fff', fontSize: '0.75rem' }}>{sale.productName || '—'}</span>
+                      <span style={{ color: '#fff', fontSize: '0.75rem' }} title={sale.productName}>{sale.productName || '—'}</span>
                     )}
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem', display: isMobile ? 'none' : 'table-cell' }}>
