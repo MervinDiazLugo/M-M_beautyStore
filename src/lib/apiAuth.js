@@ -4,7 +4,6 @@ export function validateApiKey(req, res) {
   const apiKey = req.headers['x-api-key'];
   
   if (!apiKey) {
-    if (API_KEYS.length === 0) return true;
     res.status(401).json({ error: 'API key required' });
     return false;
   }
