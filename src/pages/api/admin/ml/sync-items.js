@@ -40,7 +40,7 @@ function sanitizeString(str) {
 }
 
 async function fetchProduct(itemId, token) {
-  const ATTRIBUTES = 'id,title,price,original_price,condition,permalink,thumbnail,pictures,shipping,attributes,sold_quantity,available_quantity,status';
+  const ATTRIBUTES = 'id,title,price,permalink,thumbnail,pictures';
   const url = `${ML_API_URL}/items/${itemId}?attributes=${ATTRIBUTES}`;
 
   const data = await fetchAsJson(url, {
@@ -74,9 +74,6 @@ async function fetchProduct(itemId, token) {
     image: images,
     permalink: data.permalink || `https://articulo.mercadolibre.com.ar/${itemId}`,
     ml_price: mlPrice,
-    sold_quantity: data.sold_quantity || 0,
-    available_quantity: data.available_quantity || 0,
-    status: data.status || 'active',
   };
 }
 
