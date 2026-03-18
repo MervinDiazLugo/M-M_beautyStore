@@ -13,7 +13,7 @@ function findMatchingProduct(productTitle, products) {
   // Direct match
   for (const p of products) {
     if (p.name && titleLower.includes(p.name.toLowerCase())) {
-      return p.id;
+      return p;
     }
   }
   
@@ -22,7 +22,7 @@ function findMatchingProduct(productTitle, products) {
   for (const word of words) {
     for (const p of products) {
       if (p.name && p.name.toLowerCase().includes(word)) {
-        return p.id;
+        return p;
       }
     }
   }
@@ -39,8 +39,8 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'orders es requerido', received: typeof orders });
       }
 
-      // Get all products
-      const { data: products } = await supabaseAdmin.from('products').select('id, name');
+      // Get all products with costs
+      const { data: products } = await supabaseAdmin.from('products').select('id, name, cost, packaging_cost');
 
       let imported = 0;
       let skipped = 0;
@@ -65,22 +65,26 @@ export default async function handler(req, res) {
           continue;
         }
 
-        const totalAmount = order.total_amount || 0;
-        const mlFees = totalAmount * 0.34;
-        const netReceived = totalAmount - mlFees;
-        const profit = netReceived - 1000;
-
         const orderItem = order.order_items?.[0];
         const quantity = orderItem?.quantity || 1;
         const productTitle = orderItem?.item?.title || '';
         const saleDate = order.date_created || null;
 
         // Try to match product
-        const matchedProductId = findMatchingProduct(productTitle, products);
-        if (matchedProductId) matched++;
+        const matchedProduct = findMatchingProduct(productTitle, products);
+        const matchedProductId = matchedProduct?.id || 'unknown';
+        const productCost = matchedProduct?.cost || 0;
+        const packagingCost = matchedProduct?.packaging_cost || 1000;
+        
+        if (matchedProduct) matched++;
+
+        const totalAmount = order.total_amount || 0;
+        const mlFees = totalAmount * 0.34;
+        const netReceived = totalAmount - mlFees;
+        const profit = netReceived - productCost - packagingCost;
 
         await supabaseAdmin.from('sales').insert({
-          product_id: matchedProductId || 'unknown',
+          product_id: matchedProductId,
           sale_price: totalAmount,
           quantity,
           ml_order_id: order.id.toString(),
@@ -88,6 +92,7 @@ export default async function handler(req, res) {
           net_received: netReceived,
           profit: profit,
           sale_date: saleDate,
+          product_cost: productCost,
         });
 
         imported++;
