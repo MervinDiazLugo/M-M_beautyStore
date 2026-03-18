@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from './layout';
+import { adminFetch } from '../../lib/adminApi';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -17,8 +18,8 @@ export default function Dashboard() {
 
   async function loadStats() {
     const [productsRes, salesRes] = await Promise.all([
-      fetch('/api/admin/products').then(r => r.json()),
-      fetch('/api/admin/sales').then(r => r.json()),
+      adminFetch('/api/admin/products').then(r => r.json()),
+      adminFetch('/api/admin/sales').then(r => r.json()),
     ]);
 
     const products = productsRes || [];
