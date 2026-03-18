@@ -277,7 +277,7 @@ export default function Products() {
                   <td style={{ padding: '0.75rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       {product.image && Array.isArray(product.image) && product.image[0] && <img src={product.image[0]} alt="" style={{ width: '32px', height: '32px', borderRadius: '0.375rem', objectFit: 'cover' }} />}
-                      <span style={{ color: '#fff', fontWeight: '500', fontSize: '0.8rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</span>
+                      <span style={{ color: '#fff', fontWeight: '500', fontSize: '0.8rem' }} title={product.name}>{product.name}</span>
                     </div>
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem' }}>${salePrice.toLocaleString('es-AR')}</td>
