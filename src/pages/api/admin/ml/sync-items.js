@@ -6,6 +6,49 @@ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseAdmin = createClient(supabaseUrl, serviceKey);
 
 const ML_API_URL = 'https://api.mercadolibre.com';
+const CLIENT_ID = process.env.MERCADOLIBRE_CLIENT_ID;
+const CLIENT_SECRET = process.env.MERCADOLIBRE_CLIENT_SECRET;
+
+async function refreshToken() {
+  const { data: refreshTokenData } = await supabaseAdmin
+    .from('settings')
+    .select('value')
+    .eq('key', 'ml_refresh_token')
+    .single();
+
+  const refreshToken = refreshTokenData?.value;
+  if (!refreshToken) return false;
+
+  try {
+    const tokenRes = await fetch('https://api.mercadolibre.com/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        refresh_token: refreshToken,
+      }),
+    });
+
+    if (!tokenRes.ok) return false;
+    const tokenData = await tokenRes.json();
+
+    await supabaseAdmin
+      .from('settings')
+      .upsert({ key: 'ml_access_token', value: tokenData.access_token }, { onConflict: 'key' });
+
+    if (tokenData.refresh_token) {
+      await supabaseAdmin
+        .from('settings')
+        .upsert({ key: 'ml_refresh_token', value: tokenData.refresh_token }, { onConflict: 'key' });
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 async function getAccessToken() {
   const { data } = await supabaseAdmin
@@ -137,6 +180,7 @@ export default async function handler(req, res) {
   if (!validateApiKey(req, res)) return;
 
   try {
+    await refreshToken();
     const token = await getAccessToken();
     if (!token) {
       return res.status(401).json({ error: 'No connected to MercadoLibre' });
