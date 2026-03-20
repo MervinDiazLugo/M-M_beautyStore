@@ -75,19 +75,30 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { data: product } = await supabaseAdmin
+    let product;
+    let mlItemId;
+
+    const { data: byMlId } = await supabaseAdmin
       .from('products')
       .select('*')
-      .eq('id', id)
+      .eq('ml_item_id', id)
       .single();
+    
+    if (byMlId) {
+      product = byMlId;
+      mlItemId = byMlId.ml_item_id;
+    } else {
+      const { data: byId } = await supabaseAdmin
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+      product = byId;
+      mlItemId = byId?.ml_item_id || id;
+    }
 
     if (!product) {
       return res.status(404).json({ error: 'Producto no encontrado' });
-    }
-
-    const mlItemId = product.ml_item_id;
-    if (!mlItemId) {
-      return res.status(400).json({ error: 'Este producto no tiene ID de MercadoLibre. Sincronizá primero desde ML.' });
     }
 
     await supabaseAdmin
