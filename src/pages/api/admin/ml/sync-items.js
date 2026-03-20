@@ -168,6 +168,7 @@ async function fetchProduct(itemId, token) {
     available_quantity: data.available_quantity || 0,
     published,
     permalink,
+    ml_item_id: itemId,
   };
 }
 

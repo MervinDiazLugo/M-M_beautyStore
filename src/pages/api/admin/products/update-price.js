@@ -85,6 +85,11 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Producto no encontrado' });
     }
 
+    const mlItemId = product.ml_item_id;
+    if (!mlItemId) {
+      return res.status(400).json({ error: 'Este producto no tiene ID de MercadoLibre. Sincronizá primero desde ML.' });
+    }
+
     await supabaseAdmin
       .from('products')
       .update({ price: parseInt(price) })
@@ -96,7 +101,7 @@ export default async function handler(req, res) {
       const token = await getAccessToken();
 
       if (token) {
-        const mlRes = await fetch(`${ML_API_URL}/items/${id}`, {
+        const mlRes = await fetch(`${ML_API_URL}/items/${mlItemId}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
