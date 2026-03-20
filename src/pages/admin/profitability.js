@@ -14,8 +14,14 @@ export default function Profitability() {
   const [newPrice, setNewPrice] = useState('');
   const [updateMl, setUpdateMl] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const MIN_MARGIN = 0.20;
+
+  function showToast(message, type = 'success') {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 10000);
+  }
 
   function calculateSuggestedPrice(cost, packaging, targetMargin = MIN_MARGIN) {
     return Math.round((cost + packaging) / (1 - 0.34 - targetMargin));
@@ -87,22 +93,22 @@ export default function Profitability() {
           updateMl,
         }),
       });
-      const data = await res.json();
-      if (data.success) {
-        if (data.mlUpdated) {
-          alert(`Precio actualizado a $${data.updatedPrice.toLocaleString('es-AR')} en BD y MercadoLibre`);
+      const result = await res.json();
+      if (result.success) {
+        if (result.mlUpdated) {
+          showToast(`Precio actualizado a $${result.updatedPrice.toLocaleString('es-AR')} en BD y MercadoLibre`);
         } else if (updateMl) {
-          alert(`Precio actualizado a $${data.updatedPrice.toLocaleString('es-AR')} en BD (ML no pudo ser actualizado)`);
+          showToast(`Precio actualizado a $${result.updatedPrice.toLocaleString('es-AR')} en BD (ML no pudo ser actualizado)`, 'warning');
         } else {
-          alert(`Precio actualizado a $${data.updatedPrice.toLocaleString('es-AR')} en BD`);
+          showToast(`Precio actualizado a $${result.updatedPrice.toLocaleString('es-AR')} en BD`);
         }
         setUpdateModal(null);
         loadData();
       } else {
-        alert('Error: ' + (data.error || 'Unknown error'));
+        showToast('Error: ' + (result.error || 'Unknown error'), 'error');
       }
     } catch (err) {
-      alert('Error al actualizar: ' + err.message);
+      showToast('Error al actualizar: ' + err.message, 'error');
     }
     setUpdating(false);
   }
@@ -407,6 +413,32 @@ export default function Profitability() {
           </div>
         </div>
       )}
+
+      {toast && (
+        <div style={{
+          position: 'fixed',
+          bottom: '2rem',
+          right: '2rem',
+          padding: '1rem 1.5rem',
+          borderRadius: '0.75rem',
+          backgroundColor: toast.type === 'error' ? '#ef4444' : toast.type === 'warning' ? '#f59e0b' : '#10b981',
+          color: '#fff',
+          fontWeight: '600',
+          fontSize: '0.875rem',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+          zIndex: 9999,
+          animation: 'slideIn 0.3s ease-out',
+        }}>
+          {toast.message}
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `}</style>
     </AdminLayout>
   );
 }
