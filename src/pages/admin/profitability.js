@@ -231,19 +231,35 @@ export default function Profitability() {
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
           <thead>
             <tr style={{ backgroundColor: '#161625' }}>
-              <th style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase' }}>Producto</th>
-              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Ventas</th>
-              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Ingresos</th>
-              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Comisión ML</th>
-              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Costos</th>
-              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Ganancia</th>
-              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Margen</th>
-              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Precio Sug.</th>
+              <th onClick={() => handleSort('title')} style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }}>
+                Producto {sortConfig.key === 'title' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th onClick={() => handleSort('sales')} style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
+                Ventas {sortConfig.key === 'sales' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th onClick={() => handleSort('revenue')} style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
+                Ingresos {sortConfig.key === 'revenue' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                Comisión ML
+              </th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                Costos
+              </th>
+              <th onClick={() => handleSort('profit')} style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
+                Ganancia {sortConfig.key === 'profit' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th onClick={() => handleSort('margin')} style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
+                Margen {sortConfig.key === 'margin' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
+              </th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                Precio Sug.
+              </th>
               <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}></th>
             </tr>
           </thead>
           <tbody>
-            {profitability.map((item) => {
+            {sortedProducts.map((item) => {
               const margin = item.margin || 0;
               const marginColor = margin < 0 ? '#ef4444' : margin < 20 ? '#f59e0b' : '#10b981';
               const marginBg = margin < 0 ? '#ef444420' : margin < 20 ? '#f59e0b20' : '#10b98120';
