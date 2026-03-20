@@ -104,9 +104,10 @@ export default async function handler(req, res) {
     await supabaseAdmin
       .from('products')
       .update({ price: parseInt(price) })
-      .eq('id', id);
+      .eq('id', product.id);
 
     let mlUpdated = false;
+    let mlError = null;
     if (updateMl) {
       await refreshToken();
       const token = await getAccessToken();
@@ -122,10 +123,13 @@ export default async function handler(req, res) {
           body: JSON.stringify({ price: parseInt(price) }),
         });
 
-        console.log('ML response:', mlRes.status, await mlRes.text());
+        const responseText = await mlRes.text();
+        console.log('ML response:', mlRes.status, responseText);
 
         if (mlRes.ok) {
           mlUpdated = true;
+        } else {
+          mlError = { status: mlRes.status, body: responseText };
         }
       }
     }
@@ -134,6 +138,7 @@ export default async function handler(req, res) {
       success: true,
       updatedPrice: parseInt(price),
       mlUpdated,
+      mlError,
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
