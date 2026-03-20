@@ -113,14 +113,15 @@ export default async function handler(req, res) {
       const token = await getAccessToken();
 
       if (token) {
-        console.log('Updating ML price:', { mlItemId, price });
+        const mlPrice = Math.round((parseInt(price) + 600) / 0.945);
+        console.log('Updating ML price:', { mlItemId, storePrice: price, mlPrice });
         const mlRes = await fetch(`${ML_API_URL}/items/${mlItemId}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ price: parseInt(price) }),
+          body: JSON.stringify({ price: mlPrice }),
         });
 
         const responseText = await mlRes.text();
