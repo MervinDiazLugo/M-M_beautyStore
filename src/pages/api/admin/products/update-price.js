@@ -101,20 +101,21 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Producto no encontrado' });
     }
 
-    await supabaseAdmin
-      .from('products')
-      .update({ price: parseInt(price) })
-      .eq('id', product.id);
-
     let mlUpdated = false;
     let mlError = null;
+    let finalStorePrice = parseInt(price);
+
     if (updateMl) {
       await refreshToken();
       const token = await getAccessToken();
 
       if (token) {
-        const mlPrice = Math.round((parseInt(price) + 600) / 0.945);
-        console.log('Updating ML price:', { mlItemId, storePrice: price, mlPrice });
+        const mlPrice = parseInt(price);
+        const storePrice = Math.round(mlPrice * 0.9);
+        finalStorePrice = storePrice;
+
+        console.log('Updating prices:', { mlItemId, mlPrice, storePrice });
+
         const mlRes = await fetch(`${ML_API_URL}/items/${mlItemId}`, {
           method: 'PUT',
           headers: {
@@ -129,15 +130,27 @@ export default async function handler(req, res) {
 
         if (mlRes.ok) {
           mlUpdated = true;
+          await supabaseAdmin
+            .from('products')
+            .update({ 
+              price: storePrice,
+              ml_price: mlPrice
+            })
+            .eq('id', product.id);
         } else {
           mlError = { status: mlRes.status, body: responseText };
         }
       }
+    } else {
+      await supabaseAdmin
+        .from('products')
+        .update({ price: parseInt(price) })
+        .eq('id', product.id);
     }
 
     return res.status(200).json({
       success: true,
-      updatedPrice: parseInt(price),
+      updatedPrice: finalStorePrice,
       mlUpdated,
       mlError,
     });
