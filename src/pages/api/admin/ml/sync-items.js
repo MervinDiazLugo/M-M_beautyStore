@@ -231,13 +231,22 @@ export default async function handler(req, res) {
         batch.map(async (itemId) => {
           const product = await fetchProduct(itemId, token);
 
-          const { data: existing } = await supabaseAdmin
+          const { data: existingByMlId } = await supabaseAdmin
             .from('products')
-            .select('cost, packaging_cost, instagram_reel')
+            .select('id, cost, packaging_cost, instagram_reel')
+            .eq('ml_item_id', itemId)
+            .single();
+
+          const { data: existingById } = await supabaseAdmin
+            .from('products')
+            .select('id, cost, packaging_cost, instagram_reel')
             .eq('id', itemId)
             .single();
 
+          const existing = existingByMlId || existingById;
+
           if (existing) {
+            product.id = existing.id;
             product.cost = existing.cost;
             product.packaging_cost = existing.packaging_cost;
             if (existing.instagram_reel) product.instagram_reel = existing.instagram_reel;
