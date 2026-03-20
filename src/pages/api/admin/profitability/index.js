@@ -82,7 +82,9 @@ function calculateProfitability(products, sales) {
         totalCosts: 0,
         mlFeesTotal: 0,
         costs: 0, 
-        profit: 0 
+        profit: 0,
+        cost: product?.cost || 0,
+        packaging: product?.packaging_cost || DEFAULT_PACKAGING_COST,
       };
     }
     

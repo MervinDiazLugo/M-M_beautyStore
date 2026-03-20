@@ -17,8 +17,14 @@ export default function Profitability() {
   const MIN_MARGIN = 0.20;
   const TARGET_NET = 1 - MIN_MARGIN - 0.34;
 
-  function calculateSuggestedPrice(cost, packaging) {
-    return Math.round((cost + packaging) / TARGET_NET);
+  function calculateSuggestedPrice(cost, packaging, targetMargin = MIN_MARGIN) {
+    const netAfterFee = 1 - 0.34;
+    const margin = netAfterFee - targetMargin;
+    return Math.round((cost + packaging) / margin);
+  }
+
+  function calculateMinimumPrice(cost, packaging) {
+    return Math.round((cost + packaging) / (1 - 0.34));
   }
 
   useEffect(() => {
@@ -263,6 +269,8 @@ export default function Profitability() {
               const margin = item.margin || 0;
               const marginColor = margin < 0 ? '#ef4444' : margin < 20 ? '#f59e0b' : '#10b981';
               const marginBg = margin < 0 ? '#ef444420' : margin < 20 ? '#f59e0b20' : '#10b98120';
+              const minPrice = calculateMinimumPrice(item.cost || 0, item.packaging || 1000);
+              const suggestedPrice = calculateSuggestedPrice(item.cost || 0, item.packaging || 1000);
               return (
                 <tr key={item.id} style={{ borderTop: '1px solid #2a2a3e' }}>
                   <td style={{ padding: '0.75rem', color: '#fff', fontWeight: '500', fontSize: '0.8rem', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.title}>{item.title}</td>
@@ -276,8 +284,8 @@ export default function Profitability() {
                       {margin.toFixed(1)}%
                     </span>
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#22d3ee', fontSize: '0.75rem' }}>
-                    {margin < 20 ? '$—' : '—'}
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: margin < 20 ? '#22d3ee' : '#71717a', fontSize: '0.75rem' }}>
+                    {margin < 20 ? `$${suggestedPrice.toLocaleString('es-AR')}` : '—'}
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'center' }}>
                     <button 
