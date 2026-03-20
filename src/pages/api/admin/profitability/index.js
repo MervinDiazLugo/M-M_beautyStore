@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     const { timeFilter, year, month } = req.query;
     
     const [productsRes, salesRes] = await Promise.all([
-      supabase.from('products').select('id, name, price, cost, packaging_cost'),
+      supabase.from('products').select('id, name, price, cost, packaging_cost, mercado_libre_url'),
       supabase.from('sales').select('*').order('created_at', { ascending: false }),
     ]);
 
@@ -85,6 +85,7 @@ function calculateProfitability(products, sales) {
         profit: 0,
         cost: product?.cost || 0,
         packaging: product?.packaging_cost || DEFAULT_PACKAGING_COST,
+        mercado_libre_url: product?.mercado_libre_url || null,
       };
     }
     

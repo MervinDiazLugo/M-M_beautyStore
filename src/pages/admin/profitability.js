@@ -12,6 +12,7 @@ export default function Profitability() {
   const [isMobile, setIsMobile] = useState(false);
   const [updateModal, setUpdateModal] = useState(null);
   const [newPrice, setNewPrice] = useState('');
+  const [updateMl, setUpdateMl] = useState(true);
   const [updating, setUpdating] = useState(false);
 
   const MIN_MARGIN = 0.20;
@@ -80,13 +81,29 @@ export default function Profitability() {
     if (!updateModal || !newPrice) return;
     setUpdating(true);
     try {
-      await adminFetch(`/api/admin/products/${updateModal.id}`, {
-        method: 'PUT',
+      const res = await adminFetch('/api/admin/products/update-price', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ price: parseInt(newPrice) }),
+        body: JSON.stringify({
+          id: updateModal.id,
+          price: parseInt(newPrice),
+          updateMl,
+        }),
       });
-      setUpdateModal(null);
-      loadData();
+      const data = await res.json();
+      if (data.success) {
+        if (data.mlUpdated) {
+          alert(`Precio actualizado a $${data.updatedPrice.toLocaleString('es-AR')} en BD y MercadoLibre`);
+        } else if (updateMl) {
+          alert(`Precio actualizado a $${data.updatedPrice.toLocaleString('es-AR')} en BD (ML no pudo ser actualizado)`);
+        } else {
+          alert(`Precio actualizado a $${data.updatedPrice.toLocaleString('es-AR')} en BD`);
+        }
+        setUpdateModal(null);
+        loadData();
+      } else {
+        alert('Error: ' + (data.error || 'Unknown error'));
+      }
     } catch (err) {
       alert('Error al actualizar: ' + err.message);
     }
@@ -261,6 +278,7 @@ export default function Profitability() {
               <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 Precio Sug.
               </th>
+              <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Links</th>
               <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}></th>
             </tr>
           </thead>
@@ -286,6 +304,18 @@ export default function Profitability() {
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'right', color: margin < 20 ? '#22d3ee' : '#71717a', fontSize: '0.75rem' }}>
                     {margin < 20 ? `$${suggestedPrice.toLocaleString('es-AR')}` : '—'}
+                  </td>
+                  <td style={{ padding: '0.75rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    {item.mercado_libre_url ? (
+                      <a href={item.mercado_libre_url} target="_blank" rel="noopener noreferrer" title="Ver en MercadoLibre" style={{ color: '#f59e0b', marginRight: '0.5rem' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                      </a>
+                    ) : (
+                      <span style={{ color: '#3f3f5a', marginRight: '0.5rem' }}>—</span>
+                    )}
+                    <a href={`/product/${item.id}`} target="_blank" rel="noopener noreferrer" title="Ver en tienda" style={{ color: '#f472b6' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </a>
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'center' }}>
                     <button 
@@ -347,6 +377,19 @@ export default function Profitability() {
                 onChange={(e) => setNewPrice(e.target.value)}
                 style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '1rem' }}
               />
+            </div>
+
+            <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input 
+                type="checkbox" 
+                id="updateMl"
+                checked={updateMl}
+                onChange={(e) => setUpdateMl(e.target.checked)}
+                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+              />
+              <label htmlFor="updateMl" style={{ fontSize: '0.875rem', color: '#a1a1aa', cursor: 'pointer' }}>
+                Actualizar también en MercadoLibre
+              </label>
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem' }}>
