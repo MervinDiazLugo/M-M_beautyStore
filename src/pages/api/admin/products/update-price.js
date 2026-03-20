@@ -101,6 +101,7 @@ export default async function handler(req, res) {
       const token = await getAccessToken();
 
       if (token) {
+        console.log('Updating ML price:', { mlItemId, price });
         const mlRes = await fetch(`${ML_API_URL}/items/${mlItemId}`, {
           method: 'PUT',
           headers: {
@@ -109,6 +110,8 @@ export default async function handler(req, res) {
           },
           body: JSON.stringify({ price: parseInt(price) }),
         });
+
+        console.log('ML response:', mlRes.status, await mlRes.text());
 
         if (mlRes.ok) {
           mlUpdated = true;
