@@ -20,11 +20,12 @@ export default async function handler(req, res) {
   }
 
   if (method === 'PUT' || method === 'PATCH') {
-    const { cost, packaging_cost } = req.body;
+    const { cost, packaging_cost, price } = req.body;
     const updates = {};
     
     if (cost !== undefined) updates.cost = cost;
     if (packaging_cost !== undefined) updates.packaging_cost = packaging_cost;
+    if (price !== undefined) updates.price = price;
 
     const { data, error } = await supabase
       .from('products')

@@ -10,6 +10,16 @@ export default function Profitability() {
   const [filterMonth, setFilterMonth] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'profit', dir: 'desc' });
   const [isMobile, setIsMobile] = useState(false);
+  const [updateModal, setUpdateModal] = useState(null);
+  const [newPrice, setNewPrice] = useState('');
+  const [updating, setUpdating] = useState(false);
+
+  const MIN_MARGIN = 0.20;
+  const TARGET_NET = 1 - MIN_MARGIN - 0.34;
+
+  function calculateSuggestedPrice(cost, packaging) {
+    return Math.round((cost + packaging) / TARGET_NET);
+  }
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -41,6 +51,40 @@ export default function Profitability() {
     const result = await res.json();
     setData(result || { summary: {}, products: [] });
     setLoading(false);
+  }
+
+  async function loadProductDetails(productId) {
+    const res = await adminFetch(`/api/admin/products/${productId}`);
+    const product = await res.json();
+    if (product) {
+      const suggestedPrice = calculateSuggestedPrice(product.cost || 0, product.packaging_cost || 1000);
+      setUpdateModal({
+        id: product.id,
+        name: product.name,
+        currentPrice: product.price,
+        cost: product.cost,
+        packaging: product.packaging_cost || 1000,
+        suggestedPrice,
+      });
+      setNewPrice(suggestedPrice.toString());
+    }
+  }
+
+  async function applyPriceUpdate() {
+    if (!updateModal || !newPrice) return;
+    setUpdating(true);
+    try {
+      await adminFetch(`/api/admin/products/${updateModal.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ price: parseInt(newPrice) }),
+      });
+      setUpdateModal(null);
+      loadData();
+    } catch (err) {
+      alert('Error al actualizar: ' + err.message);
+    }
+    setUpdating(false);
   }
 
   const { summary = {}, products: profitability = [] } = data;
@@ -184,40 +228,121 @@ export default function Profitability() {
       </div>
 
       <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', border: '1px solid #2a2a3e', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
           <thead>
             <tr style={{ backgroundColor: '#161625' }}>
-              <th style={{ padding: '1rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Producto</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Ventas</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Ingresos</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Comisión ML</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Costos</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Ganancia</th>
-              <th style={{ padding: '1rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase' }}>Margen</th>
+              <th style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase' }}>Producto</th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Ventas</th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Ingresos</th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Comisión ML</th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Costos</th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Ganancia</th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Margen</th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Precio Sug.</th>
+              <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}></th>
             </tr>
           </thead>
           <tbody>
-            {profitability.map((item) => (
-              <tr key={item.id} style={{ borderTop: '1px solid #2a2a3e' }}>
-                <td style={{ padding: '1rem', color: '#fff', fontWeight: '500' }}>{item.title}</td>
-                <td style={{ padding: '1rem', textAlign: 'right', color: '#a1a1aa' }}>{item.sales}</td>
-                <td style={{ padding: '1rem', textAlign: 'right', color: '#fff' }}>${item.revenue.toLocaleString('es-AR')}</td>
-                <td style={{ padding: '1rem', textAlign: 'right', color: '#f59e0b' }}>-${(item.mlFeesTotal || 0).toLocaleString('es-AR')}</td>
-                <td style={{ padding: '1rem', textAlign: 'right', color: '#ef4444' }}>-${item.costs.toLocaleString('es-AR')}</td>
-                <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: item.profit >= 0 ? '#10b981' : '#ef4444' }}>${item.profit.toLocaleString('es-AR')}</td>
-                <td style={{ padding: '1rem', textAlign: 'right' }}>
-                  <span style={{ padding: '0.25rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.75rem', fontWeight: '600', backgroundColor: item.margin >= 0 ? '#10b98120' : '#ef444420', color: item.margin >= 0 ? '#10b981' : '#ef4444' }}>
-                    {item.margin.toFixed(1)}%
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {profitability.map((item) => {
+              const margin = item.margin || 0;
+              const marginColor = margin < 0 ? '#ef4444' : margin < 20 ? '#f59e0b' : '#10b981';
+              const marginBg = margin < 0 ? '#ef444420' : margin < 20 ? '#f59e0b20' : '#10b98120';
+              return (
+                <tr key={item.id} style={{ borderTop: '1px solid #2a2a3e' }}>
+                  <td style={{ padding: '0.75rem', color: '#fff', fontWeight: '500', fontSize: '0.8rem', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.title}>{item.title}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem' }}>{item.sales}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#fff', fontSize: '0.75rem' }}>${item.revenue.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#f59e0b', fontSize: '0.75rem' }}>-${(item.mlFeesTotal || 0).toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#ef4444', fontSize: '0.75rem' }}>-${item.costs.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: item.profit >= 0 ? '#10b981' : '#ef4444', fontSize: '0.75rem' }}>${item.profit.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                    <span style={{ padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.7rem', fontWeight: '600', backgroundColor: marginBg, color: marginColor }}>
+                      {margin.toFixed(1)}%
+                    </span>
+                  </td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#22d3ee', fontSize: '0.75rem' }}>
+                    {margin < 20 ? '$—' : '—'}
+                  </td>
+                  <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                    <button 
+                      onClick={() => loadProductDetails(item.id)}
+                      style={{ 
+                        padding: '0.25rem 0.5rem', 
+                        backgroundColor: '#f472b6', 
+                        color: '#fff', 
+                        border: 'none', 
+                        borderRadius: '0.25rem', 
+                        cursor: 'pointer',
+                        fontSize: '0.7rem',
+                        fontWeight: '500',
+                      }}
+                    >
+                      {margin < 20 ? 'Ajustar' : 'Ver'}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         {profitability.length === 0 && (
           <div style={{ padding: '3rem', textAlign: 'center', color: '#71717a' }}>No hay datos de rentabilidad</div>
         )}
       </div>
+
+      {updateModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #2a2a3e', width: '400px', maxWidth: '90%' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#fff', marginBottom: '1rem' }}>Actualizar Precio</h2>
+            <p style={{ color: '#a1a1aa', fontSize: '0.875rem', marginBottom: '1rem', wordBreak: 'break-word' }}>{updateModal.name}</p>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ backgroundColor: '#161625', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                <div style={{ fontSize: '0.7rem', color: '#71717a' }}>Precio Actual</div>
+                <div style={{ fontSize: '1rem', color: '#fff', fontWeight: '600' }}>${(updateModal.currentPrice || 0).toLocaleString('es-AR')}</div>
+              </div>
+              <div style={{ backgroundColor: '#161625', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                <div style={{ fontSize: '0.7rem', color: '#71717a' }}>Precio Sugerido</div>
+                <div style={{ fontSize: '1rem', color: '#22d3ee', fontWeight: '600' }}>${updateModal.suggestedPrice.toLocaleString('es-AR')}</div>
+              </div>
+              <div style={{ backgroundColor: '#161625', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                <div style={{ fontSize: '0.7rem', color: '#71717a' }}>Costo</div>
+                <div style={{ fontSize: '1rem', color: '#ef4444' }}>${(updateModal.cost || 0).toLocaleString('es-AR')}</div>
+              </div>
+              <div style={{ backgroundColor: '#161625', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                <div style={{ fontSize: '0.7rem', color: '#71717a' }}>Packaging</div>
+                <div style={{ fontSize: '1rem', color: '#ef4444' }}>${(updateModal.packaging || 0).toLocaleString('es-AR')}</div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#a1a1aa', marginBottom: '0.5rem' }}>Nuevo Precio</label>
+              <input 
+                type="number" 
+                value={newPrice}
+                onChange={(e) => setNewPrice(e.target.value)}
+                style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '1rem' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button 
+                onClick={() => setUpdateModal(null)}
+                style={{ flex: 1, padding: '0.75rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={applyPriceUpdate}
+                disabled={updating}
+                style={{ flex: 1, padding: '0.75rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.5rem', cursor: updating ? 'not-allowed' : 'pointer', fontWeight: '600', opacity: updating ? 0.6 : 1 }}
+              >
+                {updating ? 'Guardando...' : 'Aplicar Precio'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
