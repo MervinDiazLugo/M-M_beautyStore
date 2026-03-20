@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     const { timeFilter, year, month } = req.query;
     
     const [productsRes, salesRes] = await Promise.all([
-      supabase.from('products').select('id, name, price, cost, packaging_cost, mercado_libre_url, ml_item_id'),
+      supabase.from('products').select('id, name, price, ml_price, cost, packaging_cost, mercado_libre_url, ml_item_id'),
       supabase.from('sales').select('*').order('created_at', { ascending: false }),
     ]);
 
@@ -87,6 +87,7 @@ function calculateProfitability(products, sales) {
         packaging: product?.packaging_cost || DEFAULT_PACKAGING_COST,
         mercado_libre_url: product?.mercado_libre_url || null,
         ml_item_id: product?.ml_item_id || null,
+        ml_price: product?.ml_price || 0,
       };
     }
     
@@ -98,6 +99,11 @@ function calculateProfitability(products, sales) {
   });
 
   return Object.values(productStats)
-    .map(p => ({ ...p, margin: p.revenue > 0 ? (p.profit / p.revenue) * 100 : 0 }))
+    .map(p => {
+      const margin = p.revenue > 0 ? (p.profit / p.revenue) * 100 : 0;
+      const projectedProfit = p.ml_price - (p.ml_price * 0.34) - p.cost - p.packaging;
+      const projectedMargin = p.ml_price > 0 ? (projectedProfit / p.ml_price) * 100 : 0;
+      return { ...p, margin, projectedMargin };
+    })
     .sort((a, b) => b.profit - a.profit);
 }

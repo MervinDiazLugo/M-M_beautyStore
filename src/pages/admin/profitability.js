@@ -279,6 +279,9 @@ export default function Profitability() {
                 Margen {sortConfig.key === 'margin' && (sortConfig.dir === 'asc' ? '↑' : '↓')}
               </th>
               <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                Margen Proy.
+              </th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 Precio Sug.
               </th>
               <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Links</th>
@@ -288,9 +291,11 @@ export default function Profitability() {
           <tbody>
             {sortedProducts.map((item) => {
               const margin = item.margin || 0;
+              const projectedMargin = item.projectedMargin || 0;
               const marginColor = margin < 0 ? '#ef4444' : margin < 20 ? '#f59e0b' : '#10b981';
               const marginBg = margin < 0 ? '#ef444420' : margin < 20 ? '#f59e0b20' : '#10b98120';
-              const minPrice = calculateMinimumPrice(item.cost || 0, item.packaging || 1000);
+              const projectedMarginColor = projectedMargin < 0 ? '#ef4444' : projectedMargin < 20 ? '#f59e0b' : '#10b981';
+              const projectedMarginBg = projectedMargin < 0 ? '#ef444420' : projectedMargin < 20 ? '#f59e0b20' : '#10b98120';
               const suggestedPrice = calculateSuggestedPrice(item.cost || 0, item.packaging || 1000);
               return (
                 <tr key={item.id} style={{ borderTop: '1px solid #2a2a3e' }}>
@@ -303,6 +308,11 @@ export default function Profitability() {
                   <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                     <span style={{ padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.7rem', fontWeight: '600', backgroundColor: marginBg, color: marginColor }}>
                       {margin.toFixed(1)}%
+                    </span>
+                  </td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                    <span style={{ padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.7rem', fontWeight: '600', backgroundColor: projectedMarginBg, color: projectedMarginColor }}>
+                      {projectedMargin.toFixed(1)}%
                     </span>
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'right', color: margin < 20 ? '#22d3ee' : '#71717a', fontSize: '0.75rem' }}>
