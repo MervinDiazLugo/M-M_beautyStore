@@ -109,10 +109,10 @@ export default function Products() {
       bVal = b.cost || 0;
     } else if (sortField === 'profit') {
       const getProfit = (p) => {
-        const salePrice = p.price || 0;
+        const mlPrice = p.ml_price || 0;
         const cost = p.cost || 0;
         const packaging = p.packaging_cost || 1000;
-        return salePrice - (salePrice * 0.34) - cost - packaging;
+        return mlPrice - (mlPrice * 0.34) - cost - packaging;
       };
       aVal = getProfit(a);
       bVal = getProfit(b);
@@ -240,8 +240,11 @@ export default function Products() {
               <th onClick={() => handleSort('name')} style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
                 Producto {sortField === 'name' && (sortDir === 'asc' ? '↑' : '↓')}
               </th>
-              <th onClick={() => handleSort('price')} style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
-                Venta {sortField === 'price' && (sortDir === 'asc' ? '↑' : '↓')}
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#f59e0b', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                Precio ML
+              </th>
+              <th style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                Precio Tienda
               </th>
               <th style={{ padding: '0.75rem', textAlign: 'right', color: '#f59e0b', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 ML Fee
@@ -264,11 +267,12 @@ export default function Products() {
           </thead>
           <tbody>
             {filteredProducts.map((product, index) => {
-              const salePrice = product.price || 0;
+              const mlPrice = product.ml_price || 0;
+              const storePrice = product.price || 0;
               const cost = product.cost || 0;
               const packaging = product.packaging_cost || 1000;
-              const mlFee = salePrice * 0.34;
-              const netReceived = salePrice - mlFee;
+              const mlFee = mlPrice * 0.34;
+              const netReceived = mlPrice - mlFee;
               const profit = netReceived - cost - packaging;
 
               return (
@@ -280,7 +284,8 @@ export default function Products() {
                       <span style={{ color: '#fff', fontWeight: '500', fontSize: '0.8rem' }} title={product.name}>{product.name}</span>
                     </div>
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem' }}>${salePrice.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#f59e0b', fontSize: '0.75rem', fontWeight: '600' }}>${mlPrice.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem' }}>${storePrice.toLocaleString('es-AR')}</td>
                   <td style={{ padding: '0.75rem', textAlign: 'right', color: '#f59e0b', fontSize: '0.75rem' }}>-${mlFee.toLocaleString('es-AR')}</td>
                   <td style={{ padding: '0.75rem', textAlign: 'right', color: '#22d3ee', fontSize: '0.75rem' }}>${netReceived.toLocaleString('es-AR')}</td>
                   <td style={{ padding: '0.75rem', textAlign: 'right' }}>
