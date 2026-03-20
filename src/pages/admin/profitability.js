@@ -16,16 +16,13 @@ export default function Profitability() {
   const [updating, setUpdating] = useState(false);
 
   const MIN_MARGIN = 0.20;
-  const TARGET_NET = 1 - MIN_MARGIN - 0.34;
 
   function calculateSuggestedPrice(cost, packaging, targetMargin = MIN_MARGIN) {
-    const netAfterFee = 1 - 0.34;
-    const margin = netAfterFee - targetMargin;
-    return Math.round((cost + packaging) / margin);
+    return Math.round((cost + packaging) / (1 - 0.34 - targetMargin));
   }
 
   function calculateMinimumPrice(cost, packaging) {
-    return Math.round((cost + packaging) / (1 - 0.34));
+    return Math.round((cost + packaging) / 0.66);
   }
 
   useEffect(() => {
