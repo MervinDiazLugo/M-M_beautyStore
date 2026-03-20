@@ -65,7 +65,7 @@ export default function Profitability() {
       setUpdateModal({
         id: product.id,
         name: product.name,
-        currentPrice: product.price,
+        currentPrice: product.ml_price || product.price,
         cost: product.cost,
         packaging: product.packaging_cost || 1000,
         suggestedPrice,
