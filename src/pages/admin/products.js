@@ -51,16 +51,49 @@ export default function Products() {
     setSyncing(false);
   }
 
-  async function saveCost(productId) {
+  async function saveCost(product) {
     setSaving(true);
-    await adminFetch(`/api/admin/products/${productId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        cost: parseFloat(editForm.cost) || 0,
-        packaging_cost: parseFloat(editForm.packaging_cost) || 1000,
-      }),
-    });
+    
+    const updates = {
+      cost: parseFloat(editForm.cost) || 0,
+      packaging_cost: parseFloat(editForm.packaging_cost) || 1000,
+    };
+    
+    if (editForm.ml_price && product.ml_item_id) {
+      const newMlPrice = parseInt(editForm.ml_price);
+      const newStorePrice = Math.round(newMlPrice * 0.9);
+      
+      try {
+        const mlRes = await adminFetch('/api/admin/products/ml-action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'updatePrice',
+            productId: product.id,
+            mlItemId: product.ml_item_id,
+            price: newMlPrice,
+          }),
+        });
+        const mlData = await mlRes.json();
+        
+        if (mlData.success) {
+          updates.price = mlData.storePrice;
+          updates.ml_price = mlData.mlPrice;
+          showToast(`Precio actualizado: ML $${mlData.mlPrice?.toLocaleString('es-AR')}, Tienda $${mlData.storePrice?.toLocaleString('es-AR')}`);
+        } else {
+          showToast('Error al actualizar ML: ' + (mlData.error || 'Desconocido'), 'error');
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    } else {
+      await adminFetch(`/api/admin/products/${product.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+    }
+    
     loadProducts();
     setEditingId(null);
     setSaving(false);
@@ -153,6 +186,7 @@ export default function Products() {
     setEditForm({
       cost: product.cost || '',
       packaging_cost: product.packaging_cost || 1000,
+      ml_price: product.ml_price || '',
     });
   }
 
@@ -477,9 +511,29 @@ export default function Products() {
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                     {editingId === product.id ? (
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
-                        <button onClick={() => saveCost(product.id)} disabled={saving} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.7rem' }}>✓</button>
-                        <button onClick={cancelEdit} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.7rem' }}>✕</button>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                        {product.ml_item_id && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <span style={{ fontSize: '0.6rem', color: '#f59e0b' }}>ML $</span>
+                            <input
+                              type="number"
+                              value={editForm.ml_price}
+                              onChange={(e) => {
+                                const newMlPrice = e.target.value;
+                                setEditForm({ ...editForm, ml_price: newMlPrice });
+                              }}
+                              placeholder="ML"
+                              style={{ width: '70px', padding: '0.2rem', borderRadius: '0.25rem', border: '1px solid #f59e0b', backgroundColor: '#161625', color: '#f59e0b', textAlign: 'right', fontSize: '0.7rem' }}
+                            />
+                            {editForm.ml_price && (
+                              <span style={{ fontSize: '0.6rem', color: '#22d3ee' }}>→ ${Math.round(parseInt(editForm.ml_price) * 0.9).toLocaleString('es-AR')}</span>
+                            )}
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', gap: '0.25rem' }}>
+                          <button onClick={() => saveCost(product)} disabled={saving} style={{ padding: '0.2rem 0.4rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.65rem' }}>✓</button>
+                          <button onClick={cancelEdit} style={{ padding: '0.2rem 0.4rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.65rem' }}>✕</button>
+                        </div>
                       </div>
                     ) : (
                       <button onClick={() => startEdit(product)} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontWeight: '500', fontSize: '0.7rem' }}>Editar</button>
