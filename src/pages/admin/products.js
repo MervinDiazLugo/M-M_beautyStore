@@ -8,7 +8,7 @@ export default function Products() {
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ cost: '', packaging_cost: '' });
+  const [editForm, setEditForm] = useState({ cost: '', packaging_cost: '', ml_price: '' });
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -16,8 +16,7 @@ export default function Products() {
   const [sortField, setSortField] = useState('name');
   const [sortDir, setSortDir] = useState('asc');
   const [toast, setToast] = useState(null);
-  const [priceModal, setPriceModal] = useState(null);
-  const [newMlPrice, setNewMlPrice] = useState('');
+  const [confirmModal, setConfirmModal] = useState(null);
 
   function showToast(message, type = 'success') {
     setToast({ message, type });
@@ -112,73 +111,50 @@ export default function Products() {
     loadProducts();
   }
 
-  async function toggleMlStatus(product) {
+  function confirmToggleMlStatus(product) {
     if (!product.ml_item_id) {
       showToast('Este producto no tiene ID de ML. Sincronizá primero.', 'error');
       return;
     }
-    
-    try {
-      const res = await adminFetch('/api/admin/products/ml-action', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'updateStatus',
-          productId: product.id,
-          mlItemId: product.ml_item_id,
-          status: !product.published,
-        }),
-      });
-      const data = await res.json();
-      
-      if (data.success) {
-        showToast(`Producto ${data.mlStatus === 'active' ? 'activado' : 'pausado'} en ML`);
-        loadProducts();
-      } else {
-        showToast('Error: ' + (data.error || 'No se pudo actualizar'), 'error');
-      }
-    } catch (err) {
-      showToast('Error: ' + err.message, 'error');
-    }
-  }
-
-  function openPriceModal(product) {
-    setPriceModal({
-      productId: product.id,
-      mlItemId: product.ml_item_id,
-      name: product.name,
-      currentMlPrice: product.ml_price || 0,
-      currentStorePrice: product.price || 0,
+    setConfirmModal({
+      product,
+      action: 'toggleMl',
+      title: product.published ? 'Pausar en ML' : 'Activar en ML',
+      message: `¿Querés ${product.published ? 'pausar' : 'activar'} "${product.name}" en MercadoLibre?`,
     });
-    setNewMlPrice((product.ml_price || 0).toString());
   }
 
-  async function applyMlPriceUpdate() {
-    if (!priceModal || !newMlPrice) return;
-
-    try {
-      const res = await adminFetch('/api/admin/products/ml-action', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'updatePrice',
-          productId: priceModal.productId,
-          mlItemId: priceModal.mlItemId,
-          price: parseInt(newMlPrice),
-        }),
-      });
-      const data = await res.json();
-      
-      if (data.success) {
-        showToast(`Precio actualizado: ML $${data.mlPrice?.toLocaleString('es-AR')}, Tienda $${data.storePrice?.toLocaleString('es-AR')}`);
-        setPriceModal(null);
-        loadProducts();
-      } else {
-        showToast('Error: ' + (data.error || 'No se pudo actualizar'), 'error');
+  async function executeConfirm() {
+    if (!confirmModal) return;
+    
+    const { product, action } = confirmModal;
+    
+    if (action === 'toggleMl') {
+      try {
+        const res = await adminFetch('/api/admin/products/ml-action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'updateStatus',
+            productId: product.id,
+            mlItemId: product.ml_item_id,
+            status: !product.published,
+          }),
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          showToast(`Producto ${data.mlStatus === 'active' ? 'activado' : 'pausado'} en ML`);
+          loadProducts();
+        } else {
+          showToast('Error: ' + (data.error || 'No se pudo actualizar'), 'error');
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
       }
-    } catch (err) {
-      showToast('Error: ' + err.message, 'error');
     }
+    
+    setConfirmModal(null);
   }
 
   function startEdit(product) {
@@ -374,9 +350,6 @@ export default function Products() {
                 Activo
               </th>
               <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-                ML
-              </th>
-              <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 Links
               </th>
               <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}></th>
@@ -401,7 +374,21 @@ export default function Products() {
                       <span style={{ color: '#fff', fontWeight: '500', fontSize: '0.8rem' }} title={product.name}>{product.name}</span>
                     </div>
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#f59e0b', fontSize: '0.75rem', fontWeight: '600' }}>${mlPrice.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                    {editingId === product.id ? (
+                      <input
+                        type="number"
+                        value={editForm.ml_price}
+                        onChange={(e) => {
+                          const newMlPrice = e.target.value;
+                          setEditForm({ ...editForm, ml_price: newMlPrice });
+                        }}
+                        style={{ width: '80px', padding: '0.25rem', borderRadius: '0.25rem', border: '1px solid #f59e0b', backgroundColor: '#161625', color: '#f59e0b', textAlign: 'right', fontSize: '0.75rem' }}
+                      />
+                    ) : (
+                      <span style={{ color: '#f59e0b', fontSize: '0.75rem', fontWeight: '600' }}>${mlPrice.toLocaleString('es-AR')}</span>
+                    )}
+                  </td>
                   <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem' }}>${storePrice.toLocaleString('es-AR')}</td>
                   <td style={{ padding: '0.75rem', textAlign: 'right', color: '#f59e0b', fontSize: '0.75rem' }}>-${mlFee.toLocaleString('es-AR')}</td>
                   <td style={{ padding: '0.75rem', textAlign: 'right', color: '#22d3ee', fontSize: '0.75rem' }}>${netReceived.toLocaleString('es-AR')}</td>
@@ -459,44 +446,24 @@ export default function Products() {
                         }} />
                       </span>
                     </label>
-                  </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
                     {product.ml_item_id && (
-                      <>
-                        <button 
-                          onClick={() => toggleMlStatus(product)}
-                          title={product.published ? 'Pausar en ML' : 'Activar en ML'}
-                          style={{ 
-                            padding: '0.2rem 0.4rem', 
-                            backgroundColor: product.published ? '#f59e0b' : '#10b981', 
-                            color: '#fff', 
-                            border: 'none', 
-                            borderRadius: '0.25rem', 
-                            cursor: 'pointer',
-                            fontSize: '0.65rem',
-                            fontWeight: '600',
-                            marginRight: '0.25rem',
-                          }}
-                        >
-                          {product.published ? '⏸' : '▶'}
-                        </button>
-                        <button 
-                          onClick={() => openPriceModal(product)}
-                          title="Actualizar precio ML"
-                          style={{ 
-                            padding: '0.2rem 0.4rem', 
-                            backgroundColor: '#22d3ee', 
-                            color: '#000', 
-                            border: 'none', 
-                            borderRadius: '0.25rem', 
-                            cursor: 'pointer',
-                            fontSize: '0.65rem',
-                            fontWeight: '600',
-                          }}
-                        >
-                          $
-                        </button>
-                      </>
+                      <button 
+                        onClick={() => confirmToggleMlStatus(product)}
+                        title={product.published ? 'Pausar en ML' : 'Activar en ML'}
+                        style={{ 
+                          marginLeft: '0.5rem',
+                          padding: '0.2rem 0.4rem', 
+                          backgroundColor: product.published ? '#f59e0b' : '#10b981', 
+                          color: '#fff', 
+                          border: 'none', 
+                          borderRadius: '0.25rem', 
+                          cursor: 'pointer',
+                          fontSize: '0.6rem',
+                          fontWeight: '600',
+                        }}
+                      >
+                        {product.published ? '⏸' : '▶'}
+                      </button>
                     )}
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
@@ -511,29 +478,9 @@ export default function Products() {
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                     {editingId === product.id ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
-                        {product.ml_item_id && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                            <span style={{ fontSize: '0.6rem', color: '#f59e0b' }}>ML $</span>
-                            <input
-                              type="number"
-                              value={editForm.ml_price}
-                              onChange={(e) => {
-                                const newMlPrice = e.target.value;
-                                setEditForm({ ...editForm, ml_price: newMlPrice });
-                              }}
-                              placeholder="ML"
-                              style={{ width: '70px', padding: '0.2rem', borderRadius: '0.25rem', border: '1px solid #f59e0b', backgroundColor: '#161625', color: '#f59e0b', textAlign: 'right', fontSize: '0.7rem' }}
-                            />
-                            {editForm.ml_price && (
-                              <span style={{ fontSize: '0.6rem', color: '#22d3ee' }}>→ ${Math.round(parseInt(editForm.ml_price) * 0.9).toLocaleString('es-AR')}</span>
-                            )}
-                          </div>
-                        )}
-                        <div style={{ display: 'flex', gap: '0.25rem' }}>
-                          <button onClick={() => saveCost(product)} disabled={saving} style={{ padding: '0.2rem 0.4rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.65rem' }}>✓</button>
-                          <button onClick={cancelEdit} style={{ padding: '0.2rem 0.4rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.65rem' }}>✕</button>
-                        </div>
+                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                        <button onClick={() => saveCost(product)} disabled={saving} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.7rem' }}>✓</button>
+                        <button onClick={cancelEdit} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '0.7rem' }}>✕</button>
                       </div>
                     ) : (
                       <button onClick={() => startEdit(product)} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#f472b6', color: '#fff', border: 'none', borderRadius: '0.25rem', cursor: 'pointer', fontWeight: '500', fontSize: '0.7rem' }}>Editar</button>
@@ -551,50 +498,24 @@ export default function Products() {
         )}
       </div>
 
-      {priceModal && (
+      {confirmModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
           <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #2a2a3e', width: '400px', maxWidth: '90%' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#fff', marginBottom: '1rem' }}>Actualizar Precio ML</h2>
-            <p style={{ color: '#a1a1aa', fontSize: '0.875rem', marginBottom: '1rem', wordBreak: 'break-word' }}>{priceModal.name}</p>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#fff', marginBottom: '0.75rem' }}>{confirmModal.title}</h2>
+            <p style={{ color: '#a1a1aa', fontSize: '0.875rem', marginBottom: '1.5rem', wordBreak: 'break-word' }}>{confirmModal.message}</p>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
-              <div style={{ backgroundColor: '#161625', padding: '0.75rem', borderRadius: '0.5rem' }}>
-                <div style={{ fontSize: '0.7rem', color: '#71717a' }}>Precio ML Actual</div>
-                <div style={{ fontSize: '1rem', color: '#f59e0b', fontWeight: '600' }}>${priceModal.currentMlPrice.toLocaleString('es-AR')}</div>
-              </div>
-              <div style={{ backgroundColor: '#161625', padding: '0.75rem', borderRadius: '0.5rem' }}>
-                <div style={{ fontSize: '0.7rem', color: '#71717a' }}>Precio Tienda Actual</div>
-                <div style={{ fontSize: '1rem', color: '#a1a1aa', fontWeight: '600' }}>${priceModal.currentStorePrice.toLocaleString('es-AR')}</div>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', color: '#a1a1aa', marginBottom: '0.5rem' }}>Nuevo Precio ML</label>
-              <input 
-                type="number" 
-                value={newMlPrice}
-                onChange={(e) => setNewMlPrice(e.target.value)}
-                style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '1rem' }}
-              />
-              {newMlPrice && (
-                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#71717a' }}>
-                  Precio tienda será: <span style={{ color: '#22d3ee' }}>${Math.round(parseInt(newMlPrice) * 0.9).toLocaleString('es-AR')}</span>
-                </div>
-              )}
-            </div>
-
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button 
-                onClick={() => setPriceModal(null)}
+                onClick={() => setConfirmModal(null)}
                 style={{ flex: 1, padding: '0.75rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
               >
                 Cancelar
               </button>
               <button 
-                onClick={applyMlPriceUpdate}
-                style={{ flex: 1, padding: '0.75rem', backgroundColor: '#22d3ee', color: '#000', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
+                onClick={executeConfirm}
+                style={{ flex: 1, padding: '0.75rem', backgroundColor: confirmModal.action === 'toggleMl' && confirmModal.product.published ? '#f59e0b' : '#10b981', color: '#fff', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
               >
-                Actualizar
+                Confirmar
               </button>
             </div>
           </div>
