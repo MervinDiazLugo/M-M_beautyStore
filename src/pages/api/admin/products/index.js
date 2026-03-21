@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   if (method === 'GET') {
     const { data, error } = await supabase
       .from('products')
-      .select('id, name, price, ml_price, cost, packaging_cost, image, published')
+      .select('id, name, price, ml_price, cost, packaging_cost, image, published, mercado_libre_url, ml_item_id')
       .order('name');
     
     if (error) return res.status(500).json({ error: error.message });

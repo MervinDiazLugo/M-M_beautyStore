@@ -15,6 +15,14 @@ export default function Products() {
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState('name');
   const [sortDir, setSortDir] = useState('asc');
+  const [toast, setToast] = useState(null);
+  const [priceModal, setPriceModal] = useState(null);
+  const [newMlPrice, setNewMlPrice] = useState('');
+
+  function showToast(message, type = 'success') {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 10000);
+  }
 
   useEffect(() => {
     loadProducts();
@@ -69,6 +77,75 @@ export default function Products() {
       }),
     });
     loadProducts();
+  }
+
+  async function toggleMlStatus(product) {
+    if (!product.ml_item_id) {
+      showToast('Este producto no tiene ID de ML. Sincronizá primero.', 'error');
+      return;
+    }
+    
+    try {
+      const res = await adminFetch('/api/admin/products/ml-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateStatus',
+          productId: product.id,
+          mlItemId: product.ml_item_id,
+          status: !product.published,
+        }),
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        showToast(`Producto ${data.mlStatus === 'active' ? 'activado' : 'pausado'} en ML`);
+        loadProducts();
+      } else {
+        showToast('Error: ' + (data.error || 'No se pudo actualizar'), 'error');
+      }
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+
+  function openPriceModal(product) {
+    setPriceModal({
+      productId: product.id,
+      mlItemId: product.ml_item_id,
+      name: product.name,
+      currentMlPrice: product.ml_price || 0,
+      currentStorePrice: product.price || 0,
+    });
+    setNewMlPrice((product.ml_price || 0).toString());
+  }
+
+  async function applyMlPriceUpdate() {
+    if (!priceModal || !newMlPrice) return;
+
+    try {
+      const res = await adminFetch('/api/admin/products/ml-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updatePrice',
+          productId: priceModal.productId,
+          mlItemId: priceModal.mlItemId,
+          price: parseInt(newMlPrice),
+        }),
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        showToast(`Precio actualizado: ML $${data.mlPrice?.toLocaleString('es-AR')}, Tienda $${data.storePrice?.toLocaleString('es-AR')}`);
+        setPriceModal(null);
+        loadProducts();
+      } else {
+        showToast('Error: ' + (data.error || 'No se pudo actualizar'), 'error');
+      }
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    }
   }
 
   function startEdit(product) {
@@ -262,6 +339,12 @@ export default function Products() {
               <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 Activo
               </th>
+              <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                ML
+              </th>
+              <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                Links
+              </th>
               <th style={{ padding: '0.75rem', textAlign: 'right', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}></th>
             </tr>
           </thead>
@@ -343,6 +426,55 @@ export default function Products() {
                       </span>
                     </label>
                   </td>
+                  <td style={{ padding: '0.75rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    {product.ml_item_id && (
+                      <>
+                        <button 
+                          onClick={() => toggleMlStatus(product)}
+                          title={product.published ? 'Pausar en ML' : 'Activar en ML'}
+                          style={{ 
+                            padding: '0.2rem 0.4rem', 
+                            backgroundColor: product.published ? '#f59e0b' : '#10b981', 
+                            color: '#fff', 
+                            border: 'none', 
+                            borderRadius: '0.25rem', 
+                            cursor: 'pointer',
+                            fontSize: '0.65rem',
+                            fontWeight: '600',
+                            marginRight: '0.25rem',
+                          }}
+                        >
+                          {product.published ? '⏸' : '▶'}
+                        </button>
+                        <button 
+                          onClick={() => openPriceModal(product)}
+                          title="Actualizar precio ML"
+                          style={{ 
+                            padding: '0.2rem 0.4rem', 
+                            backgroundColor: '#22d3ee', 
+                            color: '#000', 
+                            border: 'none', 
+                            borderRadius: '0.25rem', 
+                            cursor: 'pointer',
+                            fontSize: '0.65rem',
+                            fontWeight: '600',
+                          }}
+                        >
+                          $
+                        </button>
+                      </>
+                    )}
+                  </td>
+                  <td style={{ padding: '0.75rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    {product.mercado_libre_url && (
+                      <a href={product.mercado_libre_url} target="_blank" rel="noopener noreferrer" title="Ver en ML" style={{ color: '#f59e0b', marginRight: '0.5rem' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                      </a>
+                    )}
+                    <a href={`/product/${product.id}`} target="_blank" rel="noopener noreferrer" title="Ver en tienda" style={{ color: '#f472b6' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </a>
+                  </td>
                   <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                     {editingId === product.id ? (
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
@@ -364,6 +496,82 @@ export default function Products() {
           </div>
         )}
       </div>
+
+      {priceModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #2a2a3e', width: '400px', maxWidth: '90%' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#fff', marginBottom: '1rem' }}>Actualizar Precio ML</h2>
+            <p style={{ color: '#a1a1aa', fontSize: '0.875rem', marginBottom: '1rem', wordBreak: 'break-word' }}>{priceModal.name}</p>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ backgroundColor: '#161625', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                <div style={{ fontSize: '0.7rem', color: '#71717a' }}>Precio ML Actual</div>
+                <div style={{ fontSize: '1rem', color: '#f59e0b', fontWeight: '600' }}>${priceModal.currentMlPrice.toLocaleString('es-AR')}</div>
+              </div>
+              <div style={{ backgroundColor: '#161625', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                <div style={{ fontSize: '0.7rem', color: '#71717a' }}>Precio Tienda Actual</div>
+                <div style={{ fontSize: '1rem', color: '#a1a1aa', fontWeight: '600' }}>${priceModal.currentStorePrice.toLocaleString('es-AR')}</div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#a1a1aa', marginBottom: '0.5rem' }}>Nuevo Precio ML</label>
+              <input 
+                type="number" 
+                value={newMlPrice}
+                onChange={(e) => setNewMlPrice(e.target.value)}
+                style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f5a', backgroundColor: '#161625', color: '#fff', fontSize: '1rem' }}
+              />
+              {newMlPrice && (
+                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#71717a' }}>
+                  Precio tienda será: <span style={{ color: '#22d3ee' }}>${Math.round(parseInt(newMlPrice) * 0.9).toLocaleString('es-AR')}</span>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button 
+                onClick={() => setPriceModal(null)}
+                style={{ flex: 1, padding: '0.75rem', backgroundColor: '#3f3f5a', color: '#fff', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={applyMlPriceUpdate}
+                style={{ flex: 1, padding: '0.75rem', backgroundColor: '#22d3ee', color: '#000', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
+              >
+                Actualizar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div style={{
+          position: 'fixed',
+          bottom: '2rem',
+          right: '2rem',
+          padding: '1rem 1.5rem',
+          borderRadius: '0.75rem',
+          backgroundColor: toast.type === 'error' ? '#ef4444' : toast.type === 'warning' ? '#f59e0b' : '#10b981',
+          color: '#fff',
+          fontWeight: '600',
+          fontSize: '0.875rem',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+          zIndex: 9999,
+          animation: 'slideIn 0.3s ease-out',
+        }}>
+          {toast.message}
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `}</style>
     </AdminLayout>
   );
 }
