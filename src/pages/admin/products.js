@@ -446,25 +446,6 @@ export default function Products() {
                         }} />
                       </span>
                     </label>
-                    {product.ml_item_id && (
-                      <button 
-                        onClick={() => confirmToggleMlStatus(product)}
-                        title={product.published ? 'Pausar en ML' : 'Activar en ML'}
-                        style={{ 
-                          marginLeft: '0.5rem',
-                          padding: '0.2rem 0.4rem', 
-                          backgroundColor: product.published ? '#f59e0b' : '#10b981', 
-                          color: '#fff', 
-                          border: 'none', 
-                          borderRadius: '0.25rem', 
-                          cursor: 'pointer',
-                          fontSize: '0.6rem',
-                          fontWeight: '600',
-                        }}
-                      >
-                        {product.published ? '⏸' : '▶'}
-                      </button>
-                    )}
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
                     {product.mercado_libre_url && (
