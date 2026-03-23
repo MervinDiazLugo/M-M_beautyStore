@@ -14,10 +14,10 @@ export default function Sales() {
   const [syncing, setSyncing] = useState(false);
   const [notification, setNotification] = useState(null);
   const [dateFilter, setDateFilter] = useState('all');
-  const now = new Date();
+const now = new Date();
 const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 const [filterMonth, setFilterMonth] = useState(currentMonth);
-  const [syncMonth, setSyncMonth] = useState('');
+const [syncMonth, setSyncMonth] = useState(currentMonth);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'sale_date', dir: 'desc' });
   const [isMobile, setIsMobile] = useState(false);
