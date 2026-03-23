@@ -6,8 +6,10 @@ import { adminFetch } from '../../lib/adminApi';
 export default function Profitability() {
   const [data, setData] = useState({ summary: {}, products: [] });
   const [loading, setLoading] = useState(true);
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const [timeFilter, setTimeFilter] = useState('30d');
-  const [filterMonth, setFilterMonth] = useState('');
+  const [filterMonth, setFilterMonth] = useState(currentMonth);
   const [sortConfig, setSortConfig] = useState({ key: 'profit', dir: 'desc' });
   const [isMobile, setIsMobile] = useState(false);
   const [updateModal, setUpdateModal] = useState(null);
