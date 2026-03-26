@@ -53,7 +53,7 @@ export default async function handler(req, res) {
         additionalMlCharges = extraCharges.reduce((sum, c) => sum + (c.amount || 0), 0) - (mlCharges.total_bonuses || 0);
         
         mlChargesData = {
-          total: additionalMlCharges,
+          total: additionalMlCharges + actualMlFees,
           charges: mlCharges.charges,
           bonuses: mlCharges.total_bonuses || 0,
           extraCharges,

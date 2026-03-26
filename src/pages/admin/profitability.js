@@ -233,18 +233,12 @@ export default function Profitability() {
         </div>
         <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e' }}>
           <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Comisiones ML</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f59e0b' }}>${(profitability.reduce((sum, p) => sum + (p.mlFeesTotal || 0), 0)).toLocaleString('es-AR')}</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f59e0b' }}>${mlFees.toLocaleString('es-AR')}</div>
         </div>
         <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e' }}>
           <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Costos Totales</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#ef4444' }}>${(profitability.reduce((sum, p) => sum + (p.costs || 0), 0)).toLocaleString('es-AR')}</div>
         </div>
-        {mlChargesTotal > 0 && (
-          <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #3b82f6' }}>
-            <div style={{ fontSize: '0.875rem', color: '#3b82f6' }}>Cargos ML</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#ef4444' }}>-${mlChargesTotal.toLocaleString('es-AR')}</div>
-          </div>
-        )}
         <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e' }}>
           <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Ganancia Total</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: totalProfit >= 0 ? '#10b981' : '#ef4444' }}>${totalProfit.toLocaleString('es-AR')}</div>
@@ -266,7 +260,7 @@ export default function Profitability() {
             onClick={() => setShowChargesBreakdown(!showChargesBreakdown)}
           >
             <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#fff' }}>
-              Desglose de Cargos y Comisiones ML {showChargesBreakdown ? '▲' : '▼'}
+              Desglose de Cargos ML {showChargesBreakdown ? '▲' : '▼'}
             </h2>
             <span style={{ fontSize: '1.25rem', fontWeight: '700', color: '#ef4444' }}>-${mlChargesData.total.toLocaleString('es-AR')}</span>
           </div>
