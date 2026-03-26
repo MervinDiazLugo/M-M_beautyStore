@@ -19,6 +19,7 @@ export default function Profitability() {
   const [toast, setToast] = useState(null);
   const [mlCharges, setMlCharges] = useState(null);
   const [loadingCharges, setLoadingCharges] = useState(false);
+  const [showChargesBreakdown, setShowChargesBreakdown] = useState(false);
 
   const MIN_MARGIN = 0.20;
 
@@ -260,36 +261,43 @@ export default function Profitability() {
 
       {mlChargesData && mlChargesData.charges && mlChargesData.charges.length > 0 && (
         <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #3b82f6', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#fff' }}>Desglose de Cargos y Comisiones ML</h2>
+          <div 
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showChargesBreakdown ? '1rem' : 0, cursor: 'pointer' }}
+            onClick={() => setShowChargesBreakdown(!showChargesBreakdown)}
+          >
+            <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#fff' }}>
+              Desglose de Cargos y Comisiones ML {showChargesBreakdown ? '▲' : '▼'}
+            </h2>
             <span style={{ fontSize: '1.25rem', fontWeight: '700', color: '#ef4444' }}>-${mlChargesData.total.toLocaleString('es-AR')}</span>
           </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid #3f3f5a' }}>
-                <th style={{ padding: '0.5rem', textAlign: 'left', color: '#71717a', fontSize: '0.7rem', textTransform: 'uppercase' }}>Concepto</th>
-                <th style={{ padding: '0.5rem', textAlign: 'right', color: '#71717a', fontSize: '0.7rem', textTransform: 'uppercase' }}>Monto</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mlChargesData.charges.map((charge, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid #2a2a3e' }}>
-                  <td style={{ padding: '0.75rem', color: '#a1a1aa', fontSize: '0.85rem' }}>{charge.label}</td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#ef4444', fontWeight: '600', fontSize: '0.85rem' }}>-${charge.amount.toLocaleString('es-AR')}</td>
+          {showChargesBreakdown && (
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #3f3f5a' }}>
+                  <th style={{ padding: '0.5rem', textAlign: 'left', color: '#71717a', fontSize: '0.7rem', textTransform: 'uppercase' }}>Concepto</th>
+                  <th style={{ padding: '0.5rem', textAlign: 'right', color: '#71717a', fontSize: '0.7rem', textTransform: 'uppercase' }}>Monto</th>
                 </tr>
-              ))}
-              {mlChargesData.bonuses > 0 && (
-                <tr style={{ borderBottom: '1px solid #2a2a3e' }}>
-                  <td style={{ padding: '0.75rem', color: '#10b981', fontWeight: '600', fontSize: '0.85rem' }}>Bonificaciones</td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#10b981', fontWeight: '700', fontSize: '0.85rem' }}>+${mlChargesData.bonuses.toLocaleString('es-AR')}</td>
+              </thead>
+              <tbody>
+                {mlChargesData.charges.map((charge, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #2a2a3e' }}>
+                    <td style={{ padding: '0.75rem', color: '#a1a1aa', fontSize: '0.85rem' }}>{charge.label}</td>
+                    <td style={{ padding: '0.75rem', textAlign: 'right', color: '#ef4444', fontWeight: '600', fontSize: '0.85rem' }}>-${charge.amount.toLocaleString('es-AR')}</td>
+                  </tr>
+                ))}
+                {mlChargesData.bonuses > 0 && (
+                  <tr style={{ borderBottom: '1px solid #2a2a3e' }}>
+                    <td style={{ padding: '0.75rem', color: '#10b981', fontWeight: '600', fontSize: '0.85rem' }}>Bonificaciones</td>
+                    <td style={{ padding: '0.75rem', textAlign: 'right', color: '#10b981', fontWeight: '700', fontSize: '0.85rem' }}>+${mlChargesData.bonuses.toLocaleString('es-AR')}</td>
+                  </tr>
+                )}
+                <tr style={{ backgroundColor: '#161625' }}>
+                  <td style={{ padding: '0.75rem', color: '#fff', fontWeight: '600', fontSize: '0.9rem' }}>Total Cargos ML</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#ef4444', fontWeight: '700', fontSize: '1rem' }}>-${mlChargesData.total.toLocaleString('es-AR')}</td>
                 </tr>
-              )}
-              <tr style={{ backgroundColor: '#161625' }}>
-                <td style={{ padding: '0.75rem', color: '#fff', fontWeight: '600', fontSize: '0.9rem' }}>Total Cargos ML</td>
-                <td style={{ padding: '0.75rem', textAlign: 'right', color: '#ef4444', fontWeight: '700', fontSize: '1rem' }}>-${mlChargesData.total.toLocaleString('es-AR')}</td>
-              </tr>
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 
