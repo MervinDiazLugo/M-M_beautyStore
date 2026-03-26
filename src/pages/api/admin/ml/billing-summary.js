@@ -100,7 +100,7 @@ export default async function handler(req, res) {
 
   try {
     const summaryRes = await fetch(
-      `${ML_API_URL}/billing/integration/periods/key/${periodKey}/summary/details?document_type=BILL&group=ML`,
+      `${ML_API_URL}/billing/integration/periods/key/${periodKey}/summary/details?document_type=BILL`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
