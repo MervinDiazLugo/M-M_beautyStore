@@ -35,6 +35,7 @@ export default async function handler(req, res) {
 
     let mlChargesData = null;
     let additionalMlCharges = 0;
+    let actualMlFees = 0;
     if (year && month) {
       const { data: mlCharges } = await supabase
         .from('ml_monthly_charges')
@@ -44,8 +45,11 @@ export default async function handler(req, res) {
         .single();
       
       if (mlCharges && mlCharges.charges) {
-        const excludeTypes = ['CVFV', 'CVFN', 'CVFF', 'CVF', 'CV'];
-        const extraCharges = mlCharges.charges.filter(c => !excludeTypes.includes(c.type));
+        const commissionTypes = ['CVFV', 'CVFN', 'CVFF'];
+        const commissionCharges = mlCharges.charges.filter(c => commissionTypes.includes(c.type));
+        actualMlFees = commissionCharges.reduce((sum, c) => sum + (c.amount || 0), 0);
+        
+        const extraCharges = mlCharges.charges.filter(c => !commissionTypes.includes(c.type));
         additionalMlCharges = extraCharges.reduce((sum, c) => sum + (c.amount || 0), 0) - (mlCharges.total_bonuses || 0);
         
         mlChargesData = {
@@ -53,6 +57,7 @@ export default async function handler(req, res) {
           charges: mlCharges.charges,
           bonuses: mlCharges.total_bonuses || 0,
           extraCharges,
+          actualCommission: actualMlFees,
         };
       }
     }
@@ -60,7 +65,7 @@ export default async function handler(req, res) {
     const profitability = calculateProfitability(productsRes.data || [], sales);
     
     const totalRevenue = sales.reduce((sum, s) => sum + (s.sale_price || 0), 0);
-    const totalMlFees = profitability.reduce((sum, p) => sum + (p.mlFeesTotal || 0), 0);
+    const totalMlFees = actualMlFees > 0 ? actualMlFees : profitability.reduce((sum, p) => sum + (p.mlFeesTotal || 0), 0);
     const totalProductCosts = profitability.reduce((sum, p) => sum + (p.costs || 0), 0);
     
     const totalProfit = (totalRevenue - totalMlFees - totalProductCosts) - additionalMlCharges;
