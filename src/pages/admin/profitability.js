@@ -57,12 +57,14 @@ export default function Profitability() {
     const [year, month] = filterMonth.split('-');
     const m = month.padStart(2, '0');
     try {
-      const chargesRes = await adminFetch(`/api/admin/ml/billing-summary?year=${year}&month=${m}`);
+      const chargesRes = await adminFetch(`/api/admin/ml/billing-summary?year=${year}&month=${m}&refresh=true`);
       const chargesData = await chargesRes.json();
       setMlCharges(chargesData);
       loadData();
       if (chargesData.error) {
         showToast('Error: ' + chargesData.error, 'error');
+      } else if (chargesData.charges && chargesData.charges.length > 0) {
+        showToast('Cargos de ML actualizados correctamente');
       }
     } catch (e) {
       showToast('Error al cargar cargos de ML', 'error');
