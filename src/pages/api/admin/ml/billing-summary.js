@@ -65,10 +65,29 @@ export default async function handler(req, res) {
     return res.status(405).end();
   }
 
-  const { year, month } = req.query;
+  const { year, month, refresh } = req.query;
   
   if (!year || !month) {
     return res.status(400).json({ error: 'year y month son requeridos (formato: YYYY-MM)' });
+  }
+
+  const periodKey = `${year}-${month}-01`;
+
+  const { data: savedCharges } = await supabaseAdmin
+    .from('ml_monthly_charges')
+    .select('*')
+    .eq('period_key', periodKey)
+    .single();
+
+  if (savedCharges && !refresh) {
+    return res.status(200).json({
+      period: savedCharges.period_key,
+      totalCharges: savedCharges.total_charges,
+      totalBonuses: savedCharges.total_bonuses,
+      netBalance: savedCharges.net_balance,
+      charges: savedCharges.charges,
+      savedAt: savedCharges.updated_at,
+    });
   }
 
   await refreshToken();
@@ -78,11 +97,9 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'No connected to MercadoLibre' });
   }
 
-  const periodKey = `${year}-${month}-01`;
-
   try {
     const summaryRes = await fetch(
-      `${ML_API_URL}/billing/integration/periods/key/${periodKey}/summary/details`,
+      `${ML_API_URL}/billing/integration/periods/key/${periodKey}/summary/details?document_type=BILL`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -117,12 +134,26 @@ export default async function handler(req, res) {
       type: c.type || 'OTHER',
     }));
 
+    await supabaseAdmin
+      .from('ml_monthly_charges')
+      .upsert({
+        period_key: periodKey,
+        year: parseInt(year),
+        month: parseInt(month),
+        total_charges: totalCharges,
+        total_bonuses: totalBonuses,
+        net_balance: totalBonuses - totalCharges,
+        charges: categorizedCharges,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'period_key' });
+
     return res.status(200).json({
       period: periodKey,
       totalCharges,
       totalBonuses,
       netBalance: totalBonuses - totalCharges,
       charges: categorizedCharges,
+      saved: true,
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
