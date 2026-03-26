@@ -34,6 +34,7 @@ export default async function handler(req, res) {
     }
 
     let mlChargesData = null;
+    let additionalMlCharges = 0;
     if (year && month) {
       const { data: mlCharges } = await supabase
         .from('ml_monthly_charges')
@@ -42,11 +43,16 @@ export default async function handler(req, res) {
         .eq('month', parseInt(month))
         .single();
       
-      if (mlCharges) {
+      if (mlCharges && mlCharges.charges) {
+        const excludeTypes = ['CVFV', 'CVFN', 'CVFF', 'CVF', 'CV'];
+        const extraCharges = mlCharges.charges.filter(c => !excludeTypes.includes(c.type));
+        additionalMlCharges = extraCharges.reduce((sum, c) => sum + (c.amount || 0), 0) - (mlCharges.total_bonuses || 0);
+        
         mlChargesData = {
-          total: (mlCharges.total_charges || 0) - (mlCharges.total_bonuses || 0),
-          charges: mlCharges.charges || [],
+          total: additionalMlCharges,
+          charges: mlCharges.charges,
           bonuses: mlCharges.total_bonuses || 0,
+          extraCharges,
         };
       }
     }
@@ -57,9 +63,8 @@ export default async function handler(req, res) {
     const totalMlFees = profitability.reduce((sum, p) => sum + (p.mlFeesTotal || 0), 0);
     const totalProductCosts = profitability.reduce((sum, p) => sum + (p.costs || 0), 0);
     
-    const mlChargesTotal = mlChargesData ? mlChargesData.total : 0;
-    const totalProfit = (totalRevenue - totalMlFees - totalProductCosts) - mlChargesTotal;
-    const avgMargin = totalRevenue > 0 ? ((totalRevenue - totalMlFees - totalProductCosts - mlChargesTotal) / totalRevenue) * 100 : 0;
+    const totalProfit = (totalRevenue - totalMlFees - totalProductCosts) - additionalMlCharges;
+    const avgMargin = totalRevenue > 0 ? ((totalRevenue - totalMlFees - totalProductCosts - additionalMlCharges) / totalRevenue) * 100 : 0;
     const totalUnits = sales.reduce((sum, s) => sum + (s.quantity || 1), 0);
 
     return res.status(200).json({
@@ -71,7 +76,7 @@ export default async function handler(req, res) {
         totalSales: sales.length,
         mlFees: totalMlFees,
         productCosts: totalProductCosts,
-        mlCharges: mlChargesTotal,
+        mlCharges: additionalMlCharges,
         mlChargesData,
       },
       products: profitability,
