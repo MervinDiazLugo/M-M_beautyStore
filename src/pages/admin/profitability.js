@@ -143,7 +143,7 @@ export default function Profitability() {
   const totalUnits = summary.totalUnits || 0;
   const mlFees = summary.mlFees || 0;
   const productCosts = summary.productCosts || 0;
-  const mlCharges = summary.mlCharges || 0;
+  const mlChargesTotal = summary.mlCharges || 0;
   const mlChargesData = summary.mlChargesData || null;
   const pieColors = ['#f472b6', '#8b5cf6', '#22d3ee', '#10b981', '#f59e0b', '#ef4444'];
   const topProducts = profitability.slice(0, 5);
@@ -236,10 +236,10 @@ export default function Profitability() {
           <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Costos Totales</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#ef4444' }}>${(profitability.reduce((sum, p) => sum + (p.costs || 0), 0)).toLocaleString('es-AR')}</div>
         </div>
-        {mlCharges > 0 && (
+        {mlChargesTotal > 0 && (
           <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #3b82f6' }}>
             <div style={{ fontSize: '0.875rem', color: '#3b82f6' }}>Cargos ML</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#ef4444' }}>-${mlCharges.toLocaleString('es-AR')}</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#ef4444' }}>-${mlChargesTotal.toLocaleString('es-AR')}</div>
           </div>
         )}
         <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e' }}>
