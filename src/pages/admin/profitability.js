@@ -139,6 +139,9 @@ export default function Profitability() {
   const totalProfit = summary.totalProfit || 0;
   const avgMargin = summary.avgMargin || 0;
   const totalUnits = summary.totalUnits || 0;
+  const mlFees = summary.mlFees || 0;
+  const productCosts = summary.productCosts || 0;
+  const mlCharges = summary.mlCharges || 0;
   const pieColors = ['#f472b6', '#8b5cf6', '#22d3ee', '#10b981', '#f59e0b', '#ef4444'];
   const topProducts = profitability.slice(0, 5);
   const chartData = topProducts.map(p => ({ name: p.title.substring(0, 15) + (p.title.length > 15 ? '...' : ''), ganancia: p.profit, mlFees: p.mlFeesTotal, costos: p.costs }));

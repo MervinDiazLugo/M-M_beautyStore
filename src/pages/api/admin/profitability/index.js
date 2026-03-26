@@ -33,12 +33,28 @@ export default async function handler(req, res) {
       sales = sales.filter(s => new Date(s.sale_date || s.created_at) >= filterDate);
     }
 
+    let mlChargesTotal = 0;
+    if (year && month) {
+      const { data: mlCharges } = await supabase
+        .from('ml_monthly_charges')
+        .select('total_charges, total_bonuses')
+        .eq('year', parseInt(year))
+        .eq('month', parseInt(month))
+        .single();
+      
+      if (mlCharges) {
+        mlChargesTotal = (mlCharges.total_charges || 0) - (mlCharges.total_bonuses || 0);
+      }
+    }
+
     const profitability = calculateProfitability(productsRes.data || [], sales);
     
     const totalRevenue = sales.reduce((sum, s) => sum + (s.sale_price || 0), 0);
+    const totalMlFees = profitability.reduce((sum, p) => sum + (p.mlFeesTotal || 0), 0);
+    const totalProductCosts = profitability.reduce((sum, p) => sum + (p.costs || 0), 0);
     
-    const totalProfit = profitability.reduce((sum, p) => sum + p.profit, 0);
-    const avgMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+    const totalProfit = (totalRevenue - totalMlFees - totalProductCosts) - mlChargesTotal;
+    const avgMargin = totalRevenue > 0 ? ((totalRevenue - totalMlFees - totalProductCosts - mlChargesTotal) / totalRevenue) * 100 : 0;
     const totalUnits = sales.reduce((sum, s) => sum + (s.quantity || 1), 0);
 
     return res.status(200).json({
@@ -48,6 +64,9 @@ export default async function handler(req, res) {
         avgMargin,
         totalUnits,
         totalSales: sales.length,
+        mlFees: totalMlFees,
+        productCosts: totalProductCosts,
+        mlCharges: mlChargesTotal,
       },
       products: profitability,
     });
