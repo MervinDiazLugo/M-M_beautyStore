@@ -255,22 +255,37 @@ export default function Profitability() {
       </div>
 
       {mlChargesData && mlChargesData.charges && mlChargesData.charges.length > 0 && (
-        <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1rem', fontWeight: '600', color: '#fff', marginBottom: '1rem' }}>Desglose de Cargos ML</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '0.75rem' }}>
-            {mlChargesData.charges.map((charge, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#161625', borderRadius: '0.5rem' }}>
-                <span style={{ color: '#a1a1aa', fontSize: '0.8rem' }}>{charge.label}</span>
-                <span style={{ color: '#ef4444', fontWeight: '600', fontSize: '0.85rem' }}>-${charge.amount.toLocaleString('es-AR')}</span>
-              </div>
-            ))}
-            {mlChargesData.bonuses > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#10b98120', borderRadius: '0.5rem', border: '1px solid #10b981' }}>
-                <span style={{ color: '#10b981', fontWeight: '600', fontSize: '0.85rem' }}>Total Bonificaciones</span>
-                <span style={{ color: '#10b981', fontWeight: '700', fontSize: '0.9rem' }}>+${mlChargesData.bonuses.toLocaleString('es-AR')}</span>
-              </div>
-            )}
+        <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #3b82f6', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#fff' }}>Desglose de Cargos y Comisiones ML</h2>
+            <span style={{ fontSize: '1.25rem', fontWeight: '700', color: '#ef4444' }}>-${mlChargesData.total.toLocaleString('es-AR')}</span>
           </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #3f3f5a' }}>
+                <th style={{ padding: '0.5rem', textAlign: 'left', color: '#71717a', fontSize: '0.7rem', textTransform: 'uppercase' }}>Concepto</th>
+                <th style={{ padding: '0.5rem', textAlign: 'right', color: '#71717a', fontSize: '0.7rem', textTransform: 'uppercase' }}>Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mlChargesData.charges.map((charge, i) => (
+                <tr key={i} style={{ borderBottom: '1px solid #2a2a3e' }}>
+                  <td style={{ padding: '0.75rem', color: '#a1a1aa', fontSize: '0.85rem' }}>{charge.label}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#ef4444', fontWeight: '600', fontSize: '0.85rem' }}>-${charge.amount.toLocaleString('es-AR')}</td>
+                </tr>
+              ))}
+              {mlChargesData.bonuses > 0 && (
+                <tr style={{ borderBottom: '1px solid #2a2a3e' }}>
+                  <td style={{ padding: '0.75rem', color: '#10b981', fontWeight: '600', fontSize: '0.85rem' }}>Bonificaciones</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#10b981', fontWeight: '700', fontSize: '0.85rem' }}>+${mlChargesData.bonuses.toLocaleString('es-AR')}</td>
+                </tr>
+              )}
+              <tr style={{ backgroundColor: '#161625' }}>
+                <td style={{ padding: '0.75rem', color: '#fff', fontWeight: '600', fontSize: '0.9rem' }}>Total Cargos ML</td>
+                <td style={{ padding: '0.75rem', textAlign: 'right', color: '#ef4444', fontWeight: '700', fontSize: '1rem' }}>-${mlChargesData.total.toLocaleString('es-AR')}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       )}
 
