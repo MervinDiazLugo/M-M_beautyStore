@@ -142,6 +142,7 @@ export default function Profitability() {
   const mlFees = summary.mlFees || 0;
   const productCosts = summary.productCosts || 0;
   const mlCharges = summary.mlCharges || 0;
+  const mlChargesData = summary.mlChargesData || null;
   const pieColors = ['#f472b6', '#8b5cf6', '#22d3ee', '#10b981', '#f59e0b', '#ef4444'];
   const topProducts = profitability.slice(0, 5);
   const chartData = topProducts.map(p => ({ name: p.title.substring(0, 15) + (p.title.length > 15 ? '...' : ''), ganancia: p.profit, mlFees: p.mlFeesTotal, costos: p.costs }));
@@ -233,6 +234,12 @@ export default function Profitability() {
           <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Costos Totales</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#ef4444' }}>${(profitability.reduce((sum, p) => sum + (p.costs || 0), 0)).toLocaleString('es-AR')}</div>
         </div>
+        {mlCharges > 0 && (
+          <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #3b82f6' }}>
+            <div style={{ fontSize: '0.875rem', color: '#3b82f6' }}>Cargos ML</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#ef4444' }}>-${mlCharges.toLocaleString('es-AR')}</div>
+          </div>
+        )}
         <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e' }}>
           <div style={{ fontSize: '0.875rem', color: '#71717a' }}>Ganancia Total</div>
           <div style={{ fontSize: '1.5rem', fontWeight: '700', color: totalProfit >= 0 ? '#10b981' : '#ef4444' }}>${totalProfit.toLocaleString('es-AR')}</div>
@@ -247,28 +254,22 @@ export default function Profitability() {
         </div>
       </div>
 
-      {mlCharges && mlCharges.charges && mlCharges.charges.length > 0 && (
+      {mlChargesData && mlChargesData.charges && mlChargesData.charges.length > 0 && (
         <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', padding: '1.25rem', border: '1px solid #2a2a3e', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1rem', fontWeight: '600', color: '#fff', marginBottom: '1rem' }}>Cargos de MercadoLibre - {mlCharges.period}</h2>
+          <h2 style={{ fontSize: '1rem', fontWeight: '600', color: '#fff', marginBottom: '1rem' }}>Desglose de Cargos ML</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '0.75rem' }}>
-            {mlCharges.charges.map((charge, i) => (
+            {mlChargesData.charges.map((charge, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#161625', borderRadius: '0.5rem' }}>
                 <span style={{ color: '#a1a1aa', fontSize: '0.8rem' }}>{charge.label}</span>
                 <span style={{ color: '#ef4444', fontWeight: '600', fontSize: '0.85rem' }}>-${charge.amount.toLocaleString('es-AR')}</span>
               </div>
             ))}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#10b98120', borderRadius: '0.5rem', border: '1px solid #10b981' }}>
-              <span style={{ color: '#10b981', fontWeight: '600', fontSize: '0.85rem' }}>Total Bonificaciones</span>
-              <span style={{ color: '#10b981', fontWeight: '700', fontSize: '0.9rem' }}>+${mlCharges.totalBonuses.toLocaleString('es-AR')}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#ef444420', borderRadius: '0.5rem', border: '1px solid #ef4444' }}>
-              <span style={{ color: '#ef4444', fontWeight: '600', fontSize: '0.85rem' }}>Total Cargos</span>
-              <span style={{ color: '#ef4444', fontWeight: '700', fontSize: '0.9rem' }}>-${mlCharges.totalCharges.toLocaleString('es-AR')}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: mlCharges.netBalance >= 0 ? '#10b98120' : '#ef444420', borderRadius: '0.5rem', border: `1px solid ${mlCharges.netBalance >= 0 ? '#10b981' : '#ef4444'}` }}>
-              <span style={{ color: mlCharges.netBalance >= 0 ? '#10b981' : '#ef4444', fontWeight: '600', fontSize: '0.85rem' }}>Balance Neto</span>
-              <span style={{ color: mlCharges.netBalance >= 0 ? '#10b981' : '#ef4444', fontWeight: '700', fontSize: '0.9rem' }}>${mlCharges.netBalance.toLocaleString('es-AR')}</span>
-            </div>
+            {mlChargesData.bonuses > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', backgroundColor: '#10b98120', borderRadius: '0.5rem', border: '1px solid #10b981' }}>
+                <span style={{ color: '#10b981', fontWeight: '600', fontSize: '0.85rem' }}>Total Bonificaciones</span>
+                <span style={{ color: '#10b981', fontWeight: '700', fontSize: '0.9rem' }}>+${mlChargesData.bonuses.toLocaleString('es-AR')}</span>
+              </div>
+            )}
           </div>
         </div>
       )}
