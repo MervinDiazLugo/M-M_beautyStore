@@ -55,10 +55,12 @@ export default function Profitability() {
     if (!filterMonth) return;
     setLoadingCharges(true);
     const [year, month] = filterMonth.split('-');
+    const m = month.padStart(2, '0');
     try {
-      const chargesRes = await adminFetch(`/api/admin/ml/billing-summary?year=${year}&month=${month}`);
+      const chargesRes = await adminFetch(`/api/admin/ml/billing-summary?year=${year}&month=${m}`);
       const chargesData = await chargesRes.json();
       setMlCharges(chargesData);
+      loadData();
       if (chargesData.error) {
         showToast('Error: ' + chargesData.error, 'error');
       }

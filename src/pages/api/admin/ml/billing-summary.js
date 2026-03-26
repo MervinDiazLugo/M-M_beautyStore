@@ -71,7 +71,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'year y month son requeridos (formato: YYYY-MM)' });
   }
 
-  const periodKey = `${year}-${month}-01`;
+  const monthPadded = String(month).padStart(2, '0');
+  const periodKey = `${year}-${monthPadded}-01`;
 
   const { data: savedCharges } = await supabaseAdmin
     .from('ml_monthly_charges')
