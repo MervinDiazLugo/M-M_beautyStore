@@ -113,8 +113,8 @@ export default async function handler(req, res) {
 
     const summary = await summaryRes.json();
     
-    const charges = summary.period?.bill_includes?.charges || [];
-    const bonuses = summary.period?.bill_includes?.bonuses || [];
+    const charges = summary.bill_includes?.charges || [];
+    const bonuses = summary.bill_includes?.bonuses || [];
     
     const totalCharges = charges.reduce((sum, c) => sum + (c.amount || 0), 0);
     const totalBonuses = bonuses.reduce((sum, b) => sum + (b.amount || 0), 0);
