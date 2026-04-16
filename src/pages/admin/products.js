@@ -313,10 +313,24 @@ export default function Products() {
       </div>
 
       <div style={{ backgroundColor: '#1a1a2e', borderRadius: '1rem', border: '1px solid #2a2a3e', overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1060px', tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '36px' }} />
+            <col style={{ width: 'auto' }} />
+            <col style={{ width: '92px' }} />
+            <col style={{ width: '100px' }} />
+            <col style={{ width: '80px' }} />
+            <col style={{ width: '85px' }} />
+            <col style={{ width: '88px' }} />
+            <col style={{ width: '88px' }} />
+            <col style={{ width: '90px' }} />
+            <col style={{ width: '64px' }} />
+            <col style={{ width: '60px' }} />
+            <col style={{ width: '75px' }} />
+          </colgroup>
           <thead>
             <tr style={{ backgroundColor: '#161625' }}>
-              <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', width: '40px' }}>#</th>
+              <th style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase' }}>#</th>
               <th onClick={() => handleSort('name')} style={{ padding: '0.75rem', textAlign: 'left', color: '#71717a', fontWeight: '500', fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
                 Producto {sortField === 'name' && (sortDir === 'asc' ? '↑' : '↓')}
               </th>
@@ -361,13 +375,13 @@ export default function Products() {
               return (
                 <tr key={product.id} style={{ borderTop: '1px solid #2a2a3e' }}>
                   <td style={{ padding: '0.75rem', textAlign: 'center', color: '#71717a', fontSize: '0.7rem' }}>{index + 1}</td>
-                  <td style={{ padding: '0.75rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      {product.image && Array.isArray(product.image) && product.image[0] && <img src={product.image[0]} alt="" style={{ width: '32px', height: '32px', borderRadius: '0.375rem', objectFit: 'cover' }} />}
-                      <span style={{ color: '#fff', fontWeight: '500', fontSize: '0.8rem' }} title={product.name}>{product.name}</span>
+                  <td style={{ padding: '0.75rem', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                      {product.image && Array.isArray(product.image) && product.image[0] && <img src={product.image[0]} alt="" style={{ width: '32px', height: '32px', borderRadius: '0.375rem', objectFit: 'cover', flexShrink: 0 }} />}
+                      <span style={{ color: '#fff', fontWeight: '500', fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={product.name}>{product.name}</span>
                     </div>
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
                     {editingId === product.id ? (
                       <input
                         type="number"
@@ -382,10 +396,10 @@ export default function Products() {
                       <span style={{ color: '#f59e0b', fontSize: '0.75rem', fontWeight: '600' }}>${mlPrice.toLocaleString('es-AR')}</span>
                     )}
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem' }}>${storePrice.toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#f59e0b', fontSize: '0.75rem' }}>-${mlFee.toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#22d3ee', fontSize: '0.75rem' }}>${netReceived.toLocaleString('es-AR')}</td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>${storePrice.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#f59e0b', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>-${mlFee.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#22d3ee', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>${netReceived.toLocaleString('es-AR')}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
                     {editingId === product.id ? (
                       <input
                         type="number"
@@ -397,7 +411,7 @@ export default function Products() {
                       <span style={{ color: cost > 0 ? '#10b981' : '#71717a', fontSize: '0.75rem' }}>{cost > 0 ? `$${cost.toLocaleString('es-AR')}` : '—'}</span>
                     )}
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem' }}>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: '#a1a1aa', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
                     {editingId === product.id ? (
                       <input
                         type="number"
@@ -409,7 +423,7 @@ export default function Products() {
                       `$${packaging.toLocaleString('es-AR')}`
                     )}
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: profit >= 0 ? '#10b981' : '#ef4444', fontSize: '0.75rem' }}>
+                  <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: profit >= 0 ? '#10b981' : '#ef4444', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
                     ${profit.toLocaleString('es-AR')}
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'center' }}>
