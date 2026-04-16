@@ -352,6 +352,8 @@ export default function Products() {
             {filteredProducts.map((product, index) => {
               const mlPrice = product.ml_price || 0;
               const storePrice = product.price || 0;
+              const cost = product.cost || 0;
+              const packaging = product.packaging_cost || 0;
               const mlFee = product.ml_fee || 0;
               const netReceived = product.net_received || 0;
               const profit = product.profit || 0;
