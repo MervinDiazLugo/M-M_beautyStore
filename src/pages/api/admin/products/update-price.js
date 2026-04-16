@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { validateApiKey } from '../../../../lib/apiAuth';
+import { ML_STORE_PRICE_FACTOR } from '../../../../lib/supabase';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -111,7 +112,7 @@ export default async function handler(req, res) {
 
       if (token) {
         const mlPrice = parseInt(price);
-        const storePrice = Math.round(mlPrice * 0.9);
+        const storePrice = Math.round(mlPrice * ML_STORE_PRICE_FACTOR);
         finalStorePrice = storePrice;
 
         console.log('Updating prices:', { mlItemId, mlPrice, storePrice });

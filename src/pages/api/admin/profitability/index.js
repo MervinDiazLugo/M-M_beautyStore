@@ -1,5 +1,5 @@
 // pages/api/admin/profitability/index.js
-import { supabase, DEFAULT_PACKAGING_COST } from '../../../../lib/supabase';
+import { supabase, DEFAULT_PACKAGING_COST, ML_COMMISSION_RATE, MIN_MARGIN, calculateSuggestedPrice, calculateMinimumPrice, getMarginStatus } from '../../../../lib/supabase';
 import { validateApiKey } from '../../../../lib/apiAuth';
 
 export default async function handler(req, res) {
@@ -104,7 +104,7 @@ function calculateProfitability(products, sales) {
     const productCost = product?.cost || 0;
     const packagingCost = product?.packaging_cost || DEFAULT_PACKAGING_COST;
     
-    const mlFees = salePrice * 0.34;
+    const mlFees = salePrice * ML_COMMISSION_RATE;
     const netReceived = salePrice - mlFees;
     const profit = netReceived - (productCost * quantity) - (packagingCost * quantity);
     
@@ -136,9 +136,14 @@ function calculateProfitability(products, sales) {
   return Object.values(productStats)
     .map(p => {
       const margin = p.revenue > 0 ? (p.profit / p.revenue) * 100 : 0;
-      const projectedProfit = p.ml_price - (p.ml_price * 0.34) - p.cost - p.packaging;
+      const projectedProfit = p.ml_price - (p.ml_price * ML_COMMISSION_RATE) - p.cost - p.packaging;
       const projectedMargin = p.ml_price > 0 ? (projectedProfit / p.ml_price) * 100 : 0;
-      return { ...p, margin, projectedMargin };
+      const suggestedPrice = calculateSuggestedPrice(p.cost || 0, p.packaging || DEFAULT_PACKAGING_COST);
+      const minimumPrice = calculateMinimumPrice(p.cost || 0, p.packaging || DEFAULT_PACKAGING_COST);
+      const needsAdjustment = projectedMargin < MIN_MARGIN * 100;
+      const marginStatus = getMarginStatus(margin);
+      const projectedMarginStatus = getMarginStatus(projectedMargin);
+      return { ...p, margin, projectedMargin, suggestedPrice, minimumPrice, needsAdjustment, marginStatus, projectedMarginStatus };
     })
     .sort((a, b) => b.profit - a.profit);
 }

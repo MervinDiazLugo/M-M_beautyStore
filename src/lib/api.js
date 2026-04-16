@@ -41,6 +41,7 @@ function normalizeProduct(product) {
     permalink: product.permalink,
     createdAt: product.createdAt,
     instagramReel: product.instagramReel || null,
+    top_seller: product.top_seller || false,
   };
 }
 

@@ -60,8 +60,7 @@ export default function Products() {
     
     if (editForm.ml_price && product.ml_item_id) {
       const newMlPrice = parseInt(editForm.ml_price);
-      const newStorePrice = Math.round(newMlPrice * 0.9);
-      
+
       try {
         const mlRes = await adminFetch('/api/admin/products/ml-action', {
           method: 'POST',
@@ -74,7 +73,7 @@ export default function Products() {
           }),
         });
         const mlData = await mlRes.json();
-        
+
         if (mlData.success) {
           updates.price = mlData.storePrice;
           updates.ml_price = mlData.mlPrice;
@@ -85,13 +84,13 @@ export default function Products() {
       } catch (err) {
         showToast('Error: ' + err.message, 'error');
       }
-    } else {
-      await adminFetch(`/api/admin/products/${product.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-      });
     }
+
+    await adminFetch(`/api/admin/products/${product.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
     
     loadProducts();
     setEditingId(null);
@@ -195,14 +194,8 @@ export default function Products() {
       aVal = a.cost || 0;
       bVal = b.cost || 0;
     } else if (sortField === 'profit') {
-      const getProfit = (p) => {
-        const mlPrice = p.ml_price || 0;
-        const cost = p.cost || 0;
-        const packaging = p.packaging_cost || 1000;
-        return mlPrice - (mlPrice * 0.34) - cost - packaging;
-      };
-      aVal = getProfit(a);
-      bVal = getProfit(b);
+      aVal = a.profit || 0;
+      bVal = b.profit || 0;
     } else {
       return 0;
     }
@@ -359,11 +352,9 @@ export default function Products() {
             {filteredProducts.map((product, index) => {
               const mlPrice = product.ml_price || 0;
               const storePrice = product.price || 0;
-              const cost = product.cost || 0;
-              const packaging = product.packaging_cost || 1000;
-              const mlFee = mlPrice * 0.34;
-              const netReceived = mlPrice - mlFee;
-              const profit = netReceived - cost - packaging;
+              const mlFee = product.ml_fee || 0;
+              const netReceived = product.net_received || 0;
+              const profit = product.profit || 0;
 
               return (
                 <tr key={product.id} style={{ borderTop: '1px solid #2a2a3e' }}>

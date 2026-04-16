@@ -1,13 +1,11 @@
 // pages/api/admin/ml/sync-orders.js
 import { createClient } from '@supabase/supabase-js';
 import { validateApiKey } from '../../../../lib/apiAuth';
+import { ML_COMMISSION_RATE, DEFAULT_PACKAGING_COST } from '../../../../lib/supabase';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseAdmin = createClient(supabaseUrl, serviceKey);
-
-const ML_COMMISSION_RATE = 0.34;
-const DEFAULT_PACKAGING_COST = 1000;
 
 function findMatchingProduct(productTitle, products) {
   if (!productTitle || !products) return null;

@@ -1,3 +1,5 @@
+import { TOP_SELLER_THRESHOLD } from '../../lib/supabase';
+
 const API_CONFIG = {
   baseUrl: (process.env.NEXT_PUBLIC_API_URL || 'https://m-m-beauty-store-api.vercel.app').replace(/\/$/, ''),
   getItemUrl(id) {
@@ -21,6 +23,11 @@ export default async function handler(req, res) {
     });
     
     const data = await response.json();
+
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      data.top_seller = ((data.cantidadVendida || data.soldQuantity || 0) > TOP_SELLER_THRESHOLD);
+    }
+
     res.status(response.status).json(data);
   } catch (error) {
     console.error('API proxy error:', error.message);

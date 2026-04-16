@@ -1,5 +1,5 @@
 // pages/api/admin/sales/index.js
-import { supabase, calculateProfit, DEFAULT_PACKAGING_COST } from '../../../../lib/supabase';
+import { supabase, calculateProfit, DEFAULT_PACKAGING_COST, ML_COMMISSION_RATE } from '../../../../lib/supabase';
 import { validateApiKey } from '../../../../lib/apiAuth';
 
 export default async function handler(req, res) {
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
       const product = productMap[s.product_id];
       const productCost = product?.cost || 0;
       const packagingCost = product?.packaging_cost || DEFAULT_PACKAGING_COST;
-      const mlFees = (s.sale_price || 0) * 0.34;
+      const mlFees = (s.sale_price || 0) * ML_COMMISSION_RATE;
       const netReceived = (s.sale_price || 0) - mlFees;
       const profit = netReceived - productCost - packagingCost;
       

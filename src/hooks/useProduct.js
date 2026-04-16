@@ -19,9 +19,8 @@ export function useProduct(product) {
     return { isMobile };
   }
 
-  // Calcular si es TOP VENTA
   const cantidadVendida = product.cantidad_vendida || product.sold_quantity || 0;
-  const esTopVenta = cantidadVendida > 1000;
+  const esTopVenta = product.top_seller || false;
 
   // Calcular precio mayorista para la cantidad actual
   const precioMayorista = product.precio_mayorista || 0;
@@ -44,7 +43,7 @@ export function useProduct(product) {
     ? `Hola, quiero comprar al MAYOR *${product.name}* (SKU: ${product.sku})\nCantidad: ${qty} unidades (Precio mayorista)\nPrecio unitario: $${precioMayoristaStr}\nTotal: $${totalMayorista}`
     : `Hola, quiero comprar *${product.name}* (SKU: ${product.sku})\nCantidad: ${qty}\nPrecio unitario: $${priceStr}\nTotal: $${total}`;
   
-  const waBase = "https://wa.me/5491178267112";
+  const waBase = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}`;
   const waLink = `${waBase}?text=${encodeURIComponent(message)}`;
 
   const goToPrevious = () => {

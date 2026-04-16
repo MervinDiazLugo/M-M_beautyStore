@@ -1,5 +1,5 @@
 // pages/api/admin/products/[id].js
-import { supabase } from '../../../../lib/supabase';
+import { supabase, calculateSuggestedPrice, calculateMinimumPrice, DEFAULT_PACKAGING_COST } from '../../../../lib/supabase';
 import { validateApiKey } from '../../../../lib/apiAuth';
 
 export default async function handler(req, res) {
@@ -14,9 +14,13 @@ export default async function handler(req, res) {
       .select('*')
       .eq('id', id)
       .single();
-    
+
     if (error) return res.status(404).json({ error: 'Producto no encontrado' });
-    return res.status(200).json(data);
+
+    const packagingCost = data.packaging_cost || DEFAULT_PACKAGING_COST;
+    const suggested_price = calculateSuggestedPrice(data.cost || 0, packagingCost);
+    const minimum_price = calculateMinimumPrice(data.cost || 0, packagingCost);
+    return res.status(200).json({ ...data, suggested_price, minimum_price });
   }
 
   if (method === 'PUT' || method === 'PATCH') {

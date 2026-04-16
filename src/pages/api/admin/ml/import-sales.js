@@ -1,6 +1,7 @@
 // pages/api/admin/ml/import-sales.js
 import { createClient } from '@supabase/supabase-js';
 import { validateApiKey } from '../../../../lib/apiAuth';
+import { ML_COMMISSION_RATE, DEFAULT_PACKAGING_COST } from '../../../../lib/supabase';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -77,12 +78,12 @@ export default async function handler(req, res) {
         const matchedProduct = findMatchingProduct(productTitle, products);
         const matchedProductId = matchedProduct?.id || 'unknown';
         const productCost = matchedProduct?.cost || 0;
-        const packagingCost = matchedProduct?.packaging_cost || 1000;
+        const packagingCost = matchedProduct?.packaging_cost || DEFAULT_PACKAGING_COST;
         
         if (matchedProduct) matched++;
 
         const totalAmount = order.total_amount || 0;
-        const mlFees = totalAmount * 0.34;
+        const mlFees = totalAmount * ML_COMMISSION_RATE;
         const netReceived = totalAmount - mlFees;
         const profit = netReceived - productCost - packagingCost;
 

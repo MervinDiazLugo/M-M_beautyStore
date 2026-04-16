@@ -21,19 +21,9 @@ export default function Profitability() {
   const [loadingCharges, setLoadingCharges] = useState(false);
   const [showChargesBreakdown, setShowChargesBreakdown] = useState(false);
 
-  const MIN_MARGIN = 0.20;
-
   function showToast(message, type = 'success') {
     setToast({ message, type });
     setTimeout(() => setToast(null), 10000);
-  }
-
-  function calculateSuggestedPrice(cost, packaging, targetMargin = MIN_MARGIN) {
-    return Math.round((cost + packaging) / (1 - 0.34 - targetMargin));
-  }
-
-  function calculateMinimumPrice(cost, packaging) {
-    return Math.round((cost + packaging) / 0.66);
   }
 
   useEffect(() => {
@@ -93,16 +83,15 @@ export default function Profitability() {
     const res = await adminFetch(`/api/admin/products/${productId}`);
     const product = await res.json();
     if (product) {
-      const suggestedPrice = calculateSuggestedPrice(product.cost || 0, product.packaging_cost || 1000);
       setUpdateModal({
         id: product.id,
         name: product.name,
         currentPrice: product.ml_price || product.price,
         cost: product.cost,
-        packaging: product.packaging_cost || 1000,
-        suggestedPrice,
+        packaging: product.packaging_cost,
+        suggestedPrice: product.suggested_price,
       });
-      setNewPrice(suggestedPrice.toString());
+      setNewPrice((product.suggested_price || '').toString());
     }
   }
 
@@ -371,11 +360,12 @@ export default function Profitability() {
             {sortedProducts.map((item) => {
               const margin = item.margin || 0;
               const projectedMargin = item.projectedMargin || 0;
-              const marginColor = margin < 0 ? '#ef4444' : margin < 20 ? '#f59e0b' : '#10b981';
-              const marginBg = margin < 0 ? '#ef444420' : margin < 20 ? '#f59e0b20' : '#10b98120';
-              const projectedMarginColor = projectedMargin < 0 ? '#ef4444' : projectedMargin < 20 ? '#f59e0b' : '#10b981';
-              const projectedMarginBg = projectedMargin < 0 ? '#ef444420' : projectedMargin < 20 ? '#f59e0b20' : '#10b98120';
-              const suggestedPrice = calculateSuggestedPrice(item.cost || 0, item.packaging || 1000);
+              const statusColors = { negative: '#ef4444', low: '#f59e0b', ok: '#10b981' };
+              const statusBgs = { negative: '#ef444420', low: '#f59e0b20', ok: '#10b98120' };
+              const marginColor = statusColors[item.marginStatus] || statusColors.ok;
+              const marginBg = statusBgs[item.marginStatus] || statusBgs.ok;
+              const projectedMarginColor = statusColors[item.projectedMarginStatus] || statusColors.ok;
+              const projectedMarginBg = statusBgs[item.projectedMarginStatus] || statusBgs.ok;
               return (
                 <tr key={item.id} style={{ borderTop: '1px solid #2a2a3e' }}>
                   <td style={{ padding: '0.75rem', color: '#fff', fontWeight: '500', fontSize: '0.8rem', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.title}>{item.title}</td>
@@ -394,8 +384,8 @@ export default function Profitability() {
                       {projectedMargin.toFixed(1)}%
                     </span>
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', color: margin < 20 ? '#22d3ee' : '#71717a', fontSize: '0.75rem' }}>
-                    {margin < 20 ? `$${suggestedPrice.toLocaleString('es-AR')}` : '—'}
+                  <td style={{ padding: '0.75rem', textAlign: 'right', color: item.needsAdjustment ? '#22d3ee' : '#71717a', fontSize: '0.75rem' }}>
+                    {item.needsAdjustment ? `$${(item.suggestedPrice || 0).toLocaleString('es-AR')}` : '—'}
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
                     {item.mercado_libre_url ? (
@@ -423,7 +413,7 @@ export default function Profitability() {
                         fontWeight: '500',
                       }}
                     >
-                      {margin < 20 ? 'Ajustar' : 'Ver'}
+                      {item.needsAdjustment ? 'Ajustar' : 'Ver'}
                     </button>
                   </td>
                 </tr>

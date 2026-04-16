@@ -22,7 +22,7 @@ const PreguntasFrecuentes = () => {
             <div className="answer">
               <p>Somos una tienda especializada en productos y accesorios de belleza. Te asesoramos para elegir el mejor producto o rutina que se adapte a tu piel.</p>
               <a
-                href="https://wa.me/5491178267112?text=Hola%2C%20tengo%20una%20consulta%20sobre%20un%20producto%20de%20la%20tienda"
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%2C%20tengo%20una%20consulta%20sobre%20un%20producto%20de%20la%20tienda`}
                 className="whatsapp-btn"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -237,7 +237,7 @@ const PreguntasFrecuentes = () => {
                 
                 <div className="whatsapp-majorista">
                   <a
-                    href="https://wa.me/5491178267112?text=Hola%20quiero%20consultar%20por%20venta%20mayorista"
+                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20quiero%20consultar%20por%20venta%20mayorista`}
                     className="whatsapp-btn majorista-btn"
                     target="_blank"
                     rel="noopener noreferrer"

@@ -33,13 +33,8 @@ export default function Dashboard() {
     let totalProfit = 0;
 
     sales.forEach(sale => {
-      const mlFee = sale.sale_price * 0.34;
-      const net = sale.sale_price - mlFee;
-      const product = products.find(p => p.id === sale.product_id);
-      const cost = product?.cost || 0;
-      const packaging = product?.packaging_cost || 1000;
-      totalRevenue += net;
-      totalProfit += net - cost - packaging;
+      totalRevenue += sale.calculated_net || sale.net_received || 0;
+      totalProfit += sale.calculated_profit || sale.profit || 0;
     });
 
     setStats({ totalProducts, productsWithCost, totalSales, totalRevenue, totalProfit });
