@@ -7,6 +7,7 @@ export default function ProductCard({ product }) {
   const waBase = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}`
   const waLink = `${waBase}?text=${encodeURIComponent(message)}`
   const mlLink = product.mercadoLibreUrl || product.permalink;
+  const cantidadVendida = product.cantidad_vendida || product.sold_quantity || 0;
   const esTopVenta = product.top_seller || false;
 
   return (
