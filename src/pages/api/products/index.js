@@ -1,4 +1,4 @@
-import { TOP_SELLER_THRESHOLD } from '../../lib/supabase';
+import { TOP_SELLER_THRESHOLD } from '../../../lib/supabase';
 
 const API_CONFIG = {
   baseUrl: (process.env.NEXT_PUBLIC_API_URL || 'https://m-m-beauty-store-api.vercel.app').replace(/\/$/, ''),
