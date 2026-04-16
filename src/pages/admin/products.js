@@ -58,7 +58,7 @@ export default function Products() {
       packaging_cost: parseFloat(editForm.packaging_cost) || 1000,
     };
     
-    if (editForm.ml_price && product.ml_item_id) {
+    if (editForm.ml_price && product.ml_item_id && parseInt(editForm.ml_price) !== product.ml_price) {
       const newMlPrice = parseInt(editForm.ml_price);
 
       try {
