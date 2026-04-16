@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { TOP_SELLER_THRESHOLD } from '../../lib/supabase';
 import { useProduct } from '../../hooks/useProduct';
 import { ProductHeader } from '../../components/product/ProductHeader';
 import { Breadcrumb } from '../../components/product/Breadcrumb';
@@ -37,6 +38,7 @@ function normalizeProduct(product) {
     published: product.published,
     permalink: product.permalink,
     instagramReel: product.instagramReel || null,
+    top_seller: (product.cantidadVendida || product.soldQuantity || 0) > TOP_SELLER_THRESHOLD,
   };
 }
 
