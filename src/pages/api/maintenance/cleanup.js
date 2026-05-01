@@ -1,0 +1,40 @@
+import { connectToDatabase } from '../../../lib/db';
+import { validateSecurityKey } from '../../../lib/auth';
+
+export default async function handler(req, res) {
+  if (req.method !== 'DELETE') {
+    res.setHeader('Allow', ['DELETE']);
+    return res.status(405).json({ error: `Method ${req.method} not allowed` });
+  }
+
+  const auth = validateSecurityKey(req, res);
+  if (!auth.valid) return res.status(401).json({ error: auth.error });
+
+  try {
+    const { db } = await connectToDatabase();
+    const collection = db.collection('products');
+
+    try {
+      await collection.drop();
+      return res.status(200).json({
+        success: true,
+        message: 'Colección "products" eliminada completamente',
+        note: 'La próxima importación creará la colección limpia',
+      });
+    } catch (e) {
+      if (e.message.includes('ns not found')) {
+        return res.status(200).json({
+          success: true,
+          message: 'La colección ya está eliminada',
+        });
+      }
+      throw e;
+    }
+  } catch (error) {
+    console.error('Error en cleanup:', error.message);
+    return res.status(500).json({
+      error: 'Error al limpiar la base de datos',
+      message: error.message,
+    });
+  }
+}

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { TOP_SELLER_THRESHOLD } from '../../lib/supabase';
+import { connectToDatabase } from '../../lib/db';
 import { useProduct } from '../../hooks/useProduct';
 import { ProductHeader } from '../../components/product/ProductHeader';
 import { Breadcrumb } from '../../components/product/Breadcrumb';
@@ -9,49 +10,45 @@ import { PricingCard } from '../../components/product/PricingCard';
 import { ProductDescription } from '../../components/product/ProductDescription';
 import { InstagramReelEmbed } from '../../components/product/InstagramReelEmbed';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://m-m-beauty-store-api.vercel.app';
-
 function normalizeProduct(product) {
   if (!product) return null;
-  
+
   return {
     id: product.id,
     name: product.name,
-    ml_price: product.mlPrice,
+    ml_price: product.mlPrice ?? product.ml_price,
     price: product.price,
-    precio_mayorista: product.precioMayorista,
-    cantidad_minima_mayorista: product.cantidadMinimaMayorista,
-    cantidad_vendida: product.cantidadVendida,
-    sold_quantity_real: product.soldQuantityReal,
+    precio_mayorista: product.precioMayorista ?? product.precio_mayorista,
+    cantidad_minima_mayorista: product.cantidadMinimaMayorista ?? product.cantidad_minima_mayorista,
+    cantidad_vendida: product.cantidadVendida ?? product.cantidad_vendida,
+    sold_quantity_real: product.soldQuantityReal ?? product.sold_quantity_real,
     desc: product.desc,
     sku: product.sku,
     image: product.image,
-    envioGratis: product.envioGratis,
+    envioGratis: product.envioGratis ?? product.envio_gratis,
     description: product.description,
     features: product.features,
     specifications: product.specifications,
-    mercadoLibreUrl: product.mercadoLibreUrl,
+    mercadoLibreUrl: product.mercadoLibreUrl ?? product.mercado_libre_url,
     brand: product.brand,
     condition: product.condition,
-    sold_quantity: product.soldQuantity,
-    available_quantity: product.availableQuantity,
+    sold_quantity: product.soldQuantity ?? product.sold_quantity,
+    available_quantity: product.availableQuantity ?? product.available_quantity,
     published: product.published,
     permalink: product.permalink,
-    instagramReel: product.instagramReel || null,
-    top_seller: (product.cantidadVendida || product.soldQuantity || 0) > TOP_SELLER_THRESHOLD,
+    instagramReel: product.instagramReel ?? product.instagram_reel ?? null,
+    top_seller: (product.cantidadVendida || product.cantidad_vendida || product.soldQuantity || 0) > TOP_SELLER_THRESHOLD,
   };
 }
 
 export async function getServerSideProps({ params }) {
   try {
-    const response = await fetch(`${API_URL}/api/items/${params.id}`);
-    
-    if (!response.ok) {
-      return { notFound: true };
-    }
-    
-    const product = await response.json();
-    
+    const { db } = await connectToDatabase();
+    const collection = db.collection('products');
+    const product = await collection.findOne({ id: params.id });
+
+    if (!product) return { notFound: true };
+
     return {
       props: {
         product: normalizeProduct(product)

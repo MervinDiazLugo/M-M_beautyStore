@@ -1,36 +1,25 @@
 import { TOP_SELLER_THRESHOLD } from '../../../lib/supabase';
-
-const API_CONFIG = {
-  baseUrl: (process.env.NEXT_PUBLIC_API_URL || 'https://m-m-beauty-store-api.vercel.app').replace(/\/$/, ''),
-  getItemUrl(id) {
-    return `${this.baseUrl}/api/items/${id}`;
-  }
-};
+import { connectToDatabase } from '../../../lib/db';
 
 export default async function handler(req, res) {
   const { id } = req.query;
-  
+
   if (!id) {
     return res.status(400).json({ error: 'Product ID required' });
   }
-  
+
   try {
-    const response = await fetch(API_CONFIG.getItemUrl(id), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    const data = await response.json();
+    const { db } = await connectToDatabase();
+    const collection = db.collection('products');
+    const item = await collection.findOne({ id });
 
-    if (data && typeof data === 'object' && !Array.isArray(data)) {
-      data.top_seller = ((data.cantidadVendida || data.soldQuantity || 0) > TOP_SELLER_THRESHOLD);
-    }
+    if (!item) return res.status(404).json({ error: 'Not found' });
 
-    res.status(response.status).json(data);
+    item.top_seller = ((item.cantidadVendida || item.soldQuantity || 0) > TOP_SELLER_THRESHOLD);
+
+    res.status(200).json(item);
   } catch (error) {
-    console.error('API proxy error:', error.message);
-    res.status(500).json({ error: 'Failed to fetch from API' });
+    console.error('API error:', error.message);
+    res.status(500).json({ error: 'Failed to fetch product' });
   }
 }
