@@ -466,6 +466,97 @@ Scrapea productos desde ML por IDs y los guarda en DB.
 
 ---
 
+## Schema de Producto
+
+Estructura completa del objeto producto en DB:
+
+```json
+{
+  "id": "MLA1510055959",
+  "name": "Serum De Pestañas",
+  "ml_price": 7105,
+  "price": 6114,
+  "precio_mayorista": 4891,
+  "cantidad_minima_mayorista": 18,
+  "cantidad_vendida": 1043,
+  "sold_quantity_real": 118,
+  "desc": "Descripción corta del producto",
+  "sku": "MLA1510055959",
+  "image": ["https://http2.mlstatic.com/D_NQ_NP_...jpg"],
+  "envio_gratis": false,
+  "description": "Descripción completa del producto",
+  "features": ["Hidratante", "Sin parabenos"],
+  "specifications": {
+    "Marca": "Bioaqua",
+    "Modelo": "Serum de pestañas",
+    "Tipo de piel": "Todo tipo"
+  },
+  "mercado_libre_url": "https://www.mercadolibre.com.ar/MLA...",
+  "brand": "Bioaqua",
+  "condition": "new",
+  "sold_quantity": 1043,
+  "available_quantity": 9,
+  "published": true,
+  "permalink": "https://articulo.mercadolibre.com.ar/MLA...",
+  "instagram_reel": "https://www.instagram.com/reel/...",
+  "cost": 2500,
+  "packaging_cost": 1000,
+  "ml_item_id": "MLA1510055959"
+}
+```
+
+**Campos calculados (no guardados en DB, devueltos por las APIs):**
+
+| Campo | Dónde aparece | Cálculo |
+|-------|--------------|---------|
+| `top_seller` | `/api/products`, `/api/items` | `cantidad_vendida > 1000` |
+| `ml_fee` | `/api/admin/products` | `ml_price × 0.34` |
+| `net_received` | `/api/admin/products` | `ml_price - ml_fee` |
+| `profit` | `/api/admin/products` | `net_received - cost - packaging_cost` |
+| `suggested_price` | `/api/admin/products/:id` | `(cost + packaging) / (1 - 0.34 - 0.20)` |
+| `minimum_price` | `/api/admin/products/:id` | `(cost + packaging) / (1 - 0.34)` |
+
+---
+
+## Ejemplos de uso
+
+### Importar productos desde MercadoLibre
+```bash
+curl -X POST https://m-m-beautystore.vercel.app/api/maintenance/ml-import \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: TU_KEY" \
+  -d '{"ids":["MLA1510055959","MLA1519662745"]}'
+```
+
+### Crear producto manualmente
+```bash
+curl -X POST https://m-m-beautystore.vercel.app/api/items \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: TU_KEY" \
+  -d '{"id":"MLA123","name":"Producto","price":5000,"sku":"MLA123","published":true}'
+```
+
+### Actualizar producto parcialmente
+```bash
+curl -X PATCH https://m-m-beautystore.vercel.app/api/items/MLA123 \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: TU_KEY" \
+  -d '{"instagram_reel":"https://www.instagram.com/reel/..."}'
+```
+
+### Verificar salud de la DB
+```bash
+curl https://m-m-beautystore.vercel.app/api/maintenance/health
+```
+
+### Importar órdenes ML del mes
+```bash
+curl "https://m-m-beautystore.vercel.app/api/admin/ml/sync-orders?year=2026&month=5" \
+  -H "x-api-key: TU_KEY_ADMIN"
+```
+
+---
+
 ## Constantes de negocio
 
 Definidas en `src/lib/supabase.js`:
